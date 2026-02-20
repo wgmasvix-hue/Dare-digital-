@@ -1,0 +1,353 @@
+.libraryContainer {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 100px 24px 60px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  min-height: 100vh;
+}
+
+@media (min-width: 1024px) {
+  .libraryContainer {
+    grid-template-columns: 280px 1fr;
+  }
+}
+
+/* SIDEBAR */
+.sidebar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    position: sticky;
+    top: 100px;
+    height: calc(100vh - 140px);
+    overflow-y: auto;
+    padding-right: 16px;
+    /* Custom Scrollbar for sidebar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--mist) transparent;
+  }
+}
+
+.filterSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-bottom: 1px solid var(--mist);
+  padding-bottom: 24px;
+}
+
+.filterSection:last-child {
+  border-bottom: none;
+}
+
+.filterTitle {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--soil);
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radioLabel, .checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--clay);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.radioLabel:hover, .checkboxLabel:hover {
+  color: var(--soil);
+}
+
+.radioInput, .checkboxInput {
+  accent-color: var(--amber);
+  width: 16px;
+  height: 16px;
+}
+
+.count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--clay);
+  opacity: 0.6;
+}
+
+.yearInputs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.yearInput {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--mist);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--soil);
+}
+
+.clearBtn {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--clay);
+  text-decoration: underline;
+  align-self: flex-start;
+  margin-top: 16px;
+}
+
+.clearBtn:hover {
+  color: var(--amber);
+}
+
+/* MAIN AREA */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Search Header */
+.searchHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.searchBarWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--clay);
+  opacity: 0.6;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 16px 20px 16px 56px;
+  border: 1px solid var(--mist);
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--soil);
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--amber);
+  box-shadow: 0 4px 20px rgba(200, 134, 26, 0.1);
+}
+
+.aiHint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--clay);
+  opacity: 0.8;
+  margin-left: 4px;
+}
+
+.sparkleIcon {
+  color: var(--amber);
+}
+
+/* Controls Bar */
+.controlsBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--mist);
+}
+
+.resultsCount {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--clay);
+}
+
+.controlsRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sortSelect {
+  padding: 8px 12px;
+  border: 1px solid var(--mist);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--soil);
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.viewToggles {
+  display: flex;
+  gap: 4px;
+  background-color: var(--mist);
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.viewBtn {
+  padding: 6px;
+  border-radius: 6px;
+  color: var(--clay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewBtn.active {
+  background-color: white;
+  color: var(--soil);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Results Grid */
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 24px;
+}
+
+@media (min-width: 640px) {
+  .resultsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .resultsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.resultsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Loading State */
+.skeletonCard {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+.skeletonCover {
+  width: 100%;
+  height: 65%;
+  background-color: var(--mist);
+  animation: pulse 1.5s infinite;
+}
+
+.skeletonInfo {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeletonLine {
+  height: 16px;
+  background-color: var(--mist);
+  border-radius: 4px;
+  animation: pulse 1.5s infinite;
+}
+
+.w80 { width: 80%; }
+.w60 { width: 60%; }
+.w40 { width: 40%; }
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* Load More */
+.loadMoreContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.loadMoreBtn {
+  background-color: var(--soil);
+  color: var(--parchment);
+  padding: 12px 32px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.loadMoreBtn:hover {
+  background-color: var(--clay);
+  transform: translateY(-2px);
+}
+
+.loadMoreBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Mobile Filter Toggle */
+.mobileFilterToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: white;
+  border: 1px solid var(--mist);
+  border-radius: 8px;
+  color: var(--soil);
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 1024px) {
+  .mobileFilterToggle {
+    display: none;
+  }
+}

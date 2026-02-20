@@ -1,0 +1,190 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 24px 60px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--mist);
+  padding-bottom: 24px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  color: var(--soil);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: var(--clay);
+  font-size: 1rem;
+}
+
+.newBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--amber);
+  color: var(--parchment);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.newBtn:hover {
+  background-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+/* Stats */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.statCard {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--mist);
+  text-align: center;
+}
+
+.statValue {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--soil);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.statLabel {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--clay);
+}
+
+/* Table */
+.submissionsSection {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--mist);
+  padding: 24px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--soil);
+  margin-bottom: 24px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--clay);
+  border-bottom: 1px solid var(--mist);
+}
+
+.table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--mist);
+  color: var(--soil);
+  font-size: 0.95rem;
+}
+
+.titleCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+}
+
+.icon {
+  color: var(--clay);
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.submitted { background: rgba(200, 134, 26, 0.1); color: var(--amber); }
+.published { background: rgba(45, 80, 22, 0.1); color: var(--leaf); }
+.rejected { background: rgba(192, 57, 43, 0.1); color: #c0392b; }
+.draft { background: var(--mist); color: var(--clay); }
+
+.actionBtn {
+  font-size: 0.85rem;
+  color: var(--clay);
+  text-decoration: underline;
+}
+
+.actionBtn:hover {
+  color: var(--amber);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 40px;
+  color: var(--clay);
+}
+
+.createBtn {
+  margin-top: 16px;
+  color: var(--amber);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* Wizard Wrapper */
+.wizardWrapper {
+  padding-top: 100px;
+  background-color: var(--cream);
+  min-height: 100vh;
+}
+
+.wizardHeader {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px 20px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.backLink {
+  color: var(--clay);
+  font-weight: 500;
+}
+
+.backLink:hover {
+  color: var(--soil);
+}

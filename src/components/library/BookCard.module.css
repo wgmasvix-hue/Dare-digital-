@@ -1,0 +1,247 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  height: 100%;
+  border: 1px solid transparent;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(28, 18, 8, 0.08);
+  border-color: rgba(200, 134, 26, 0.2);
+}
+
+/* Cover Section */
+.coverWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  background-color: var(--mist);
+  overflow: hidden;
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.05);
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .coverImage {
+  transform: scale(1.05);
+}
+
+.placeholderCover {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px 20px 20px 32px; /* Extra left padding for spine */
+  color: white;
+  position: relative;
+}
+
+.spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: inset -1px 0 2px rgba(0,0,0,0.1);
+}
+
+.placeholderTitle {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.1;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.placeholderAuthor {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Badges */
+.badges {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 2;
+}
+
+.accessBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  backdrop-filter: blur(4px);
+}
+
+/* Info Section */
+.info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 8px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--soil);
+  line-height: 1.2;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.author {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--clay);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.details {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--clay);
+  opacity: 0.7;
+}
+
+.dot {
+  font-size: 0.5rem;
+  opacity: 0.5;
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--mist);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--clay);
+}
+
+.rating, .downloads, .pages {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* VARIANTS */
+
+/* List Variant */
+.list {
+  flex-direction: row;
+  height: 160px;
+  align-items: stretch;
+}
+
+.list .coverWrapper {
+  width: 106px; /* Aspect ratio 2:3 of 160px height */
+  height: 100%;
+  aspect-ratio: auto;
+  flex-shrink: 0;
+}
+
+.list .info {
+  justify-content: center;
+  padding: 16px 24px;
+}
+
+.list .title {
+  font-size: 1.25rem;
+  -webkit-line-clamp: 1;
+}
+
+/* Featured Variant */
+.featured {
+  height: auto;
+}
+
+.featured .coverWrapper {
+  aspect-ratio: 3 / 4;
+}
+
+.featured .title {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.description {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--clay);
+  line-height: 1.5;
+  margin: 8px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .list {
+    height: 140px;
+  }
+  
+  .list .coverWrapper {
+    width: 93px;
+  }
+  
+  .list .title {
+    font-size: 1.1rem;
+  }
+}

@@ -1,0 +1,542 @@
+.home {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* 1. HERO SECTION */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  padding: 120px 24px 60px;
+  max-width: 1280px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    grid-template-columns: 1.2fr 0.8fr;
+    padding: 160px 24px 100px;
+  }
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--soil);
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .headline {
+    font-size: 4.5rem;
+  }
+}
+
+.subheading {
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  color: var(--clay);
+  margin-bottom: 40px;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.ctaGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 60px;
+}
+
+.primaryBtn {
+  background-color: var(--amber);
+  color: var(--parchment);
+  padding: 14px 32px;
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(200, 134, 26, 0.3);
+}
+
+.primaryBtn:hover {
+  background-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.secondaryLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--soil);
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 8px 0;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.secondaryLink:hover {
+  color: var(--amber);
+  gap: 12px;
+}
+
+.statsBar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--mist);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.statNumber {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--soil);
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--clay);
+  opacity: 0.8;
+}
+
+.statDivider {
+  width: 1px;
+  height: 30px;
+  background-color: var(--mist);
+}
+
+/* Hero Visual */
+.heroVisual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+}
+
+.bookStack {
+  position: relative;
+  width: 200px;
+  height: 260px;
+  perspective: 1000px;
+}
+
+.book {
+  position: absolute;
+  width: 180px;
+  height: 240px;
+  border-radius: 4px 12px 12px 4px;
+  box-shadow: -5px 5px 20px rgba(0,0,0,0.15);
+  transition: transform 0.5s ease;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
+}
+
+.book1 {
+  background-color: var(--soil);
+  top: 0;
+  left: 0;
+  z-index: 1;
+  transform: rotate(-5deg);
+  animation-delay: 0s;
+}
+
+.book2 {
+  background-color: var(--clay);
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  transform: rotate(5deg);
+  animation-delay: 1s;
+}
+
+.book3 {
+  background-color: var(--amber);
+  top: 40px;
+  left: 10px;
+  z-index: 3;
+  transform: rotate(-2deg);
+  animation-delay: 2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.book3::after {
+  content: "Dare.";
+  font-family: var(--font-display);
+  color: rgba(255,255,255,0.2);
+  font-size: 3rem;
+  font-weight: 700;
+  transform: rotate(90deg);
+}
+
+.tag {
+  position: absolute;
+  bottom: 20px;
+  right: 0;
+  background: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--mist);
+  animation: float 5s ease-in-out infinite reverse;
+}
+
+.tagShona {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--soil);
+}
+
+.tagEnglish {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: var(--clay);
+}
+
+/* 2. FEATURES STRIP */
+.featuresStrip {
+  background-color: var(--soil);
+  padding: 20px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.featuresTrack {
+  display: inline-flex;
+  gap: 40px;
+  animation: scroll 30s linear infinite;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.featurePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--parchment);
+  border: 1px solid rgba(245, 237, 216, 0.2);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+/* 3. SECTIONS GENERAL */
+.section {
+  padding: 80px 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  color: var(--soil);
+}
+
+.viewAll {
+  font-family: var(--font-body);
+  color: var(--amber);
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+}
+
+.viewAll:hover {
+  border-bottom-color: var(--amber);
+}
+
+/* Featured Books Scroll */
+.bookScroll {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  padding-bottom: 24px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bookScroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.bookWrapper {
+  min-width: 200px;
+  width: 200px;
+  scroll-snap-align: start;
+}
+
+.emptyText {
+  color: var(--clay);
+  font-style: italic;
+}
+
+/* Skeleton Loader */
+.skeletonCard {
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeletonCover {
+  width: 100%;
+  aspect-ratio: 2/3;
+  background-color: var(--mist);
+  border-radius: 4px;
+  animation: pulse 1.5s infinite;
+}
+
+.skeletonText {
+  height: 16px;
+  width: 80%;
+  background-color: var(--mist);
+  border-radius: 4px;
+  animation: pulse 1.5s infinite;
+}
+
+.skeletonTextShort {
+  height: 12px;
+  width: 50%;
+  background-color: var(--mist);
+  border-radius: 4px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* 4. FACULTY GRID */
+.bgMist {
+  background-color: rgba(232, 223, 200, 0.3);
+  width: 100%;
+  max-width: none;
+}
+
+.facultyGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .facultyGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+}
+
+.facultyCard {
+  background: white;
+  padding: 32px 24px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+.facultyCard:hover {
+  border-color: var(--amber);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.05);
+}
+
+.facultyIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--soil);
+}
+
+.facultyName {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--soil);
+}
+
+/* 5. WHY DARE */
+.whyGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+@media (min-width: 768px) {
+  .whyGrid {
+    grid-template-columns: 1.5fr 1fr;
+    align-items: center;
+  }
+}
+
+.whyText {
+  font-size: 1.1rem;
+  color: var(--clay);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.whyList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.whyList li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  color: var(--soil);
+}
+
+.whyList li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--amber);
+}
+
+.researchSpotlight {
+  background-color: var(--soil);
+  color: var(--parchment);
+  padding: 40px;
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.researchSpotlight::before {
+  content: "";
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--amber) 0%, transparent 70%);
+  opacity: 0.2;
+}
+
+.spotlightHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.spotlightHeader h3 {
+  color: var(--parchment);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.spotlightIcon {
+  color: var(--amber);
+}
+
+.researchSpotlight p {
+  color: rgba(245, 237, 216, 0.8);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.spotlightLink {
+  display: inline-block;
+  color: var(--amber);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--amber);
+  padding-bottom: 2px;
+}
+
+/* 6. INSTITUTION CTA */
+.institutionCta {
+  background-color: var(--bark);
+  padding: 100px 24px;
+  text-align: center;
+}
+
+.ctaContent {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.ctaTitle {
+  color: var(--parchment);
+  font-size: 3rem;
+  margin-bottom: 24px;
+}
+
+.ctaText {
+  color: rgba(245, 237, 216, 0.7);
+  font-size: 1.2rem;
+  margin-bottom: 40px;
+}
+
+.emailBtn {
+  display: inline-block;
+  background-color: var(--parchment);
+  color: var(--soil);
+  padding: 16px 40px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+}
+
+.emailBtn:hover {
+  background-color: var(--white);
+  transform: scale(1.05);
+}

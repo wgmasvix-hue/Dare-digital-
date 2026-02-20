@@ -1,0 +1,602 @@
+.wizardContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Progress Bar */
+.progressContainer {
+  margin-bottom: 40px;
+}
+
+.progressSteps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+}
+
+.stepNumber {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--mist);
+  color: var(--clay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.activeStep .stepNumber {
+  background-color: var(--amber);
+  color: var(--parchment);
+}
+
+.stepLabel {
+  font-size: 0.75rem;
+  color: var(--clay);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .stepLabel {
+    display: block;
+  }
+}
+
+.activeStep .stepLabel {
+  color: var(--soil);
+  font-weight: 600;
+}
+
+.stepLine {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background-color: var(--mist);
+  z-index: -1;
+}
+
+.activeStep .stepLine {
+  background-color: var(--amber);
+}
+
+/* Form Card */
+.formCard {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(28, 18, 8, 0.05);
+  border: 1px solid var(--mist);
+}
+
+.stepTitle {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  color: var(--soil);
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--mist);
+}
+
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 300px;
+}
+
+/* Inputs */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--soil);
+}
+
+.required {
+  color: #c0392b;
+}
+
+.input, .textarea, .select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--mist);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--soil);
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.input:focus, .textarea:focus, .select:focus {
+  outline: none;
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(200, 134, 26, 0.1);
+}
+
+.tagInputWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--mist);
+  border-radius: 8px;
+  background-color: white;
+}
+
+.tag {
+  background-color: var(--mist);
+  color: var(--soil);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.removeTag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clay);
+}
+
+.tagInput {
+  border: none;
+  outline: none;
+  flex: 1;
+  min-width: 120px;
+  padding: 4px;
+  font-size: 0.9rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+/* File Upload */
+.uploadSection {
+  margin-bottom: 24px;
+}
+
+.dropZone {
+  border: 2px dashed var(--mist);
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  transition: all 0.2s ease;
+  background-color: #fafafa;
+}
+
+.dropZone:hover, .fileSelected {
+  border-color: var(--amber);
+  background-color: rgba(200, 134, 26, 0.05);
+}
+
+.fileInput {
+  display: none;
+}
+
+.dropLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.uploadIcon {
+  color: var(--clay);
+  opacity: 0.5;
+}
+
+.dropText {
+  font-weight: 500;
+  color: var(--soil);
+}
+
+.dropSubText {
+  font-size: 0.85rem;
+  color: var(--clay);
+}
+
+.fileInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.fileIcon {
+  color: var(--amber);
+}
+
+.fileName {
+  font-weight: 600;
+  color: var(--soil);
+}
+
+.fileSize {
+  font-size: 0.85rem;
+  color: var(--clay);
+  font-family: var(--font-mono);
+}
+
+.changeFile {
+  font-size: 0.85rem;
+  color: var(--amber);
+  text-decoration: underline;
+  margin-top: 8px;
+}
+
+.coverUploadRow {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.coverPreview {
+  width: 100px;
+  height: 150px;
+  background-color: var(--mist);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clay);
+}
+
+.coverPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coverActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uploadBtn {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: white;
+  border: 1px solid var(--clay);
+  border-radius: 8px;
+  color: var(--clay);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+}
+
+.helpText {
+  font-size: 0.8rem;
+  color: var(--clay);
+  opacity: 0.8;
+}
+
+/* Access & Pricing */
+.accessGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .accessGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.accessCard {
+  border: 1px solid var(--mist);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.accessCard:hover {
+  border-color: var(--accent);
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.activeAccess {
+  border-color: var(--accent);
+  background-color: white;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.hiddenRadio {
+  display: none;
+}
+
+.accessIcon {
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.accessLabel {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--soil);
+  margin-bottom: 4px;
+}
+
+.accessDesc {
+  font-size: 0.85rem;
+  color: var(--clay);
+  line-height: 1.4;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 12px;
+  color: var(--clay);
+}
+
+.inputWrapper .input {
+  padding-left: 36px;
+}
+
+/* Review & Submit */
+.summaryCard {
+  background-color: var(--parchment);
+  padding: 24px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  border-bottom: 1px dashed rgba(107, 58, 31, 0.2);
+  padding-bottom: 8px;
+}
+
+.summaryRow:last-child {
+  border-bottom: none;
+}
+
+.summaryLabel {
+  color: var(--clay);
+}
+
+.summaryValue {
+  font-weight: 500;
+  color: var(--soil);
+  text-align: right;
+}
+
+.attributionPreview {
+  margin-top: 16px;
+}
+
+.attributionPreview h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.previewBox {
+  padding: 16px;
+  border: 1px solid var(--mist);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--soil);
+  background-color: #fafafa;
+}
+
+.copyrightCheckbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--soil);
+}
+
+.checkbox {
+  accent-color: var(--amber);
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+
+/* Upload Progress */
+.uploadProgress {
+  margin-top: 24px;
+}
+
+.progressLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  color: var(--soil);
+  font-weight: 500;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background-color: var(--mist);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--amber);
+  transition: width 0.3s ease;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--mist);
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--clay);
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background-color: var(--mist);
+  color: var(--soil);
+}
+
+.nextBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--soil);
+  color: var(--parchment);
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-left: auto;
+  transition: all 0.2s ease;
+}
+
+.nextBtn:hover {
+  background-color: var(--clay);
+  transform: translateY(-2px);
+}
+
+.submitBtn {
+  background-color: var(--amber);
+  color: var(--parchment);
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-left: auto;
+  transition: all 0.2s ease;
+}
+
+.submitBtn:hover {
+  background-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Success State */
+.successContainer {
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.successCard {
+  background: white;
+  padding: 48px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(28, 18, 8, 0.08);
+  max-width: 500px;
+  width: 100%;
+}
+
+.successIcon {
+  width: 80px;
+  height: 80px;
+  background-color: var(--leaf);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.submissionId {
+  background-color: var(--parchment);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 24px 0;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--soil);
+}
+
+.dashboardBtn {
+  display: inline-block;
+  background-color: var(--soil);
+  color: var(--parchment);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+/* Error Alert */
+.errorAlert {
+  background-color: rgba(192, 57, 43, 0.1);
+  color: #c0392b;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+}
