@@ -1,0 +1,483 @@
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.header {
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--mist);
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.iconWrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #2c3e50, #1a1a1a);
+  color: var(--amber);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--soil);
+  margin: 0 0 4px 0;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+}
+
+.subtitle {
+  color: var(--clay);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.ingestBtn {
+  background-color: var(--amber);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ingestBtn:hover {
+  background-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.ingestBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.uploadBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--soil);
+  color: var(--parchment);
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.uploadBtn:hover {
+  background-color: var(--amber);
+  transform: translateY(-2px);
+}
+
+.priorityIngest {
+  background: var(--parchment);
+  border: 1px solid var(--mist);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.priorityHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.priorityTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bulkIngestBtn {
+  background-color: var(--amber);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bulkIngestBtn:hover:not(:disabled) {
+  background-color: var(--gold);
+  transform: scale(1.05);
+}
+
+.bulkIngestBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.priorityHeader h2 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--soil);
+  margin: 0;
+}
+
+.priorityIcon {
+  color: var(--amber);
+}
+
+.priorityGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.priorityCard {
+  background: white;
+  border: 1px solid var(--mist);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.priorityCard:hover {
+  border-color: var(--amber);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.priorityInfo h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--soil);
+  margin: 0 0 4px 0;
+}
+
+.priorityInfo p {
+  font-size: 0.8rem;
+  color: var(--clay);
+  margin: 0;
+}
+
+.miniIngestBtn {
+  background-color: var(--soil);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.miniIngestBtn:hover {
+  background-color: var(--amber);
+}
+
+.miniIngestBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.controls {
+  margin-bottom: 32px;
+}
+
+.searchWrapper {
+  position: relative;
+  max-width: 400px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--clay);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid var(--mist);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.bookGridItem {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gridReadBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--amber);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.gridReadBtn:hover {
+  background-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(200, 134, 26, 0.2);
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px;
+  background-color: var(--mist);
+  border-radius: 16px;
+  color: var(--clay);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Skeleton */
+.skeletonCard {
+  height: 300px;
+  background-color: var(--mist);
+  border-radius: 12px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.gridDetailsLink {
+  display: block;
+  text-align: center;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--clay);
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.gridDetailsLink:hover {
+  color: var(--amber);
+}
+
+.spinnerSmall {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--mist);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.modal {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modalHeader h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--soil);
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--clay);
+  cursor: pointer;
+}
+
+.uploadForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--soil);
+}
+
+.formGroup input, .formGroup textarea {
+  padding: 10px;
+  border: 1px solid var(--mist);
+  border-radius: 6px;
+  font-family: var(--font-body);
+}
+
+.fileInputs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .fileInputs {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fileUploadBox {
+  border: 2px dashed var(--mist);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--clay);
+  transition: all 0.2s;
+}
+
+.fileUploadBox:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--parchment);
+}
+
+.statusMessage {
+  padding: 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.statusMessage.success {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.statusMessage.error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.submitBtn {
+  background-color: var(--soil);
+  color: white;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

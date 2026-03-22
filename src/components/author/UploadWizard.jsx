@@ -14,10 +14,13 @@ import {
   BookOpen,
   Lock,
   ShieldCheck,
-  Globe
+  Globe,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import { enrichMetadata } from '../../services/enrichmentService';
 import styles from './UploadWizard.module.css';
 
 const STEPS = [
@@ -54,14 +57,23 @@ const ACCESS_MODELS = [
 
 const LEVELS = ['Certificate', 'Diploma', 'HND', 'Degree', 'Masters', 'PhD'];
 
+const SUBJECTS = [
+  'STEM', 'Agriculture', 'Health', 'Business', 
+  'Education', 'Engineering', 'Law', 'Humanities', 'AI & Future Tech'
+];
+
+const EDUCATION_50_PILLARS = [
+  'Teaching', 'Research', 'Community Engagement', 'Innovation', 'Industrialisation'
+];
+
 export default function UploadWizard() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [subjects, setSubjects] = useState([]);
   const [submissionId, setSubmissionId] = useState(null);
   const [error, setError] = useState(null);
+  const [isEnriching, setIsEnriching] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -70,16 +82,29 @@ export default function UploadWizard() {
     description: '',
     keywords: [],
     language: 'English',
-    subjectId: '',
+    subject: '',
     zimcheCodes: [],
     targetAudience: '',
     level: '',
     edition: '',
+    education50Pillars: [],
     accessModel: 'preview',
     price: '',
     isbn: '',
-    copyrightDeclared: false
+    license: 'All Rights Reserved',
+    copyrightDeclared: false,
+    enrichmentData: null,
+    bookUrl: ''
   });
+
+  const LICENSES = [
+    { value: 'All Rights Reserved', label: 'All Rights Reserved' },
+    { value: 'CC BY', label: 'CC BY (Attribution)' },
+    { value: 'CC BY-SA', label: 'CC BY-SA (ShareAlike)' },
+    { value: 'CC BY-NC', label: 'CC BY-NC (Non-Commercial)' },
+    { value: 'CC BY-ND', label: 'CC BY-ND (NoDerivatives)' },
+    { value: 'Public Domain', label: 'Public Domain' }
+  ];
 
   // Files
   const [pdfFile, setPdfFile] = useState(null);
@@ -89,15 +114,18 @@ export default function UploadWizard() {
   // UI State for inputs
   const [keywordInput, setKeywordInput] = useState('');
   const [zimcheInput, setZimcheInput] = useState('');
+  const [zimcheError, setZimcheError] = useState(null);
 
-  // Fetch Subjects on mount
-  useEffect(() => {
-    async function fetchSubjects() {
-      const { data } = await supabase.from('subjects').select('id, name').order('name');
-      setSubjects(data || []);
-    }
-    fetchSubjects();
-  }, []);
+  const ZIMCHE_SUGGESTIONS = [
+    'BSC-AI-001', 'BSC-CS-101', 'BACC-101', 'HCS101', 'ENG-CIV-201', 'MED-SUR-501'
+  ];
+
+  const validateZimcheCode = (code) => {
+    // Format: 2-4 letters followed by optional dash and 3-6 alphanumeric chars
+    // e.g., BSC-AI-001, HCS101, ENG-201
+    const regex = /^[A-Z]{2,4}(-?[A-Z]{2,4})?-?\d{3,6}$/;
+    return regex.test(code);
+  };
 
   // Cleanup preview URL
   useEffect(() => {
@@ -135,10 +163,29 @@ export default function UploadWizard() {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       const code = zimcheInput.trim().toUpperCase();
-      if (code && !formData.zimcheCodes.includes(code)) {
-        setFormData(prev => ({ ...prev, zimcheCodes: [...prev.zimcheCodes, code] }));
-        setZimcheInput('');
+      
+      if (!code) return;
+
+      if (formData.zimcheCodes.includes(code)) {
+        setZimcheError('Code already added');
+        return;
       }
+
+      if (!validateZimcheCode(code)) {
+        setZimcheError('Invalid format. Example: BSC-AI-001 or HCS101');
+        return;
+      }
+
+      setFormData(prev => ({ ...prev, zimcheCodes: [...prev.zimcheCodes, code] }));
+      setZimcheInput('');
+      setZimcheError(null);
+    }
+  };
+
+  const addZimcheSuggestion = (code) => {
+    if (!formData.zimcheCodes.includes(code)) {
+      setFormData(prev => ({ ...prev, zimcheCodes: [...prev.zimcheCodes, code] }));
+      setZimcheError(null);
     }
   };
 
@@ -183,9 +230,69 @@ export default function UploadWizard() {
       setError('Cover image exceeds 5MB limit.');
       return;
     }
+    // Revoke previous preview URL to prevent memory leak
+    if (coverPreview) {
+      URL.revokeObjectURL(coverPreview);
+    }
     setCoverFile(file);
     setCoverPreview(URL.createObjectURL(file));
     setError(null);
+  };
+
+  const handleEnrich = async () => {
+    if (!formData.title || !formData.description) {
+      setError('Title and Description are required for AI enrichment.');
+      return;
+    }
+
+    setIsEnriching(true);
+    setError(null);
+
+    try {
+      const enrichment = await enrichMetadata({
+        title: formData.title,
+        subtitle: formData.subtitle,
+        description: formData.description,
+        authors: user.user_metadata?.full_name || 'Unknown Author',
+        keywords: formData.keywords,
+        language: formData.language
+      });
+
+      // Map enrichment to form fields
+      const primaryDiscipline = enrichment.disciplines.find(d => d.is_primary)?.code || '';
+      const mappedSubject = SUBJECTS.find(s => s.toUpperCase().includes(primaryDiscipline)) || SUBJECTS[0];
+
+      setFormData(prev => ({
+        ...prev,
+        subject: mappedSubject,
+        zimcheCodes: [...new Set([...prev.zimcheCodes, ...enrichment.disciplines.map(d => d.code)])],
+        keywords: [...new Set([...prev.keywords, ...enrichment.subject_tags])].slice(0, 10),
+        level: mapNQFToLevel(enrichment.nqf_level.level),
+        education50Pillars: enrichment.education_5_0_mapping || [],
+        enrichmentData: enrichment
+      }));
+
+      // Success feedback or just continue
+    } catch (err) {
+      console.error('Enrichment error:', err);
+      setError('DARA AI enrichment failed. You can still fill the fields manually.');
+    } finally {
+      setIsEnriching(false);
+    }
+  };
+
+  const mapNQFToLevel = (nqf) => {
+    const map = {
+      'nqf_1': 'Certificate',
+      'nqf_2': 'Certificate',
+      'nqf_3': 'Diploma',
+      'nqf_4': 'HND',
+      'nqf_5': 'Degree',
+      'nqf_6': 'Degree',
+      'nqf_7': 'Masters',
+      'nqf_8': 'PhD'
+    };
+    return map[nqf] || '';
   };
 
   // Navigation
@@ -201,30 +308,47 @@ export default function UploadWizard() {
   const validateStep = (step) => {
     switch (step) {
       case 1:
-        if (!formData.title) return setError('Title is required.');
-        if (!formData.description || formData.description.split(' ').length < 10) return setError('Description must be at least 10 words.'); // Simplified for UX
+        if (!formData.title) {
+          setError('Title is required.');
+          return false;
+        }
+        if (!formData.description || formData.description.trim().split(/\s+/).length < 5) {
+          setError('Description must be at least 5 words.');
+          return false;
+        }
         break;
       case 2:
-        if (!formData.subjectId) return setError('Please select a subject.');
-        if (!formData.level) return setError('Please select a programme level.');
+        if (!formData.subject) {
+          setError('Please select a subject.');
+          return false;
+        }
+        if (!formData.level) {
+          setError('Please select a programme level.');
+          return false;
+        }
         break;
       case 3:
-        if (!pdfFile) return setError('Please upload a PDF manuscript.');
+        if (!pdfFile && !formData.bookUrl) {
+          setError('Please upload a PDF manuscript or provide a valid URL.');
+          return false;
+        }
+        if (formData.bookUrl && !formData.bookUrl.startsWith('http')) {
+          setError('Please enter a valid URL starting with http:// or https://');
+          return false;
+        }
         break;
       case 4:
-        if (formData.accessModel !== 'free' && !formData.price && formData.accessModel !== 'institutional') {
-           // Logic check: if pay-per-download was an option, we'd check price. 
-           // But here access models are Free, Preview, Institutional. 
-           // Assuming 'Preview' might imply paid access later? 
-           // Prompt says "Price field (appears only if pay-per-download selected)".
-           // I'll assume 'preview' might map to pay-per-download or similar.
-           // For now, I'll just check if price is entered if access is NOT free/institutional?
-           // Actually, let's just make price optional unless explicitly required by logic I define.
-           // I'll skip strict price validation for now as the prompt is slightly ambiguous on which model triggers it.
+        // Access model validation — price required only for preview model if logic dictates
+        if (formData.accessModel === 'preview' && formData.price && isNaN(parseFloat(formData.price))) {
+          setError('Please enter a valid price.');
+          return false;
         }
         break;
       case 5:
-        if (!formData.copyrightDeclared) return setError('You must declare copyright ownership.');
+        if (!formData.copyrightDeclared) {
+          setError('You must declare copyright ownership.');
+          return false;
+        }
         break;
     }
     return true;
@@ -237,65 +361,69 @@ export default function UploadWizard() {
     setUploadProgress(0);
 
     try {
-      // 1. Insert Submission Record
-      const { data: submission, error: submitError } = await supabase
-        .from('publication_submissions')
+      // 1. Upload Files first to get URLs
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + 10, 90));
+      }, 500);
+
+      const timestamp = Date.now();
+      
+      // Upload PDF
+      let pdfUrl = formData.bookUrl;
+
+      if (pdfFile) {
+        const pdfFileName = `${timestamp}_${pdfFile.name.replace(/\s+/g, '_')}`;
+        const { error: pdfError } = await supabase.storage
+          .from('books')
+          .upload(`pdfs/${pdfFileName}`, pdfFile);
+
+        if (pdfError) throw pdfError;
+        
+        pdfUrl = supabase.storage.from('books').getPublicUrl(`pdfs/${pdfFileName}`).data.publicUrl;
+      }
+
+      // Upload Cover (if exists)
+      let coverUrl = null;
+      if (coverFile) {
+        const coverFileName = `${timestamp}_${coverFile.name.replace(/\s+/g, '_')}`;
+        const { error: coverError } = await supabase.storage
+          .from('books')
+          .upload(`covers/${coverFileName}`, coverFile);
+        
+        if (coverError) throw coverError;
+        coverUrl = supabase.storage.from('books').getPublicUrl(`covers/${coverFileName}`).data.publicUrl;
+      }
+
+      // 2. Insert Book Record
+      const { data: book, error: submitError } = await supabase
+        .from('books')
         .insert({
-          user_id: user.id,
           title: formData.title,
-          subtitle: formData.subtitle,
+          author_names: user.user_metadata?.full_name || 'Unknown Author', // Or add author field to form
           description: formData.description,
-          keywords: formData.keywords,
-          language: formData.language,
-          subject_id: formData.subjectId,
-          zimche_codes: formData.zimcheCodes,
-          target_audience: formData.targetAudience,
+          subject: formData.subject,
+          zimche_programme_codes: formData.zimcheCodes,
+          pillars: formData.education50Pillars,
           level: formData.level,
-          edition: formData.edition,
+          file_url: pdfUrl,
+          cover_image_url: coverUrl,
           access_model: formData.accessModel,
-          price: formData.price ? parseFloat(formData.price) : null,
+          creator_id: user.id,
+          status: 'published', // Auto-publish for now
+          institution_id: formData.accessModel === 'institutional' ? user.institution_id : null, // Assuming user has institution_id
+          page_count: 0,
           isbn: formData.isbn,
-          status: 'submitted'
+          enrichment_data: formData.enrichmentData || {}
         })
         .select()
         .single();
 
       if (submitError) throw submitError;
-      setSubmissionId(submission.id);
-
-      // 2. Upload Files
-      // Simulate progress for UX since supabase-js v2 upload doesn't expose it easily
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => Math.min(prev + 10, 90));
-      }, 500);
-
-      // Upload PDF
-      const pdfPath = `staging/${submission.id}/manuscript.pdf`;
-      const { error: pdfError } = await supabase.storage
-        .from('author-uploads')
-        .upload(pdfPath, pdfFile);
-
-      if (pdfError) throw pdfError;
-
-      // Upload Cover (if exists)
-      let coverPath = null;
-      if (coverFile) {
-        const fileExt = coverFile.name.split('.').pop();
-        coverPath = `staging/${submission.id}/cover.${fileExt}`;
-        const { error: coverError } = await supabase.storage
-          .from('author-uploads')
-          .upload(coverPath, coverFile);
-        
-        if (coverError) throw coverError;
-      }
-
+      
       clearInterval(progressInterval);
       setUploadProgress(100);
-
-      // 3. Update Submission with file paths (optional, depends on backend trigger, but good practice)
-      // We'll skip this if the backend handles it via triggers, but usually we store the path.
-      // Assuming the table has file_path columns or similar.
-      // For now, we assume success.
+      setSubmissionId(book.id);
+      setLoading(false);
 
     } catch (err) {
       console.error('Submission error:', err);
@@ -311,14 +439,14 @@ export default function UploadWizard() {
           <div className={styles.successIcon}>
             <Check size={48} strokeWidth={3} />
           </div>
-          <h2>Submission Received!</h2>
-          <p>Your manuscript has been successfully uploaded and is now pending review.</p>
+          <h2>Submission Successful!</h2>
+          <p>Your book has been successfully uploaded and is now available.</p>
           <div className={styles.submissionId}>
-            <span>Submission ID:</span>
+            <span>ID:</span>
             <code>{submissionId}</code>
           </div>
-          <Link to="/author/submissions" className={styles.dashboardBtn}>
-            Go to My Submissions
+          <Link to="/author" className={styles.dashboardBtn}>
+            Back to Author Portal
           </Link>
         </div>
       </div>
@@ -425,19 +553,49 @@ export default function UploadWizard() {
         {/* STEP 2: CLASSIFICATION */}
         {currentStep === 2 && (
           <div className={styles.stepContent}>
-            <h2 className={styles.stepTitle}>Classification</h2>
+            <div className={styles.stepHeader}>
+              <h2 className={styles.stepTitle}>Classification</h2>
+              <button 
+                className={styles.enrichBtn}
+                onClick={handleEnrich}
+                disabled={isEnriching}
+              >
+                {isEnriching ? (
+                  <>
+                    <Loader2 size={16} className={styles.spin} />
+                    <span>Enriching...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={16} />
+                    <span>Auto-fill with DARA AI</span>
+                  </>
+                )}
+              </button>
+            </div>
+            
+            {formData.enrichmentData && (
+              <div className={styles.enrichmentSuccess}>
+                <Sparkles size={14} />
+                <span>Enriched by DARA AI: {formData.enrichmentData.dara_summary.substring(0, 100)}...</span>
+              </div>
+            )}
+
             <div className={styles.inputGroup}>
               <label className={styles.label}>Subject <span className={styles.required}>*</span></label>
-              <select name="subjectId" className={styles.select} value={formData.subjectId} onChange={handleInputChange}>
+              <select name="subject" className={styles.select} value={formData.subject} onChange={handleInputChange}>
                 <option value="">Select a subject</option>
-                {subjects.map(sub => (
-                  <option key={sub.id} value={sub.id}>{sub.name}</option>
+                {SUBJECTS.map(sub => (
+                  <option key={sub} value={sub}>{sub}</option>
                 ))}
               </select>
             </div>
             <div className={styles.inputGroup}>
-              <label className={styles.label}>ZIMCHE Programme Codes</label>
-              <div className={styles.tagInputWrapper}>
+              <label className={styles.label}>
+                ZIMCHE Programme Codes
+                <span className={styles.labelHint}> (Press Enter to add)</span>
+              </label>
+              <div className={`${styles.tagInputWrapper} ${zimcheError ? styles.inputError : ''}`}>
                 {formData.zimcheCodes.map(code => (
                   <span key={code} className={styles.tag}>
                     {code}
@@ -448,12 +606,58 @@ export default function UploadWizard() {
                   type="text" 
                   className={styles.tagInput} 
                   value={zimcheInput}
-                  onChange={(e) => setZimcheInput(e.target.value)}
+                  onChange={(e) => {
+                    setZimcheInput(e.target.value);
+                    if (zimcheError) setZimcheError(null);
+                  }}
                   onKeyDown={handleZimcheKeyDown}
-                  placeholder="e.g. HCS101 (Press Enter)"
+                  placeholder="e.g. BSC-AI-001"
                 />
               </div>
+              {zimcheError && <p className={styles.fieldError}>{zimcheError}</p>}
+              
+              <div className={styles.suggestions}>
+                <span className={styles.suggestionLabel}>Suggestions:</span>
+                <div className={styles.suggestionList}>
+                  {ZIMCHE_SUGGESTIONS.map(sug => (
+                    <button 
+                      key={sug} 
+                      type="button"
+                      className={styles.suggestionItem}
+                      onClick={() => addZimcheSuggestion(sug)}
+                      disabled={formData.zimcheCodes.includes(sug)}
+                    >
+                      {sug}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
+
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>Education 5.0 Pillars</label>
+              <div className={styles.checkboxGrid}>
+                {EDUCATION_50_PILLARS.map(pillar => (
+                  <label key={pillar} className={styles.checkboxLabel}>
+                    <input 
+                      type="checkbox" 
+                      checked={formData.education50Pillars.includes(pillar)}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setFormData(prev => ({
+                          ...prev,
+                          education50Pillars: checked 
+                            ? [...prev.education50Pillars, pillar]
+                            : prev.education50Pillars.filter(p => p !== pillar)
+                        }));
+                      }}
+                    />
+                    <span>{pillar}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <div className={styles.inputGroup}>
               <label className={styles.label}>Target Audience</label>
               <input 
@@ -497,35 +701,65 @@ export default function UploadWizard() {
             
             <div className={styles.uploadSection}>
               <label className={styles.label}>Manuscript (PDF) <span className={styles.required}>*</span></label>
-              <div 
-                className={`${styles.dropZone} ${pdfFile ? styles.fileSelected : ''}`}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handlePdfDrop}
-              >
-                <input 
-                  type="file" 
-                  accept="application/pdf" 
-                  onChange={handlePdfSelect} 
-                  className={styles.fileInput} 
-                  id="pdf-upload"
-                />
-                <label htmlFor="pdf-upload" className={styles.dropLabel}>
-                  {pdfFile ? (
-                    <div className={styles.fileInfo}>
-                      <FileText size={32} className={styles.fileIcon} />
-                      <div className={styles.fileName}>{pdfFile.name}</div>
-                      <div className={styles.fileSize}>{(pdfFile.size / 1024 / 1024).toFixed(2)} MB</div>
-                      <span className={styles.changeFile}>Click to change</span>
-                    </div>
-                  ) : (
-                    <>
-                      <UploadCloud size={48} className={styles.uploadIcon} />
-                      <span className={styles.dropText}>Drag & drop PDF here or click to browse</span>
-                      <span className={styles.dropSubText}>Max size: 150MB</span>
-                    </>
-                  )}
-                </label>
+              
+              <div className={styles.uploadTabs}>
+                <button 
+                  className={`${styles.uploadTab} ${!formData.bookUrl ? styles.activeTab : ''}`}
+                  onClick={() => setFormData(prev => ({ ...prev, bookUrl: '' }))}
+                >
+                  Upload File
+                </button>
+                <button 
+                  className={`${styles.uploadTab} ${formData.bookUrl ? styles.activeTab : ''}`}
+                  onClick={() => setPdfFile(null)}
+                >
+                  Provide URL
+                </button>
               </div>
+
+              {!formData.bookUrl ? (
+                <div 
+                  className={`${styles.dropZone} ${pdfFile ? styles.fileSelected : ''}`}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handlePdfDrop}
+                >
+                  <input 
+                    type="file" 
+                    accept="application/pdf" 
+                    onChange={handlePdfSelect} 
+                    className={styles.fileInput} 
+                    id="pdf-upload"
+                  />
+                  <label htmlFor="pdf-upload" className={styles.dropLabel}>
+                    {pdfFile ? (
+                      <div className={styles.fileInfo}>
+                        <FileText size={32} className={styles.fileIcon} />
+                        <div className={styles.fileName}>{pdfFile.name}</div>
+                        <div className={styles.fileSize}>{(pdfFile.size / 1024 / 1024).toFixed(2)} MB</div>
+                        <span className={styles.changeFile}>Click to change</span>
+                      </div>
+                    ) : (
+                      <>
+                        <UploadCloud size={48} className={styles.uploadIcon} />
+                        <span className={styles.dropText}>Drag & drop PDF here or click to browse</span>
+                        <span className={styles.dropSubText}>Max size: 150MB</span>
+                      </>
+                    )}
+                  </label>
+                </div>
+              ) : (
+                <div className={styles.urlInputWrapper}>
+                  <input 
+                    type="url" 
+                    name="bookUrl"
+                    className={styles.input}
+                    value={formData.bookUrl}
+                    onChange={handleInputChange}
+                    placeholder="https://example.com/manuscript.pdf"
+                  />
+                  <p className={styles.helpText}>Provide a direct link to the PDF manuscript.</p>
+                </div>
+              )}
             </div>
 
             <div className={styles.uploadSection}>
@@ -605,16 +839,26 @@ export default function UploadWizard() {
               </div>
             )}
 
-            <div className={styles.inputGroup}>
-              <label className={styles.label}>ISBN (Optional)</label>
-              <input 
-                type="text" 
-                name="isbn" 
-                className={styles.input} 
-                value={formData.isbn} 
-                onChange={handleInputChange}
-                placeholder="e.g. 978-3-16-148410-0"
-              />
+            <div className={styles.row}>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>License Type</label>
+                <select name="license" className={styles.select} value={formData.license} onChange={handleInputChange}>
+                  {LICENSES.map(lic => (
+                    <option key={lic.value} value={lic.value}>{lic.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>ISBN (Optional)</label>
+                <input 
+                  type="text" 
+                  name="isbn" 
+                  className={styles.input} 
+                  value={formData.isbn} 
+                  onChange={handleInputChange}
+                  placeholder="e.g. 978-3-16-148410-0"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -632,7 +876,7 @@ export default function UploadWizard() {
               <div className={styles.summaryRow}>
                 <span className={styles.summaryLabel}>Subject:</span>
                 <span className={styles.summaryValue}>
-                  {subjects.find(s => s.id === formData.subjectId)?.name || 'Unknown'}
+                  {formData.subject || 'Unknown'}
                 </span>
               </div>
               <div className={styles.summaryRow}>
@@ -640,6 +884,10 @@ export default function UploadWizard() {
                 <span className={styles.summaryValue}>
                   {ACCESS_MODELS.find(m => m.id === formData.accessModel)?.label}
                 </span>
+              </div>
+              <div className={styles.summaryRow}>
+                <span className={styles.summaryLabel}>License:</span>
+                <span className={styles.summaryValue}>{formData.license}</span>
               </div>
               <div className={styles.summaryRow}>
                 <span className={styles.summaryLabel}>Files:</span>
@@ -653,7 +901,7 @@ export default function UploadWizard() {
               <h3>Attribution Preview</h3>
               <div className={styles.previewBox}>
                 <p>
-                  <strong>{formData.title}</strong> by {user?.user_metadata?.first_name} {user?.user_metadata?.last_name}. 
+                  <strong>{formData.title}</strong> by {user?.user_metadata?.first_name || 'Author'} {user?.user_metadata?.last_name || ''}. 
                   Published via Dare Digital Library. {new Date().getFullYear()}.
                 </p>
               </div>
@@ -671,18 +919,27 @@ export default function UploadWizard() {
                 I confirm I own the rights to publish this work and it does not infringe on any third-party copyrights.
               </span>
             </label>
+          </div>
+        )}
 
-            {loading && (
+        {/* Uploading Overlay */}
+        {loading && (
+          <div className={styles.uploadOverlay}>
+            <div className={styles.uploadProgressCard}>
+              <UploadCloud size={48} className={styles.uploadingIcon} />
+              <h3>Uploading Publication</h3>
+              <p>Please wait while we process your manuscript and cover image...</p>
+              
               <div className={styles.uploadProgress}>
                 <div className={styles.progressLabel}>
-                  <span>Uploading...</span>
+                  <span>{uploadProgress < 100 ? 'Uploading...' : 'Finalizing...'}</span>
                   <span>{uploadProgress}%</span>
                 </div>
                 <div className={styles.progressBar}>
                   <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }} />
                 </div>
               </div>
-            )}
+            </div>
           </div>
         )}
 

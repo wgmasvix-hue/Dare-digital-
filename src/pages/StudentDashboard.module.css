@@ -10,10 +10,18 @@
 /* 1. HEADER */
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: 20px;
   border-bottom: 1px solid var(--mist);
   padding-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
 }
 
 .greeting {
@@ -21,6 +29,22 @@
   font-size: 2.5rem;
   color: var(--soil);
   margin-bottom: 8px;
+}
+
+.institutionInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.institutionLogo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 4px;
+  background-color: var(--color-bg-base);
+  padding: 2px;
+  border: 1px solid var(--mist);
 }
 
 .subHeader {
@@ -34,10 +58,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background-color: white;
+  background-color: var(--color-bg-base);
   padding: 12px 16px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-soft);
   border: 1px solid var(--mist);
 }
 
@@ -109,12 +133,12 @@
 }
 
 .continueCard {
-  background: white;
+  background: var(--color-bg-base);
   border-radius: 12px;
   padding: 16px;
   display: flex;
   gap: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: var(--shadow-soft);
   border: 1px solid var(--mist);
   transition: transform 0.2s ease;
 }
@@ -205,6 +229,45 @@
   color: var(--amber);
 }
 
+/* 6.5 STUDY PROGRESS CHART */
+.chartCard {
+  background: var(--color-bg-base);
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid var(--mist);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.chartFooter {
+  display: flex;
+  gap: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--mist);
+}
+
+.chartStat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chartStatValue {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--soil);
+}
+
+.chartStatLabel {
+  font-size: 0.75rem;
+  color: var(--clay);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* 3. READING LISTS */
 .listsGrid {
   display: grid;
@@ -219,7 +282,7 @@
 }
 
 .listCard {
-  background: white;
+  background: var(--color-bg-base);
   padding: 20px;
   border-radius: 12px;
   border: 1px solid var(--mist);
@@ -228,6 +291,7 @@
   gap: 16px;
   position: relative;
   transition: all 0.2s ease;
+  box-shadow: var(--shadow-soft);
 }
 
 .listCard:hover {
@@ -299,15 +363,81 @@
   }
 }
 
+/* Partner Subjects Grid */
+.partnerSubjectsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .partnerSubjectsGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+}
+
+.partnerSubjectCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  background: var(--color-bg-base);
+  border: 1px solid var(--mist);
+  border-radius: 16px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-soft);
+}
+
+.partnerSubjectCard:hover {
+  border-color: var(--subject-color);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+}
+
+.partnerSubjectIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--mist);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clay);
+  transition: all 0.2s;
+}
+
+.partnerSubjectCard:hover .partnerSubjectIcon {
+  background: var(--subject-color);
+  color: white;
+}
+
+.partnerSubjectLabel {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--soil);
+  text-align: center;
+}
+
 /* 6. STATS */
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
 }
 
 .statCard {
-  background: white;
+  background: var(--color-bg-base);
   padding: 24px;
   border-radius: 16px;
   border: 1px solid var(--mist);
@@ -318,6 +448,7 @@
   gap: 8px;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-soft);
 }
 
 .statCard::before {
@@ -350,7 +481,159 @@
   color: var(--clay);
 }
 
-/* Loading */
+/* 1.2 QUICK ACTIONS */
+.quickActionsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .quickActionsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.actionCard {
+  background: var(--color-bg-base);
+  border: 1px solid var(--mist);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  box-shadow: var(--shadow-soft);
+}
+
+.actionCard:hover {
+  transform: translateY(-4px);
+  border-color: var(--amber);
+  box-shadow: var(--shadow-md);
+}
+
+.actionIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionCard span {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--soil);
+}
+
+/* 7. ACCOUNT & ACTIVITY */
+.accountSection {
+  background: var(--color-bg-base);
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid var(--mist);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-soft);
+}
+
+.accountHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.accountAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--mist);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--soil);
+}
+
+.accountInfo h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--soil);
+  margin: 0;
+}
+
+.accountInfo p {
+  font-size: 0.85rem;
+  color: var(--clay);
+  margin: 0;
+}
+
+.accountActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.accountLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--soil);
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.accountLink:hover {
+  background: var(--parchment);
+  color: var(--amber);
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activityItem {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--cream);
+  align-items: center;
+}
+
+.activityIcon {
+  padding: 8px;
+  background: var(--color-bg-base);
+  border-radius: 50%;
+  color: var(--amber);
+  box-shadow: var(--shadow-soft);
+}
+
+.activityDetails {
+  flex: 1;
+}
+
+.activityTitle {
+  font-weight: 600;
+  color: var(--soil);
+  font-size: 0.9rem;
+}
+
+.activityTime {
+  font-size: 0.75rem;
+  color: var(--clay);
+}
+
 .loadingContainer {
   min-height: 60vh;
   display: flex;
@@ -371,4 +654,71 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.errorBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  background: var(--color-bg-subtle);
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 0.875rem;
+}
+
+.errorBanner button {
+  padding: 8px 16px;
+  background: var(--soil);
+  color: var(--cream);
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.daraFloatingBtn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: var(--soil);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  border: none;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.daraFloatingBtn:hover {
+  transform: translateY(-4px) scale(1.05);
+  background: var(--clay);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+}
+
+.daraFloatingBtn svg {
+  color: var(--gold);
+}
+
+@media (max-width: 640px) {
+  .daraFloatingBtn {
+    bottom: 24px;
+    right: 24px;
+    padding: 10px 16px;
+  }
+  
+  .daraFloatingBtn span {
+    display: none;
+  }
 }

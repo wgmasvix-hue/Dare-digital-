@@ -4,6 +4,7 @@ import {
   Mail, Lock, User, Building, GraduationCap, 
   CheckCircle, AlertCircle, ArrowRight, ArrowLeft 
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../lib/supabase';
 import styles from './Auth.module.css';
 
@@ -37,11 +38,38 @@ export default function Register() {
 
   useEffect(() => {
     async function fetchInstitutions() {
-      const { data } = await supabase
-        .from('institutions')
-        .select('id, name')
-        .order('name');
-      setInstitutions(data || []);
+      try {
+        const { data, error } = await supabase
+          .from('institutions')
+          .select('id, name')
+          .order('name');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          setInstitutions(data);
+        } else {
+          // Fallback if DB is empty
+          throw new Error('No institutions found');
+        }
+      } catch (err) {
+        console.warn('Using fallback institutions:', err);
+        setInstitutions([
+          { id: 'uz', name: 'University of Zimbabwe' },
+          { id: 'nust', name: 'National University of Science and Technology' },
+          { id: 'msu', name: 'Midlands State University' },
+          { id: 'gzu', name: 'Great Zimbabwe University' },
+          { id: 'au', name: 'Africa University' },
+          { id: 'cut', name: 'Chinhoyi University of Technology' },
+          { id: 'buse', name: 'Bindura University of Science Education' },
+          { id: 'hit', name: 'Harare Institute of Technology' },
+          { id: 'lsu', name: 'Lupane State University' },
+          { id: 'rcu', name: 'Reformed Church University' },
+          { id: 'zequ', name: 'Zimbabwe Ezekiel Guti University' },
+          { id: 'wua', name: 'Women\'s University in Africa' },
+          { id: 'other', name: 'Other / Independent' }
+        ]);
+      }
     }
     fetchInstitutions();
   }, []);
@@ -95,7 +123,7 @@ export default function Register() {
     setError(null);
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -113,7 +141,7 @@ export default function Register() {
 
       if (signUpError) throw signUpError;
       
-      // Success - Redirect
+      // Success - Redirect to dashboard. ProtectedRoute will handle loading state.
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
@@ -124,7 +152,12 @@ export default function Register() {
 
   return (
     <div className={styles.authContainer}>
-      <div className={styles.authCard}>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className={styles.authCard}
+      >
         {/* Header */}
         <div className={styles.header}>
           <Link to="/" className={styles.logoGroup}>
@@ -150,9 +183,16 @@ export default function Register() {
           </div>
         )}
 
-        {/* STEP 1: ACCOUNT */}
-        {step === 1 && (
-          <div className={styles.formStep}>
+        <AnimatePresence mode="wait">
+          {/* STEP 1: ACCOUNT */}
+          {step === 1 && (
+            <motion.div 
+              key="step1"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className={styles.formStep}
+            >
             <div className={styles.inputGroup}>
               <label className={styles.label}>Email Address</label>
               <div className={styles.inputWrapper}>
@@ -201,12 +241,18 @@ export default function Register() {
             <button onClick={handleNext} className={styles.submitBtn}>
               Next Step <ArrowRight size={18} />
             </button>
-          </div>
+          </motion.div>
         )}
 
         {/* STEP 2: IDENTITY */}
         {step === 2 && (
-          <div className={styles.formStep}>
+          <motion.div 
+            key="step2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className={styles.formStep}
+          >
             <div className={styles.row}>
               <div className={styles.inputGroup}>
                 <label className={styles.label}>First Name</label>
@@ -323,12 +369,18 @@ export default function Register() {
                 Next <ArrowRight size={18} />
               </button>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* STEP 3: CONFIRM */}
         {step === 3 && (
-          <div className={styles.formStep}>
+          <motion.div 
+            key="step3"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className={styles.formStep}
+          >
             <div className={styles.summary}>
               <h3 className={styles.summaryTitle}>Review Details</h3>
               <div className={styles.summaryRow}>
@@ -376,13 +428,14 @@ export default function Register() {
                 {loading ? 'Creating Account...' : 'Create Account'} <CheckCircle size={18} />
               </button>
             </div>
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         <p className={styles.footerText}>
           Already have an account? <Link to="/login" className={styles.link}>Sign in</Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

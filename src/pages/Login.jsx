@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react';
+import { motion } from 'motion/react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
 import styles from './Auth.module.css';
 
 export default function Login() {
@@ -48,7 +50,12 @@ export default function Login() {
 
   return (
     <div className={styles.authContainer}>
-      <div className={styles.authCard}>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className={styles.authCard}
+      >
         <div className={styles.header}>
           <Link to="/" className={styles.logoGroup}>
             <span className={styles.dare}>Dare</span>
@@ -135,9 +142,13 @@ export default function Login() {
         </button>
 
         <p className={styles.footerText}>
+          Institutional user? <Link to="/institutional-login" className={styles.link}>Sign in with institution</Link>
+        </p>
+
+        <p className={styles.footerText}>
           Don't have an account? <Link to="/register" className={styles.link}>Register now</Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -1,82 +1,365 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;600&family=Source+Code+Pro:wght@400;500&display=swap');
+@import "tailwindcss";
+
 :root {
-  /* Brand Palette */
-  --soil: #1C1208;
-  --bark: #2E1F0E;
-  --clay: #6B3A1F;
-  --amber: #C8861A;
-  --gold: #E8A830;
-  --parchment: #F5EDD8;
-  --cream: #FBF6EC;
-  --mist: #E8DFC8;
-  --leaf: #2D5016;
+  /* HSL for dynamic control - Refined for better vibrancy and contrast */
+  --h-teal: 165; --s-teal: 85%; --l-teal: 35%; /* More vibrant teal */
+  --h-gold: 42;  --s-gold: 95%;  --l-gold: 45%; /* Brighter, more visible gold */
 
-  /* Typography */
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-body: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'Space Mono', monospace;
+  /* Semantic Light Palette */
+  --color-bg-base:    #FFFFFF;
+  --color-bg-subtle:  #F8FAFC; 
+  --color-border:     #E2E8F0;
+  
+  --color-teal:       hsl(var(--h-teal), var(--s-teal), var(--l-teal));
+  --color-teal-light: hsla(var(--h-teal), var(--s-teal), var(--l-teal), 0.1);
+  --color-gold:       hsl(var(--h-gold), var(--s-gold), var(--l-gold));
+  
+  --text-main:        #0F172A; /* Slate 900 */
+  --text-muted:       #334155; /* Slate 700 - Darker for better contrast */
+
+  --font-main: 'Source Sans 3', system-ui, sans-serif;
+  --font-display: 'Playfair Display', serif;
+  --font-mono: 'Source Code Pro', monospace;
+  
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Earthy Palette - Refined for better readability */
+  --soil: #4E342E; /* Slightly warmer/lighter than before */
+  --clay: #8D6E63;
+  --amber: #D97706; /* More vibrant amber */
+  --parchment: #FEFAF3;
+  --cream: #FDFCF7; /* Cleaner cream */
+  --mist: #F1F5F9; /* Using slate 100 for mist for cleaner look */
+  --leaf: #166534; /* Darker green for contrast */
+  --white: #FFFFFF;
+  --gold: var(--color-gold);
+  --navy: #0F172A; /* Slate 900 for navy */
+  --bark: #5D4037;
+  --font-sans: var(--font-main);
+  --font-serif: var(--font-display);
+  --font-body: var(--font-main);
+
+  /* Modern UI Additions */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 24px; /* Larger radius for modern feel */
+  --radius-full: 9999px;
 }
 
-/* Global Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.dark-mode {
+  --color-bg-base:    #020617; /* Slate 950 - Deeper black */
+  --color-bg-subtle:  #0F172A; /* Slate 900 */
+  --color-border:     #1E293B; /* Slate 800 */
+  
+  --text-main:        #F8FAFC; /* Slate 50 */
+  --text-muted:       #CBD5E1; /* Slate 300 - Brighter for better contrast */
+  
+  --color-teal:       hsl(var(--h-teal), var(--s-teal), 60%); /* Even lighter for dark BG */
+  --color-teal-light: hsla(var(--h-teal), var(--s-teal), 60%, 0.2);
+
+  /* Dark Mode Earthy Palette - Adjusted for visibility */
+  --soil: #E7DED0;
+  --clay: #D7CCC8;
+  --amber: #FBBF24; /* Bright amber for dark mode */
+  --parchment: #020617;
+  --cream: #0F172A;
+  --mist: #1E293B;
+  --leaf: #4ADE80; /* Bright green for dark mode */
 }
+
+/* --- THE CLEAN CANVAS --- */
 
 body {
-  background-color: var(--cream);
-  color: var(--clay);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
+  background-color: var(--color-bg-base);
+  color: var(--text-main);
+  font-family: var(--font-main);
+  line-height: 1.6;
 }
 
-h1, h2, h3, h4, h5, h6 {
+/* --- SUPABASE COMPONENT REFINEMENT --- */
+
+/* Professional Inputs for Supabase Auth */
+input, textarea {
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border);
+  color: var(--text-main);
+  border-radius: 6px;
+  padding: 10px 14px;
+  transition: var(--transition);
+}
+
+input:focus {
+  border-color: var(--color-teal);
+  box-shadow: 0 0 0 4px var(--color-teal-light);
+  outline: none;
+}
+
+/* --- AI RESPONSE (GOOGLE AI STUDIO) --- */
+
+.ai-container {
+  background: var(--color-bg-subtle);
+  border-left: 4px solid var(--color-teal);
+  border-radius: 0 8px 8px 0;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  box-shadow: var(--shadow-soft);
+}
+
+/* High-contrast code for light mode */
+pre, code {
+  font-family: var(--font-mono);
+  background: #F1F5F9;
+  color: #0F172A;
+  border: 1px solid #CBD5E1;
+  border-radius: 4px;
+  padding: 0.2rem 0.4rem;
+}
+
+/* --- DATA FETCHING (SUPABASE STATES) --- */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-light {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* --- TYPOGRAPHY UTILITIES --- */
+
+.markdown-body {
+  font-family: var(--font-main);
+  line-height: 1.6;
+}
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
   font-family: var(--font-display);
-  color: var(--soil);
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: var(--color-teal);
+}
+
+.markdown-body p {
+  margin-bottom: 1rem;
+}
+
+.markdown-body ul, .markdown-body ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.markdown-body li {
+  margin-bottom: 0.5rem;
+}
+
+.markdown-body strong {
+  font-weight: 600;
+  color: var(--color-teal);
+}
+
+.display-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: -0.01em;
+}
+
+.gold-accent {
+  color: var(--color-gold);
   font-weight: 600;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
-  transition: color 0.2s ease;
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-button {
-  font-family: var(--font-body);
+/* Scroll to Top Button */
+.scroll-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--amber);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 99;
+}
+
+.scroll-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.scroll-top-btn:hover {
+  background: var(--soil);
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .scroll-top-btn {
+  background: var(--amber);
+  color: #1a1208;
+}
+
+.dark-mode .scroll-top-btn:hover {
+  background: var(--clay);
+}
+
+@media (max-width: 768px) {
+  .scroll-top-btn {
+    bottom: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* --- MODERN UI UTILITIES --- */
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark-mode .glass-effect {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-modern {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   border: none;
-  background: none;
-  transition: all 0.2s ease;
+  font-family: var(--font-sans);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--mist);
-}
-
-::-webkit-scrollbar-thumb {
+.btn-primary {
   background: var(--amber);
-  border-radius: 5px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(200, 146, 42, 0.2);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--gold);
+.btn-primary:hover {
+  background: var(--soil);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* Utility Classes */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+.btn-secondary {
+  background: var(--color-bg-subtle);
+  color: var(--text-main);
+  border: 1px solid var(--color-border);
 }
 
-.mono {
-  font-family: var(--font-mono);
+.btn-secondary:hover {
+  background: var(--color-border);
+  transform: translateY(-2px);
+}
+
+.card-modern {
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s ease;
+}
+
+.card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--amber);
+}
+
+/* Modern Tabs (Pill Style) */
+.tabs-pill {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-lg);
+  width: fit-content;
+}
+
+.tab-pill {
+  padding: 8px 20px;
+  border-radius: var(--radius-lg);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: transparent;
+}
+
+.tab-pill:hover {
+  color: var(--text-main);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.tab-pill.active {
+  background: var(--white);
+  color: var(--amber);
+  box-shadow: var(--shadow-soft);
+}
+
+.dark-mode .tab-pill.active {
+  background: var(--color-bg-base);
+  color: var(--amber);
+}
+
+/* Custom Scrollbar Utility */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #E2E8F0;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #CBD5E1;
+}
+
+.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
