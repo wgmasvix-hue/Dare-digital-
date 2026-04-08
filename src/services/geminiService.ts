@@ -1,15 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
 import { DARA_SYSTEM_PROMPT } from "../lib/daraSystemPrompt";
 import { supabase } from "../lib/supabase";
-
-const getApiKey = () => {
-  // Priority: import.meta.env (Vite standard) -> process.env (Vite define/Node)
-  const key = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
-  if (!key) {
-    console.warn("Gemini API Key is missing. AI features may not work.");
-  }
-  return key;
-};
 
 /**
  * Truncate text to avoid token limits
@@ -20,13 +10,19 @@ const truncateText = (text: string, maxLength = 30000) => {
   return text.substring(0, maxLength) + "... [Text truncated for AI processing]";
 };
 
+const callGemini = async (contents: unknown, config: Record<string, unknown> = {}) => {
+  const { data, error } = await supabase.functions.invoke('gemini', {
+    body: { contents, config: { ...config, systemInstruction: (config.systemInstruction as string) || DARA_SYSTEM_PROMPT } }
+  });
+  if (error) throw error;
+  return data;
+};
+
 export const geminiService = {
   /**
    * Generate a summary for a book or a specific context
    */
   async summarize(text: string, context = "") {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
-    
     const taskPrompt = `
       Task: Provide a concise and insightful summary of the following text.
       Focus on key concepts, main arguments, and educational value.
@@ -38,14 +34,8 @@ export const geminiService = {
     `;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: taskPrompt,
-        config: {
-          systemInstruction: DARA_SYSTEM_PROMPT,
-        },
-      });
-      return response.text;
+      const data = await callGemini(taskPrompt);
+      return data.text;
     } catch (error) {
       console.error("Gemini Summarization Error:", error);
       throw error;
@@ -56,8 +46,6 @@ export const geminiService = {
    * Answer a question based on book context
    */
   async askQuestion(question: string, bookContext: string) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
-    
     const taskPrompt = `
       Task: Answer the student's question based on the provided book context.
       
@@ -69,14 +57,8 @@ export const geminiService = {
     `;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: taskPrompt,
-        config: {
-          systemInstruction: DARA_SYSTEM_PROMPT,
-        },
-      });
-      return response.text;
+      const data = await callGemini(taskPrompt);
+      return data.text;
     } catch (error) {
       console.error("Gemini Q&A Error:", error);
       throw error;
@@ -87,17 +69,12 @@ export const geminiService = {
    * Get search suggestions based on query
    */
   async getSearchSuggestions(query: string) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Task: Provide 5 related academic search terms or Boolean search combinations for the following query.\nQuery: ${query}`,
-      config: { 
+    try {
+      const data = await callGemini(`Task: Provide 5 related academic search terms or Boolean search combinations for the following query.\nQuery: ${query}`, {
         systemInstruction: "You are DARA, an academic librarian. Return only a JSON array of strings. No markdown, no explanation.",
         responseMimeType: "application/json"
-      },
-    });
-    try {
-      return JSON.parse(response.text || "[]");
+      });
+      return JSON.parse(data.text || "[]");
     } catch {
       return [];
     }
@@ -107,20 +84,15 @@ export const geminiService = {
    * AI-powered book search/filtering
    */
   async searchBooks(query: string) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Task: Analyze the user's request and extract search parameters.\nRequest: ${query}`,
-      config: {
+    try {
+      const data = await callGemini(`Task: Analyze the user's request and extract search parameters.\nRequest: ${query}`, {
         systemInstruction: `You are DARA. Extract keywords, faculty, and level from the user's request. 
         Return JSON: { "keywords": [], "faculty": "All", "level": "All" }. 
         Faculties: STEM, Agriculture, Health, Business, Education, Engineering, Law, Humanities, AI & Future Tech.
         Levels: Certificate, Diploma, HND, Degree, Masters, PhD.`,
         responseMimeType: "application/json"
-      },
-    });
-    try {
-      return JSON.parse(response.text || '{"keywords": [], "faculty": "All", "level": "All"}');
+      });
+      return JSON.parse(data.text || '{"keywords": [], "faculty": "All", "level": "All"}');
     } catch {
       return { keywords: [query], faculty: 'All', level: 'All' };
     }
@@ -130,8 +102,6 @@ export const geminiService = {
    * Generate a lesson plan for teachers (HBC Aligned)
    */
   async generateLessonPlan(details: { subject: string; level: string; topic: string; duration: string; resources?: string }) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
-    
     const prompt = `You are DARA, Zimbabwe's Heritage-Based Curriculum (HBC) aligned teacher training AI. 
 Generate a complete, detailed lesson plan for a Zimbabwean teacher or student teacher.
 
@@ -190,14 +160,8 @@ By the end of the lesson, learners should be able to: (3-5 measurable objectives
 Make it detailed, practical, and strictly aligned with Zimbabwe's Heritage-Based Curriculum.`;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          systemInstruction: DARA_SYSTEM_PROMPT,
-        },
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("Gemini Lesson Plan Error:", error);
       throw error;
@@ -208,8 +172,6 @@ Make it detailed, practical, and strictly aligned with Zimbabwe's Heritage-Based
    * Generate an interactive assessment (HBC Aligned)
    */
   async generateAssessment(details: { subject: string; topic: string; level: string; type?: string }) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
-    
     const prompt = `You are DARA. Generate an interactive, Heritage-Based Curriculum (HBC) aligned assessment for:
 - Subject: ${details.subject}
 - Topic: ${details.topic}
@@ -225,14 +187,8 @@ Include:
 Format as clean Markdown.`;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          systemInstruction: DARA_SYSTEM_PROMPT,
-        },
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("Gemini Assessment Error:", error);
       throw error;
@@ -245,48 +201,25 @@ Format as clean Markdown.`;
   async chat(message: string, history: { role: string; text: string }[] = [], options: { programmeCode?: string; faculty?: string; institutionId?: string; temperature?: number; topP?: number; topK?: number; responseMimeType?: string; responseSchema?: unknown; systemInstruction?: string } = {}) {
     try {
       const truncatedMessage = truncateText(message, 12000);
-      const { data, error } = await supabase.functions.invoke('dara-chat', {
-        body: { 
-          message: truncatedMessage, 
-          history,
-          programmeCode: options.programmeCode,
-          faculty: options.faculty,
-          institutionId: options.institutionId,
-          systemInstruction: options.systemInstruction
-        }
-      });
-
-      if (error) throw error;
-      return data.response;
-    } catch (error) {
-      console.error("DARA Edge Function Error:", error);
-      
-      // Fallback to direct Gemini if Edge Function fails
-      const apiKey = getApiKey();
-      if (!apiKey) {
-        throw new Error("Gemini API Key is missing. Cannot fallback.");
-      }
-      
-      const ai = new GoogleGenAI({ apiKey });
       const contents = history.map(msg => ({
         role: msg.role === 'ai' ? 'model' : 'user',
         parts: [{ text: msg.text }]
       }));
-      contents.push({ role: 'user', parts: [{ text: truncateText(message, 12000) }] });
+      contents.push({ role: 'user', parts: [{ text: truncatedMessage }] });
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: contents,
-        config: { 
-          systemInstruction: options.systemInstruction || DARA_SYSTEM_PROMPT,
-          temperature: options.temperature || 0.7,
-          topP: options.topP || 0.95,
-          topK: options.topK || 40,
-          responseMimeType: options.responseMimeType,
-          responseSchema: options.responseSchema
-        },
+      const data = await callGemini(contents, {
+        temperature: options.temperature,
+        topP: options.topP,
+        topK: options.topK,
+        responseMimeType: options.responseMimeType,
+        responseSchema: options.responseSchema,
+        systemInstruction: options.systemInstruction
       });
-      return response.text;
+
+      return data.text;
+    } catch (error) {
+      console.error("DARA Edge Function Error:", error);
+      throw error;
     }
   },
 
@@ -295,7 +228,6 @@ Format as clean Markdown.`;
    * Aligned with Zimbabwe's Heritage-Based Curriculum and Education 5.0.
    */
   async generateVocationalGuide({ trade, skill, level, resources }: { trade: string; skill: string; level: string; resources: string }) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const prompt = `Generate a comprehensive, practical skill guide for a vocational training student in Zimbabwe.
     
     Trade: ${trade}
@@ -321,12 +253,8 @@ Format as clean Markdown.`;
     - Troubleshooting: Common mistakes and how to fix them.`;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: { systemInstruction: DARA_SYSTEM_PROMPT },
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("Vocational Guide Error:", error);
       throw error;
@@ -337,7 +265,6 @@ Format as clean Markdown.`;
    * Generates a structured skill learning module (Tasks, Steps, Practice, Test).
    */
   async generateVocationalSkillModule({ trade, skill, level, part }: { trade: string; skill: string; level: string; part: 'tasks' | 'steps' | 'practice' | 'test' }) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     let prompt = "";
 
     if (part === 'tasks') {
@@ -365,12 +292,8 @@ Format as clean Markdown.`;
     }
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: { systemInstruction: DARA_SYSTEM_PROMPT },
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("Vocational Skill Module Error:", error);
       throw error;
@@ -381,7 +304,6 @@ Format as clean Markdown.`;
    * DARE Assist for Vocational Skills
    */
   async vocationalAssist({ action, trade, skill, context }: { action: string; trade: string; skill: string; context: string }) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     let prompt = "";
 
     if (action === 'explain') {
@@ -401,12 +323,8 @@ Format as clean Markdown.`;
     }
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: { systemInstruction: DARA_SYSTEM_PROMPT },
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("Vocational Assist Error:", error);
       throw error;
@@ -417,7 +335,6 @@ Format as clean Markdown.`;
    * Generates a project cost estimator and material list for vocational projects.
    */
   async generateProjectEstimator({ project, trade, scale }: { project: string; trade: string; scale: string }) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const prompt = `Generate a project estimation and material list for a vocational training project in Zimbabwe.
     
     Project: ${project}
@@ -434,12 +351,8 @@ Format as clean Markdown.`;
     - Sustainability Note: How to minimize waste and use eco-friendly practices.`;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: { systemInstruction: DARA_SYSTEM_PROMPT },
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("Project Estimator Error:", error);
       throw error;
@@ -451,7 +364,6 @@ Format as clean Markdown.`;
    * Supports reflection, supervisor prep, and feedback analysis.
    */
   async generateTPCompanionResponse({ type, details }: { type: 'reflection' | 'supervisor_prep' | 'feedback_analysis'; details: { subject: string; topic: string; level?: string; experience?: string; challenges?: string; feedback?: string } }) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     let prompt = "";
 
     if (type === "reflection") {
@@ -497,12 +409,8 @@ Provide a structured Improvement Plan in Markdown:
     }
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: { systemInstruction: DARA_SYSTEM_PROMPT },
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("TP Companion Error:", error);
       throw error;
@@ -513,7 +421,6 @@ Provide a structured Improvement Plan in Markdown:
    * Generates a ZTC Portfolio structure or accreditation report.
    */
   async generatePortfolioStructure({ collegeName, department, focusArea }: { collegeName: string; department: string; focusArea: string }) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const prompt = `You are DARA, an expert in Zimbabwean Teacher Education (ZIMCHE standards).
 Generate a comprehensive "ZTC Portfolio Structure" for:
 - College: ${collegeName}
@@ -528,12 +435,8 @@ The response should be in Markdown and include:
 5. **DARA's Professional Advice**: 3 tips for maintaining an award-winning portfolio.`;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: { systemInstruction: DARA_SYSTEM_PROMPT },
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("Portfolio Generation Error:", error);
       throw error;
@@ -544,7 +447,6 @@ The response should be in Markdown and include:
    * Generates curriculum guidance for a specific topic and level.
    */
   async generateCurriculumGuidance({ level, topic }: { level: string; topic: string }) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const prompt = `You are DARA, the Zimbabwe Curriculum Intelligence Engine.
 Provide a deep-dive analysis of the following curriculum topic:
 - Level: ${level}
@@ -558,12 +460,8 @@ The response should be in Markdown and include:
 5. **Exam Pattern Analysis**: How this topic is typically tested in ZIMSEC exams (if applicable).`;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: { systemInstruction: DARA_SYSTEM_PROMPT },
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("Curriculum Engine Error:", error);
       throw error;
@@ -592,7 +490,6 @@ The response should be in Markdown and include:
    * Generate an archival report or summary for a resource
    */
   async generateArchivalReport(resourceData: { title: string; author: string; subject: string; abstract: string; institution: string; year: string | number }) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const prompt = `
       As a professional archivist, generate a comprehensive archival report for the following local resource:
       
@@ -613,14 +510,8 @@ The response should be in Markdown and include:
     `;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          systemInstruction: DARA_SYSTEM_PROMPT
-        }
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("Error generating archival report:", error);
       throw error;
@@ -631,7 +522,6 @@ The response should be in Markdown and include:
    * Extract academic metadata from raw text using Gemini
    */
   async extractMetadata(rawText: string) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const prompt = `
       Extract academic metadata from the following text and return ONLY a JSON object.
       Required fields: title, authors (list of strings), date (YYYY-MM-DD format if possible), abstract.
@@ -640,15 +530,11 @@ The response should be in Markdown and include:
     `;
     
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          systemInstruction: "You are an academic metadata extractor. Return only pure JSON. No markdown, no explanation.",
-          responseMimeType: "application/json"
-        },
+      const data = await callGemini(prompt, {
+        systemInstruction: "You are an academic metadata extractor. Return only pure JSON. No markdown, no explanation.",
+        responseMimeType: "application/json"
       });
-      return JSON.parse(response.text || "{}");
+      return JSON.parse(data.text || "{}");
     } catch (error) {
       console.error("Gemini Metadata Extraction Error:", error);
       throw error;
@@ -659,7 +545,6 @@ The response should be in Markdown and include:
    * Process institutional content (Summarize, Explain, Quiz)
    */
   async processInstitutionalContent(text: string, type: string) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     let prompt = "";
 
     if (type === "summary") {
@@ -673,14 +558,8 @@ The response should be in Markdown and include:
     }
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          systemInstruction: DARA_SYSTEM_PROMPT,
-        },
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("Gemini Institutional Content Error:", error);
       throw error;
@@ -691,8 +570,6 @@ The response should be in Markdown and include:
    * Transforms textbook content into structured HBC learning material.
    */
   async transformToHBC(content: string) {
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
-    
     const prompt = `You are a Zimbabwean curriculum expert specializing in the Heritage-Based Curriculum (HBC).
 
 Using the provided textbook content, transform it into structured HBC learning material.
@@ -714,19 +591,122 @@ Ensure:
 * Alignment with ZIMSEC/HBC
 * Clear, simple language
 * Practical relevance
-do not make any other changes.`;
+* do not make any other changes.`;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          systemInstruction: DARA_SYSTEM_PROMPT,
-        },
-      });
-      return response.text;
+      const data = await callGemini(prompt);
+      return data.text;
     } catch (error) {
       console.error("Gemini HBC Transformation Error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Analyze a student's exam answer
+   */
+  async analyzeExamAnswer(question: Record<string, unknown>, answer: string) {
+    const prompt = `
+      You are an expert Zimbabwean examiner for the Heritage-Based Curriculum.
+      Analyze the following student answer for the given exam question.
+      
+      Question: ${question.question}
+      Subject: ${question.subject}
+      Topic: ${question.topic}
+      Total Marks: ${question.marks}
+      Model Answer/Key Points: ${question.answer}
+      Examiner Notes: ${question.notes}
+      
+      Student Answer: "${answer}"
+      
+      Provide a detailed assessment in JSON format with the following structure:
+      {
+        "score": number (0 to 100 percentage based on quality and accuracy),
+        "comments": "Overall feedback on the answer, encouraging and constructive",
+        "strengths": ["Strength 1", "Strength 2"],
+        "improvements": ["Improvement 1", "Improvement 2"]
+      }
+    `;
+
+    try {
+      const data = await callGemini(prompt, {
+        responseMimeType: "application/json"
+      });
+      return JSON.parse(data.text || "{}");
+    } catch (error) {
+      console.error("Gemini Exam Analysis Error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Generate a book action (Summary, Notes, Remix, etc.)
+   */
+  async generateBookAction(bookContext: string, task: string) {
+    const prompt = `${bookContext}\n\nTask: ${task}\n\nPlease format your response using Markdown.`;
+    try {
+      const data = await callGemini(prompt);
+      return data.text;
+    } catch (error) {
+      console.error("Gemini Book Action Error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Chat with a book result
+   */
+  async chatWithBook(context: string, question: string) {
+    const prompt = `Context: ${context}\n\nFollow-up Question: ${question}\n\nPlease format your response using Markdown.`;
+    try {
+      const data = await callGemini(prompt);
+      return data.text;
+    } catch (error) {
+      console.error("Gemini Book Chat Error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Generate a summary for the library view
+   */
+  async generateSummary(resource: Record<string, unknown>, domainInfo: Record<string, unknown>) {
+    const prompt = `You are an expert academic librarian. Provide a concise, high-impact summary (max 100 words) for the following book/resource. 
+    Focus on key takeaways and why it's important for students in the field of ${domainInfo?.name || 'Education'}.
+    
+    Title: ${resource.title}
+    Authors: ${Array.isArray(resource.authors) ? resource.authors.join(", ") : resource.authors}
+    Abstract: ${resource.abstract}
+    
+    Format the response as a single paragraph of text.`;
+
+    try {
+      const data = await callGemini(prompt);
+      return data.text;
+    } catch (error) {
+      console.error("Gemini Library Summary Error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * AI Librarian search
+   */
+  async librarianSearch(query: string, domains: Record<string, unknown>[]) {
+    const prompt = `You are the DARA AI Librarian for a Zimbabwean educational library. 
+    A user is asking: "${query}"
+    
+    Based on your knowledge of educational resources, provide a helpful, concise answer. 
+    If they are looking for specific topics, suggest what they should look for in our library.
+    Our library focuses on: ${domains.map(d => d.name).join(", ")}.
+    
+    Keep the response under 150 words and focus on saving the user's data by providing the most essential information directly.`;
+
+    try {
+      const data = await callGemini(prompt);
+      return data.text;
+    } catch (error) {
+      console.error("Gemini Librarian Search Error:", error);
       throw error;
     }
   }

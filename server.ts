@@ -2,14 +2,9 @@ import express from "express";
 import path from "path";
 import helmet from "helmet";
 import cors from "cors";
-import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 
 dotenv.config();
-
-// Supabase initialization
-const supabaseUrl = process.env.SUPABASE_URL || 'https://odklvauuiitaoenzhlda.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''; // Should be in .env
 
 async function startServer() {
   const app = express();

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GoogleGenAI } from "@google/genai";
 import { HfInference } from '@huggingface/inference';
 import { supabase } from '../lib/supabase';
+import { geminiService } from '../services/geminiService';
 import { 
   Zap, 
   Search, 
@@ -230,38 +230,7 @@ export default function AIModelsTools() {
     setFeedback(null);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
-      const prompt = `
-        You are an expert Zimbabwean examiner for the Heritage-Based Curriculum.
-        Analyze the following student answer for the given exam question.
-        
-        Question: ${selectedQuestion.question}
-        Subject: ${selectedQuestion.subject}
-        Topic: ${selectedQuestion.topic}
-        Total Marks: ${selectedQuestion.marks}
-        Model Answer/Key Points: ${selectedQuestion.answer}
-        Examiner Notes: ${selectedQuestion.notes}
-        
-        Student Answer: "${userAnswer}"
-        
-        Provide a detailed assessment in JSON format with the following structure:
-        {
-          "score": number (0 to 100 percentage based on quality and accuracy),
-          "comments": "Overall feedback on the answer, encouraging and constructive",
-          "strengths": ["Strength 1", "Strength 2"],
-          "improvements": ["Improvement 1", "Improvement 2"]
-        }
-      `;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json"
-        }
-      });
-
-      const result = JSON.parse(response.text);
+      const result = await geminiService.analyzeExamAnswer(selectedQuestion, userAnswer);
       setFeedback(result);
 
       // Record in Supabase

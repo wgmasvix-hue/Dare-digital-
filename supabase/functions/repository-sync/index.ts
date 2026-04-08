@@ -35,10 +35,10 @@ serve(async (req) => {
     const records = jsonObj['OAI-PMH']?.ListRecords?.record || []
     const recordArray = Array.isArray(records) ? records : [records]
     
-    const dspaceItems = recordArray.map((record: any) => {
-      const metadata = record.metadata?.['oai_dc:dc'] || {}
+    const dspaceItems = recordArray.map((record: Record<string, unknown>) => {
+      const metadata = (record.metadata as Record<string, unknown>)?.['oai_dc:dc'] as Record<string, unknown> || {}
       return {
-        identifier: record.header?.identifier,
+        identifier: (record.header as Record<string, unknown>)?.identifier as string,
         title: metadata['dc:title'],
         creator: Array.isArray(metadata['dc:creator']) ? metadata['dc:creator'].join('; ') : metadata['dc:creator'],
         description: Array.isArray(metadata['dc:description']) ? metadata['dc:description'] : metadata['dc:description'],
@@ -48,17 +48,17 @@ serve(async (req) => {
     })
 
     const docsToUpsert = dspaceItems
-      .filter((item: any) => !!item.identifier)
-      .map((item: any) => {
-        const identifier = item.identifier!
+      .filter((item: Record<string, unknown>) => !!item.identifier)
+      .map((item: Record<string, unknown>) => {
+        const identifier = item.identifier as string
         return {
           id: `dspace-${identifier.split(':').pop() || identifier}`,
           dspace_handle: identifier,
-          title: Array.isArray(item.title) ? item.title[0] : item.title || 'Untitled',
-          creator: item.creator || 'Unknown Author',
-          description: item.description || '',
-          document_type: Array.isArray(item.type) ? item.type[0] : item.type || 'Research Paper',
-          institution: Array.isArray(item.publisher) ? item.publisher[0] : item.publisher || 'DSpace Repository',
+          title: Array.isArray(item.title) ? item.title[0] : (item.title as string) || 'Untitled',
+          creator: (item.creator as string) || 'Unknown Author',
+          description: (item.description as string) || '',
+          document_type: Array.isArray(item.type) ? item.type[0] : (item.type as string) || 'Research Paper',
+          institution: Array.isArray(item.publisher) ? item.publisher[0] : (item.publisher as string) || 'DSpace Repository',
           synced_from_dspace_at: new Date().toISOString(),
           url: identifier.includes('hdl.handle.net') ? identifier : `https://hdl.handle.net/${identifier.split('/').slice(-2).join('/')}`
         }

@@ -11,7 +11,7 @@ import {
   Grid, List, LayoutGrid, Info, ShieldCheck, Globe, Sparkles,
   Zap, AlertCircle
 } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
+import { geminiService } from '../services/geminiService';
 import Toast from '../components/ui/Toast';
 
 import SearchBar from '../components/library/SearchBar';
@@ -112,22 +112,7 @@ const ResourceDetail = ({ resource, onClose, onToast, aiDataSaverActive }) => {
     setError(null);
     
     try {
-      const prompt = `You are an expert academic librarian. Provide a concise, high-impact summary (max 100 words) for the following book/resource. 
-      Focus on key takeaways and why it's important for students in the field of ${domainInfo?.name || 'Education'}.
-      
-      Title: ${resource.title}
-      Authors: ${resource.authors.join(", ")}
-      Abstract: ${resource.abstract}
-      
-      Format the response as a single paragraph of text.`;
-
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-      });
-      
-      const text = response.text;
+      const text = await geminiService.generateSummary(resource, domainInfo);
       setAiSummary(text);
       onToast("AI Insight generated successfully", "success");
     } catch (err) {
@@ -680,20 +665,8 @@ export default function DareLibrary() {
     setAiResponse(null);
     
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `You are the DARA AI Librarian for a Zimbabwean educational library. 
-        A user is asking: "${query}"
-        
-        Based on your knowledge of educational resources, provide a helpful, concise answer. 
-        If they are looking for specific topics, suggest what they should look for in our library.
-        Our library focuses on: ${DOMAINS.map(d => d.name).join(", ")}.
-        
-        Keep the response under 150 words and focus on saving the user's data by providing the most essential information directly.`,
-      });
-      
-      setAiResponse(response.text);
+      const text = await geminiService.librarianSearch(query, DOMAINS);
+      setAiResponse(text);
       showToast("AI Librarian has an answer for you", "success");
     } catch (err) {
       console.error("AI Search Error:", err);

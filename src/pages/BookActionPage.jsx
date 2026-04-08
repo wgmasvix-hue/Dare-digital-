@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, FileText, Sparkles, Brain, ArrowLeft, Loader2, Send, Download, MessageSquare, Edit3, Copy, Save } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
+import { geminiService } from '../services/geminiService';
 import jsPDF from 'jspdf';
 import ReactMarkdown from 'react-markdown';
 import Toast from '../components/ui/Toast';
@@ -21,37 +21,6 @@ export default function BookActionPage() {
   const [toast, setToast] = useState(null);
   const chatEndRef = useRef(null);
 
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-  const generateContentWithRetry = async (params, maxRetries = 3) => {
-    let retries = 0;
-    while (retries < maxRetries) {
-      try {
-        return await ai.models.generateContent(params);
-      } catch (error) {
-        const isUnavailable = error?.status === 503 || 
-                              error?.message?.includes('503') || 
-                              error?.message?.includes('UNAVAILABLE');
-        
-        if (isUnavailable) {
-          retries++;
-          if (retries >= maxRetries) throw error;
-          const delay = Math.pow(2, retries) * 1000 + Math.random() * 1000;
-          console.warn(`Gemini API 503 error. Retrying in ${Math.round(delay)}ms... (Attempt ${retries} of ${maxRetries})`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-        } else {
-          throw error;
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [chatHistory]);
-
   const runAiAction = async (actionName, prompt) => {
     if (!book) {
       setResult("Error: Book information not found.");
@@ -63,12 +32,10 @@ export default function BookActionPage() {
     setIsEditing(false);
     setChatHistory([]);
     try {
-      const response = await generateContentWithRetry({
-        model: "gemini-3-flash-preview",
-        contents: `Book Title: ${book.title}\nAuthor: ${book.author_names}\nDescription: ${book.description}\n\nTask: ${prompt}\n\nPlease format your response using Markdown.`,
-      });
-      setResult(response.text);
-      setEditableResult(response.text);
+      const context = `Book Title: ${book.title}\nAuthor: ${book.author_names}\nDescription: ${book.description}`;
+      const text = await geminiService.generateBookAction(context, prompt);
+      setResult(text);
+      setEditableResult(text);
       setToast({ message: `${actionName} completed! +50 XP`, type: "success" });
     } catch (error) {
       console.error("Gemini Error:", error);
@@ -85,11 +52,8 @@ export default function BookActionPage() {
     setChatHistory(prev => [...prev, { role: 'user', text: userMessage }]);
     
     try {
-      const response = await generateContentWithRetry({
-        model: "gemini-3-flash-preview",
-        contents: `Context: ${editableResult}\n\nFollow-up Question: ${userMessage}\n\nPlease format your response using Markdown.`,
-      });
-      setChatHistory(prev => [...prev, { role: 'ai', text: response.text }]);
+      const text = await geminiService.chatWithBook(editableResult, userMessage);
+      setChatHistory(prev => [...prev, { role: 'ai', text: text }]);
     } catch (error) {
       console.error("Gemini Chat Error:", error);
       setToast({ message: "Failed to get response. Please try again.", type: "error" });
