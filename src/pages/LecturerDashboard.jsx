@@ -150,20 +150,34 @@ export default function LecturerDashboard() {
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 min-h-screen bg-[#FDFCF9]"
     >
       {/* HEADER */}
-      <motion.header variants={itemVariants} className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
+      <motion.header 
+        variants={itemVariants} 
+        className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 p-10 rounded-[32px] relative overflow-hidden bg-[#3D3028] text-white"
+      >
+        {/* Real Book Background Image */}
+        <div className="absolute inset-0 z-0 opacity-20">
+          <img 
+            src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=2000" 
+            alt="Lecturer Dashboard Background" 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#3D3028] via-[#3D3028]/80 to-transparent" />
+        </div>
+
+        <div className="relative z-10">
           <div className="flex items-center gap-2 text-[#C8861A] font-semibold mb-2">
             <GraduationCap className="w-4 h-4" />
             <span className="text-xs uppercase tracking-widest">Lecturer Dashboard</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif text-[#3D3028] mb-2">
+          <h1 className="text-4xl md:text-5xl font-serif text-white mb-2">
             Welcome, {profile?.title || 'Dr.'} {profile?.last_name || 'Lecturer'}
           </h1>
           <div className="flex items-center gap-3">
             {institution?.logo_url && (
-              <img src={institution.logo_url} alt={institution.name} className="w-8 h-8 object-contain rounded-md border border-[#E8DFD0] p-0.5 bg-white" />
+              <img src={institution.logo_url} alt={institution.name} className="w-8 h-8 object-contain rounded-md border border-white/20 p-0.5 bg-white" />
             )}
-            <p className="text-[#8E8271]">
+            <p className="text-white/70">
               {institution?.name || 'Academic Institution'} • {profile?.department || 'Faculty'}
             </p>
           </div>
@@ -171,7 +185,7 @@ export default function LecturerDashboard() {
         
         <Link 
           to="/upload" 
-          className="bg-[#C8861A] text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-[#D8962A] transition-all shadow-lg shadow-orange-900/10"
+          className="relative z-10 bg-[#C8861A] text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-[#D8962A] transition-all shadow-xl shadow-black/20"
         >
           <Plus size={18} /> Upload Resource
         </Link>

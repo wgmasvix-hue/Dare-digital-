@@ -270,13 +270,30 @@ const Overview = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-br from-[var(--navy)] via-[var(--navy-mid)] to-[var(--teal)] rounded-2xl p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="relative z-10">
-          <h2 className="text-3xl font-serif font-bold mb-2 tracking-tight">Welcome back, Library Officer</h2>
-          <p className="text-blue-100 max-w-2xl text-lg opacity-90">Here's what's happening at Mkoba Teachers College today. Student engagement is up this week.</p>
+      <div className="bg-primary rounded-[2.5rem] p-12 text-white shadow-premium relative overflow-hidden">
+        {/* Real Book Background Image */}
+        <div className="absolute inset-0 z-0 opacity-20">
+          <img 
+            src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=2000" 
+            alt="Institutional Dashboard Background" 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-transparent" />
         </div>
-        <div className="absolute right-0 top-0 h-full w-1/3 opacity-10 mix-blend-overlay">
-          <BookOpen size={400} className="-mr-20 -mt-20" />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-[0.2em] mb-4">
+            <Sparkles className="w-5 h-5" />
+            <span>Institutional Overview</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-display font-black mb-4 tracking-tight leading-tight">
+            Welcome back, <br />
+            <span className="text-accent italic">Library Officer</span>
+          </h2>
+          <p className="text-white/70 max-w-2xl text-lg font-medium">
+            Here's what's happening at Mkoba Teachers College today. Student engagement is up this week.
+          </p>
         </div>
       </div>
 

@@ -128,20 +128,15 @@ export const oerService = {
   },
 
   async getGapAnalysis(subject) {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const functionUrl = `${supabaseUrl}/functions/v1/gap-analysis?subject=${subject}`;
-
-    const response = await fetch(functionUrl, {
+    const { data, error } = await supabase.functions.invoke('gap-analysis', {
       method: 'GET',
+      queryParams: { subject },
       headers: {
         'x-dare-token': ADMIN_TOKEN
       }
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch gap analysis');
-    }
-
-    return await response.json();
+    if (error) throw error;
+    return data;
   }
 };

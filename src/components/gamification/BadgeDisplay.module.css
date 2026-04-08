@@ -1,0 +1,47 @@
+.badgeContainer {
+  background: white;
+  border: 1px solid #E8DFD0;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.badgeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+}
+
+.badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #FDFCF9;
+  border: 1px solid #E8DFD0;
+  transition: all 0.3s ease;
+}
+
+.badge.locked {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.badge.unlocked {
+  border-color: #C8861A;
+  background: #FFF9F0;
+}
+
+.icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #3D3028;
+}

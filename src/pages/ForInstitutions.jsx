@@ -95,24 +95,101 @@ const HeroSection = ({ formRef, plansRef }) => {
   };
 
   return (
-    <section style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-      <div className="hero-animate hero-delay-1" style={{ color: 'var(--dare-gold)', fontSize: '12px', letterSpacing: '4px', fontWeight: '700', marginBottom: '24px' }}>
-        INSTITUTIONAL PARTNERSHIPS
+    <section style={{ 
+      padding: '120px 24px', 
+      maxWidth: '1200px', 
+      margin: '40px auto', 
+      textAlign: 'center',
+      position: 'relative',
+      overflow: 'hidden',
+      borderRadius: '40px',
+      backgroundColor: 'var(--dare-dark)',
+      color: 'white',
+      boxShadow: '0 20px 50px rgba(0,0,0,0.2)'
+    }}>
+      {/* Real Book Background Image */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        zIndex: 0,
+        opacity: 0.25
+      }}>
+        <img 
+          src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80&w=2000" 
+          alt="Institutional Background" 
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          referrerPolicy="no-referrer"
+        />
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to bottom, rgba(15, 35, 64, 0.8), rgba(15, 35, 64, 1))'
+        }} />
       </div>
-      <h1 className="hero-animate hero-delay-2" style={{ fontFamily: "'Libre Baskerville', serif", fontSize: 'clamp(32px, 5vw, 56px)', color: 'var(--dare-dark)', lineHeight: '1.1', marginBottom: '24px' }}>
-        Transform your campus library <br />
-        <span style={{ color: 'var(--dare-gold)', fontStyle: 'italic' }}>for the digital age</span>
-      </h1>
-      <p className="hero-animate hero-delay-3" style={{ fontSize: '18px', color: 'var(--dare-warm-gray)', maxWidth: '600px', margin: '0 auto 40px', lineHeight: '1.6' }}>
-        Dare Digital Library gives Zimbabwe's tertiary institutions a single subscription covering 6,000+ academic titles — with offline access built for our connectivity realities.
-      </p>
-      <div className="hero-animate hero-delay-3" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-        <button onClick={() => scrollTo(formRef)} style={{ backgroundColor: 'var(--dare-gold)', color: '#fff', border: 'none', padding: '14px 32px', fontSize: '16px', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Libre Baskerville', serif", fontWeight: '700' }}>
-          Request Information
-        </button>
-        <button onClick={() => scrollTo(plansRef)} style={{ backgroundColor: 'transparent', color: 'var(--dare-dark)', border: '1px solid var(--dare-dark)', padding: '14px 32px', fontSize: '16px', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Libre Baskerville', serif", fontWeight: '700' }}>
-          View Plans
-        </button>
+
+      <div style={{ position: 'relative', zIndex: 10 }}>
+        <div className="hero-animate hero-delay-1" style={{ color: 'var(--dare-gold)', fontSize: '12px', letterSpacing: '4px', fontWeight: '700', marginBottom: '24px' }}>
+          INSTITUTIONAL PARTNERSHIPS
+        </div>
+        <h1 className="hero-animate hero-delay-2" style={{ 
+          fontFamily: "'Libre Baskerville', serif", 
+          fontSize: 'clamp(32px, 5vw, 56px)', 
+          color: 'white', 
+          lineHeight: '1.1', 
+          marginBottom: '24px' 
+        }}>
+          Transform your campus library <br />
+          <span style={{ color: 'var(--dare-gold)', fontStyle: 'italic' }}>for the digital age</span>
+        </h1>
+        <p className="hero-animate hero-delay-3" style={{ 
+          fontSize: '18px', 
+          color: 'rgba(255, 255, 255, 0.7)', 
+          maxWidth: '600px', 
+          margin: '0 auto 40px', 
+          lineHeight: '1.6' 
+        }}>
+          Dare Digital Library gives Zimbabwe's tertiary institutions a single subscription covering 6,000+ academic titles — with offline access built for our connectivity realities.
+        </p>
+        <div className="hero-animate hero-delay-3" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button 
+            onClick={() => scrollTo(formRef)} 
+            style={{ 
+              backgroundColor: 'var(--dare-gold)', 
+              color: 'var(--dare-dark)', 
+              border: 'none', 
+              padding: '14px 32px', 
+              fontSize: '16px', 
+              borderRadius: '4px', 
+              cursor: 'pointer', 
+              fontFamily: "'Libre Baskerville', serif", 
+              fontWeight: '700',
+              transition: 'all 0.3s'
+            }}
+            onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+            onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+          >
+            Request Information
+          </button>
+          <button 
+            onClick={() => scrollTo(plansRef)} 
+            style={{ 
+              backgroundColor: 'transparent', 
+              color: 'white', 
+              border: '1px solid rgba(255, 255, 255, 0.3)', 
+              padding: '14px 32px', 
+              fontSize: '16px', 
+              borderRadius: '4px', 
+              cursor: 'pointer', 
+              fontFamily: "'Libre Baskerville', serif", 
+              fontWeight: '700',
+              transition: 'all 0.3s'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+            onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+          >
+            View Plans
+          </button>
+        </div>
       </div>
     </section>
   );

@@ -23,8 +23,10 @@ export function transformBook(book) {
       'Dare Digital Library',
     cover_path: book.cover_image_url || book.cover_path || null,
     cover_image_url: book.cover_image_url || book.cover_path || null,
-    access_model: book.access_model || (book.institution_id ? 'licensed' : 'dare_access'),
-    isOpenAccess: (book.access_model || (book.institution_id ? 'licensed' : 'dare_access')) === 'dare_access',
+    access_model: (book.access_model === 'public_domain' || book.id?.startsWith('gutenberg-') || book.id?.startsWith('openstax-')) 
+      ? 'open_access' 
+      : (book.access_model || (book.institution_id ? 'licensed' : 'dare_access')),
+    isOpenAccess: (book.access_model === 'public_domain' || book.id?.startsWith('gutenberg-') || book.id?.startsWith('openstax-')) || (book.access_model || (book.institution_id ? 'licensed' : 'dare_access')) === 'dare_access',
     year: 
       book.year_published ||
       (book.publication_year) ||
@@ -83,7 +85,7 @@ export function transformBooks(books) {
   return books.map(transformBook).filter(Boolean);
 }
 
-export const BOOK_SELECT = '*, creator:profiles(full_name), institution:institutions(institution_name)';
+export const BOOK_SELECT = '*';
 
 export const OPENSTAX_CURATED = [
   {
@@ -231,5 +233,28 @@ export const OPENSTAX_CURATED = [
     total_downloads: 10100,
     average_rating: 4.6,
     page_count: 1086
+  },
+  {
+    id: 'openstax-fundamentals-nursing',
+    title: 'Fundamentals of Nursing',
+    author_names: 'Christy Bowen',
+    publisher_name: 'OpenStax',
+    faculty: 'Health',
+    subject: 'Nursing',
+    cover_image_url: 'https://assets.openstax.org/oscms-prodcms/media/documents/FundamentalsOfNursing_cover.jpg',
+    file_url: 'https://openstax.org/download/pdf?book=fundamentals-nursing',
+    access_model: 'dare_access',
+    year_published: 2023,
+    description: 'Fundamentals of Nursing is designed to meet the scope and sequence of an introductory nursing course, providing a solid foundation for nursing practice.',
+    license_type: 'CC BY 4.0',
+    total_downloads: 4500,
+    average_rating: 4.9,
+    page_count: 1100,
+    format: 'pdf',
+    ai_level: 'Degree',
+    zimche_programme_codes: ['NSG101', 'NSG102'],
+    subject_tags: ['Nursing', 'Health', 'Patient Care'],
+    pillars: ['Teaching', 'Community Service'],
+    dara_summary: 'This introductory nursing text is vital for Zimbabwean health sciences students. It supports the development of essential nursing skills and knowledge, contributing to the improvement of healthcare services in line with national health goals.'
   }
 ];

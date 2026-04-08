@@ -18,6 +18,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { vocationalService } from '../services/vocationalService';
+import TrainerAI from '../components/TrainerAI';
 import styles from './VocationalSchools.module.css';
 
 const SCHOOLS = [
@@ -28,7 +29,8 @@ const SCHOOLS = [
     type: 'polytechnic',
     description: 'The oldest and largest technical college in Zimbabwe, offering a wide range of engineering, business, and applied arts programs.',
     programs: ['Engineering', 'ICT', 'Business', 'Applied Arts', 'Mass Comm'],
-    icon: Building2
+    icon: Building2,
+    logo: 'https://picsum.photos/seed/hararepoly/200'
   },
   {
     id: 'bpt',
@@ -37,7 +39,8 @@ const SCHOOLS = [
     type: 'polytechnic',
     description: 'A leading technical institution in the southern region, known for its strong engineering and hospitality departments.',
     programs: ['Mechanical Eng', 'Electrical Eng', 'Hospitality', 'Commerce'],
-    icon: Hammer
+    icon: Hammer,
+    logo: 'https://picsum.photos/seed/bulawayopoly/200'
   },
   {
     id: 'kpt',
@@ -46,7 +49,8 @@ const SCHOOLS = [
     type: 'polytechnic',
     description: 'Strategically located in the industrial hub, specializing in mining and heavy engineering skills.',
     programs: ['Mining Eng', 'Metallurgy', 'Automotive', 'Science Tech'],
-    icon: Zap
+    icon: Zap,
+    logo: 'https://picsum.photos/seed/kwekwe/200'
   },
   {
     id: 'mpt',
@@ -55,7 +59,8 @@ const SCHOOLS = [
     type: 'polytechnic',
     description: 'Providing technical and vocational training with a focus on sustainable development and industrial skills.',
     programs: ['Civil Eng', 'Wood Tech', 'Fashion', 'Tourism'],
-    icon: Sprout
+    icon: Sprout,
+    logo: 'https://picsum.photos/seed/mutare/200'
   },
   {
     id: 'msvtc',
@@ -64,7 +69,8 @@ const SCHOOLS = [
     type: 'vocational',
     description: 'A unique vocational centre focusing on self-reliance and entrepreneurial skills for rural development.',
     programs: ['Agriculture', 'Building', 'Textiles', 'Metalwork'],
-    icon: Hammer
+    icon: Hammer,
+    logo: 'https://picsum.photos/seed/mupfure/200'
   },
   {
     id: 'kvtc',
@@ -73,7 +79,8 @@ const SCHOOLS = [
     type: 'vocational',
     description: 'Specializing in youth empowerment through practical skills training in various trades.',
     programs: ['Bricklaying', 'Carpentry', 'Plumbing', 'Motor Mechanics'],
-    icon: Wrench
+    icon: Wrench,
+    logo: 'https://picsum.photos/seed/kaguvi/200'
   }
 ];
 
@@ -136,21 +143,42 @@ export default function VocationalSchools() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <motion.h1 
-          className={styles.title}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          Polytechnic & Vocational Portal
-        </motion.h1>
-        <motion.p 
-          className={styles.subtitle}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          Empowering Zimbabwe's workforce through practical skills, technical excellence, and industrial innovation.
-        </motion.p>
+        {/* Real Book Background Image */}
+        <div className="absolute inset-0 z-0 opacity-20">
+          <img 
+            src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=2000" 
+            alt="Vocational Background" 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/50 to-primary" />
+        </div>
+
+        <div className="relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center justify-center gap-2 text-accent font-bold text-xs uppercase tracking-[0.2em] mb-4"
+          >
+            <Wrench className="w-5 h-5" />
+            <span>Skills & Trades</span>
+          </motion.div>
+          <motion.h1 
+            className="text-4xl md:text-6xl font-display font-black text-white mb-6 leading-tight"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            Polytechnic & <span className="text-accent italic">Vocational Portal</span>
+          </motion.h1>
+          <motion.p 
+            className="text-white/70 max-w-2xl mx-auto text-lg font-medium"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            Empowering Zimbabwe's workforce through practical skills, technical excellence, and industrial innovation.
+          </motion.p>
+        </div>
       </header>
 
       <div className={styles.tabsContainer}>
@@ -193,7 +221,11 @@ export default function VocationalSchools() {
               transition={{ delay: index * 0.1 }}
             >
               <div className={styles.iconWrapper}>
-                <school.icon size={28} />
+                {school.logo ? (
+                  <img src={school.logo} alt={school.name} className={styles.logoImg} referrerPolicy="no-referrer" />
+                ) : (
+                  <school.icon size={28} />
+                )}
               </div>
               <h2 className={styles.schoolName}>{school.name}</h2>
               <div className={styles.location}>
@@ -208,9 +240,9 @@ export default function VocationalSchools() {
                 ))}
               </div>
 
-              <a href="#" className={styles.viewBtn} onClick={(e) => e.preventDefault()}>
+              <Link to="/vocational-tools" className={styles.viewBtn}>
                 View Resources <ExternalLink size={16} />
-              </a>
+              </Link>
             </motion.div>
           ))
         )}
@@ -266,6 +298,8 @@ export default function VocationalSchools() {
           </button>
         </div>
       </section>
+      
+      <TrainerAI />
     </div>
   );
 }

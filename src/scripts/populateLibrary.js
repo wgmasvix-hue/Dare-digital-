@@ -47,11 +47,11 @@ const ZIMBABWE_PRIORITY_OER = [
 
 const ALL_RESOURCES = [
   ...ZIMBABWE_PRIORITY_OER,
-  ...catalog.OPENSTAX_EXPANDED.slice(0, 5),
-  ...catalog.AGRICULTURE_OER.slice(0, 3),
-  ...catalog.HEALTH_OER.slice(0, 3),
-  ...catalog.ENGINEERING_OER.slice(0, 3),
-  ...catalog.EDUCATION_OER.slice(0, 3),
+  ...catalog.OPENSTAX_EXPANDED,
+  ...catalog.AGRICULTURE_OER,
+  ...catalog.HEALTH_OER,
+  ...catalog.ENGINEERING_OER,
+  ...catalog.EDUCATION_OER,
   ...catalog.AI_OER,
   ...catalog.AI_PRIORITY_OER
 ];
@@ -61,7 +61,7 @@ async function populate() {
   
   // We'll process in small batches to avoid rate limits
   const BATCH_SIZE = 3;
-  const resourcesToProcess = ALL_RESOURCES.slice(0, 15); // Let's do 15 for now
+  const resourcesToProcess = ALL_RESOURCES; // Let's do 15 for now
   
   for (let i = 0; i < resourcesToProcess.length; i += BATCH_SIZE) {
     const batch = resourcesToProcess.slice(i, i + BATCH_SIZE);
@@ -85,7 +85,9 @@ async function populate() {
           subject: enrichment?.disciplines?.[0]?.code || resource.subject,
           zimche_programme_codes: enrichment?.zimbabwe_relevance?.applicable_programmes || resource.zimche_programme_codes,
           ai_level: enrichment?.nqf_level?.level ? parseInt(enrichment.nqf_level.level.replace('nqf_', '')) : resource.ai_level,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          source: resource.source || 'OER',
+          institution_id: resource.institution_id || 'oer-commons'
         };
 
         // Only add enrichment_data if we actually got something

@@ -53,7 +53,10 @@ add column if not exists ai_difficulty text,
 add column if not exists featured_priority integer default 0,
 add column if not exists difficulty_level text default 'undergraduate',
 add column if not exists resource_type text default 'book',
-add column if not exists language text default 'English';
+add column if not exists language text default 'English',
+add column if not exists source text default 'Dare Library',
+add column if not exists institution_id text,
+add column if not exists ddc_code text;
 
 -- 4. Full Text Search Setup
 -- Add a generated column for full text search
@@ -64,6 +67,7 @@ generated always as (
                          coalesce(author_names, '') || ' ' || 
                          coalesce(subject, '') || ' ' || 
                          coalesce(description, '') || ' ' ||
+                         coalesce(source, '') || ' ' ||
                          coalesce(dara_summary, ''))
 ) stored;
 
@@ -78,13 +82,26 @@ alter table public.books enable row level security;
 drop policy if exists "Allow public read access on books" on public.books;
 drop policy if exists "Allow authenticated insert on books" on public.books;
 drop policy if exists "Allow creators to update their own books" on public.books;
+drop policy if exists "Allow anon insert on books" on public.books;
 
 create policy "Allow public read access on books"
 on public.books for select
 using (true);
 
+-- Allow authenticated users to insert
 create policy "Allow authenticated insert on books"
 on public.books for insert
+with check (auth.role() = 'authenticated');
+
+-- Allow anon to insert (for ingestion scripts - disable in production)
+create policy "Allow anon insert on books"
+on public.books for insert
+with check (true);
+
+-- Allow authenticated users to update
+create policy "Allow authenticated update on books"
+on public.books for update
+using (auth.role() = 'authenticated')
 with check (auth.role() = 'authenticated');
 
 create policy "Allow creators to update their own books"
@@ -160,8 +177,34 @@ CREATE TABLE IF NOT EXISTS public.reading_sessions (
     PRIMARY KEY (user_id, book_id)
 );
 
+-- 10. Highlights and Notes
+CREATE TABLE IF NOT EXISTS public.book_highlights (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    book_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    page_number INTEGER,
+    color TEXT DEFAULT 'yellow',
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.book_notes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    book_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    page_number INTEGER,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 ALTER TABLE public.reading_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.book_highlights ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.book_notes ENABLE ROW LEVEL SECURITY;
+
 CREATE POLICY "Users can manage their own reading sessions" ON public.reading_sessions FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage their own highlights" ON public.book_highlights FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage their own notes" ON public.book_notes FOR ALL USING (auth.uid() = user_id);
 
 -- 11. Profiles and Institutions
 CREATE TABLE IF NOT EXISTS public.institutions (
@@ -338,11 +381,12 @@ $$;
 
 -- Function for advanced search with full-text search
 CREATE OR REPLACE FUNCTION search_publications(
-  search_query TEXT DEFAULT NULL,
+  p_query TEXT DEFAULT NULL,
   p_faculty TEXT DEFAULT NULL,
   p_level TEXT DEFAULT NULL,
   p_limit INTEGER DEFAULT 24,
-  p_offset INTEGER DEFAULT 0
+  p_offset INTEGER DEFAULT 0,
+  p_sort TEXT DEFAULT 'title'
 )
 RETURNS SETOF public.books
 LANGUAGE plpgsql
@@ -353,15 +397,30 @@ BEGIN
   SELECT *
   FROM public.books
   WHERE status = 'published'
-    AND (search_query IS NULL OR search_query = '' OR search_vector @@ plainto_tsquery('english', search_query))
-    AND (p_faculty IS NULL OR p_faculty = 'All' OR faculty = p_faculty OR subject ILIKE '%' || p_faculty || '%')
+    AND (p_query IS NULL OR p_query = '' OR search_vector @@ plainto_tsquery('english', p_query))
+    AND (
+    p_faculty IS NULL OR 
+    p_faculty = 'All' OR 
+    faculty ILIKE '%' || p_faculty || '%' OR 
+    p_faculty ILIKE '%' || faculty || '%' OR
+    subject ILIKE '%' || p_faculty || '%' OR
+    p_faculty ILIKE '%' || subject || '%' OR
+    -- Also check against the first word of the faculty (e.g., "Agriculture" matches "Agriculture & Environmental")
+    faculty ILIKE '%' || split_part(p_faculty, ' ', 1) || '%' OR
+    subject ILIKE '%' || split_part(p_faculty, ' ', 1) || '%'
+  )
     AND (p_level IS NULL OR p_level = 'All' OR level = p_level)
   ORDER BY 
     CASE 
-      WHEN search_query IS NOT NULL AND search_query != '' 
-      THEN ts_rank(search_vector, plainto_tsquery('english', search_query)) 
+      WHEN p_sort = 'relevance' AND p_query IS NOT NULL AND p_query != '' 
+      THEN ts_rank(search_vector, plainto_tsquery('english', p_query)) 
       ELSE 0 
     END DESC,
+    CASE WHEN p_sort = 'newest' THEN created_at END DESC,
+    CASE WHEN p_sort = 'oldest' THEN created_at END ASC,
+    CASE WHEN p_sort = 'title' THEN title END ASC,
+    CASE WHEN p_sort = 'rating' THEN average_rating END DESC,
+    CASE WHEN p_sort = 'reads' THEN total_reads END DESC,
     title ASC
   LIMIT p_limit
   OFFSET p_offset;

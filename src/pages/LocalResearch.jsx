@@ -27,6 +27,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { researchService } from '../services/researchService';
 import { geminiService } from '../services/geminiService';
 import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabase';
 import styles from './LocalResearch.module.css';
 
 const SUBJECTS = [
@@ -45,6 +46,7 @@ export default function LocalResearch() {
   const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState('repository');
   const [research, setResearch] = useState([]);
+  const [dspaceResearch, setDspaceResearch] = useState([]);
   const [reports, setReports] = useState([]);
   const [digitizationRequests, setDigitizationRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,12 +87,13 @@ export default function LocalResearch() {
   }, [loading, hasMore]);
 
   useEffect(() => {
-    if (currentPage * itemsPerPage >= research.length) {
+    const currentList = activeTab === 'repository' ? research : (activeTab === 'dspace' ? dspaceResearch : []);
+    if (currentPage * itemsPerPage >= currentList.length) {
       setHasMore(false);
     } else {
       setHasMore(true);
     }
-  }, [currentPage, research.length]);
+  }, [currentPage, research.length, dspaceResearch.length, activeTab]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -158,6 +161,11 @@ export default function LocalResearch() {
             }
           ]);
         }
+      } else if (activeTab === 'dspace') {
+        const data = await researchService.getDSpaceResearch({ 
+          q: searchQuery 
+        });
+        setDspaceResearch(data || []);
       } else if (activeTab === 'reports') {
         const data = await researchService.getArchivalReports();
         if (data && data.length > 0) {
@@ -281,8 +289,19 @@ export default function LocalResearch() {
   return (
     <div className={styles.container}>
       {/* Hero Section */}
-      <header className={styles.hero}>
-        <div className={styles.heroContent}>
+      <header className={`${styles.hero} relative overflow-hidden`}>
+        {/* Real Book Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80&w=2000" 
+            alt="Research Background" 
+            className="w-full h-full object-cover opacity-20"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-transparent" />
+        </div>
+
+        <div className={`${styles.heroContent} relative z-10`}>
           <div className={styles.badge}>Zimbabwean Academic Repository</div>
           <h1 className={styles.title}>Institutional Digital Repository (IDR)</h1>
           <p className={styles.subtitle}>
@@ -337,6 +356,12 @@ export default function LocalResearch() {
             Research Repository
           </button>
           <button 
+            className={`${styles.tab} ${activeTab === 'dspace' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('dspace')}
+          >
+            DSpace Repository
+          </button>
+          <button 
             className={`${styles.tab} ${activeTab === 'digitization' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('digitization')}
           >
@@ -353,22 +378,24 @@ export default function LocalResearch() {
         <div className={styles.contentGrid}>
           {/* Sidebar Filters */}
           <aside className={styles.sidebar}>
-            <div className={styles.filterGroup}>
-              <h3 className={styles.filterTitle}>
-                <Filter size={16} /> Subjects
-              </h3>
-              <div className={styles.subjectList}>
-                {SUBJECTS.map(subject => (
-                  <button
-                    key={subject}
-                    className={`${styles.subjectBtn} ${activeSubject === subject ? styles.activeSubject : ''}`}
-                    onClick={() => setActiveSubject(subject)}
-                  >
-                    {subject}
-                  </button>
-                ))}
+            {activeTab === 'repository' && (
+              <div className={styles.filterGroup}>
+                <h3 className={styles.filterTitle}>
+                  <Filter size={16} /> Subjects
+                </h3>
+                <div className={styles.subjectList}>
+                  {SUBJECTS.map(subject => (
+                    <button
+                      key={subject}
+                      className={`${styles.subjectBtn} ${activeSubject === subject ? styles.activeSubject : ''}`}
+                      onClick={() => setActiveSubject(subject)}
+                    >
+                      {subject}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className={styles.contributionCard}>
               <Archive size={32} className="mx-auto mb-4 text-amber-400" />
@@ -380,13 +407,13 @@ export default function LocalResearch() {
 
           {/* Results Area */}
           <div className={styles.resultsArea}>
-            {activeTab === 'repository' && (
+            {(activeTab === 'repository' || activeTab === 'dspace') && (
               <>
                 <form className={styles.searchBar} onSubmit={handleSearch}>
                   <Search size={20} className={styles.searchIcon} />
                   <input 
                     type="text" 
-                    placeholder="Search by title, author, or keywords..." 
+                    placeholder={activeTab === 'dspace' ? "Search DSpace repository..." : "Search by title, author, or keywords..."} 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -394,8 +421,10 @@ export default function LocalResearch() {
                 </form>
 
                 <div className={styles.listHeader}>
-                  <h2>{activeSubject === 'All' ? 'Recent Research' : activeSubject}</h2>
-                  <span>{research.length} results found</span>
+                  <h2>
+                    {activeTab === 'dspace' ? 'DSpace Repository' : (activeSubject === 'All' ? 'Recent Research' : activeSubject)}
+                  </h2>
+                  <span>{(activeTab === 'repository' ? research : dspaceResearch).length} results found</span>
                 </div>
 
                 <div className={styles.researchList}>
@@ -403,18 +432,27 @@ export default function LocalResearch() {
                     Array(3).fill(0).map((_, i) => (
                       <div key={i} className={styles.skeletonCard} />
                     ))
-                  ) : research.length > 0 ? (
+                  ) : (activeTab === 'repository' ? paginatedResearch : dspaceResearch.slice(0, currentPage * itemsPerPage)).length > 0 ? (
                     <>
-                      {paginatedResearch.map(item => (
+                      {(activeTab === 'repository' ? paginatedResearch : dspaceResearch.slice(0, currentPage * itemsPerPage)).map(item => (
                         <div key={item.id} className={styles.researchCard}>
                           <div className={styles.cardHeader}>
                             <span className={styles.cardSubject}>{item.subject}</span>
                             <span className={styles.cardDate}>
                               <Calendar size={14} /> {item.publication_date}
                             </span>
+                            {item.is_dspace && (
+                              <span className="ml-auto bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                                DSpace
+                              </span>
+                            )}
                           </div>
                           <h3 className={styles.cardTitle}>
-                            <Link to={`/reader/${item.id}`}>{item.title}</Link>
+                            {item.url ? (
+                              <a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a>
+                            ) : (
+                              <Link to={`/reader/${item.id}`}>{item.title}</Link>
+                            )}
                           </h3>
                           <div className={styles.cardMeta}>
                             <span className={styles.cardAuthor}>
@@ -425,12 +463,18 @@ export default function LocalResearch() {
                             </span>
                           </div>
                           <p className={styles.cardAbstract}>
-                            {item.abstract.substring(0, 180)}...
+                            {item.abstract ? item.abstract.substring(0, 180) : 'No abstract available.'}...
                           </p>
                           <div className={styles.cardActions}>
-                            <Link to={`/research/${item.id}`} className={styles.viewBtn}>
-                              View Details <ArrowRight size={16} />
-                            </Link>
+                            {item.url ? (
+                              <a href={item.url} target="_blank" rel="noopener noreferrer" className={styles.viewBtn}>
+                                View in DSpace <ArrowRight size={16} />
+                              </a>
+                            ) : (
+                              <Link to={`/research/${item.id}`} className={styles.viewBtn}>
+                                View Details <ArrowRight size={16} />
+                              </Link>
+                            )}
                             <button 
                               className={styles.saveBtn}
                               onClick={() => handleGenerateReport(item)}
@@ -459,6 +503,27 @@ export default function LocalResearch() {
                       <FileText size={48} />
                       <h3>No research found</h3>
                       <p>Try adjusting your filters or search query.</p>
+                      {activeTab === 'dspace' && (
+                        <button 
+                          onClick={async () => {
+                            try {
+                              setLoading(true);
+                              const { data, error } = await supabase.functions.invoke('repository-sync');
+                              if (!error) {
+                                await fetchData();
+                              }
+                            } catch (err) {
+                              console.error('Sync failed:', err);
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          className="mt-4 px-6 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-all flex items-center gap-2 mx-auto"
+                        >
+                          <Loader2 className={loading ? "animate-spin" : ""} size={18} />
+                          {loading ? "Syncing..." : "Sync Repository Now"}
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>

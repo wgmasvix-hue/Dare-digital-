@@ -14,13 +14,16 @@ export const openStaxService = {
     try {
       // Construct advanced search query for OpenStax collection
       const q = query ? `(${query}) AND ` : '';
-      const searchUrl = `${OPENSTAX_API_BASE}?q=${q}collection:(openstax)&fl[]=identifier,title,creator,description,date,subject,mediatype,licenseurl&sort[]=downloads desc&rows=${limit}&page=${page}&output=json`;
+      const targetUrl = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(q + 'collection:(openstax)')}&rows=${limit}&page=${page}&output=json&fl[]=identifier,title,creator,description,date,subject,mediatype,licenseurl&sort[]=downloads desc`;
 
-      const response = await fetch(searchUrl);
-      if (!response.ok) throw new Error('OpenStax API request failed');
+      const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
+        body: { url: targetUrl }
+      });
+
+      if (proxyError) throw proxyError;
       
-      const data = await response.json();
-      const docs = data.response.docs;
+      const responseData = proxyResponse.data;
+      const docs = responseData.response.docs;
 
       // Transform to match our internal book structure
       return {
@@ -40,7 +43,7 @@ export const openStaxService = {
           total_downloads: 0, // Not available in this specific API view easily
           average_rating: 0
         })),
-        total: data.response.numFound
+        total: responseData.response.numFound
       };
     } catch (error) {
       console.error('OpenStax search error:', error);

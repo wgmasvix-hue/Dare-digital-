@@ -6,8 +6,10 @@
 
 .header {
   margin-bottom: 40px;
-  padding-bottom: 24px;
+  padding: 40px 0;
   border-bottom: 1px solid var(--mist);
+  position: relative;
+  overflow: hidden;
 }
 
 .headerContent {

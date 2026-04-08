@@ -1,0 +1,383 @@
+.motivationalBanner {
+  background: linear-gradient(135deg, #3D3028 0%, #4D4038 100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  border-radius: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 10px 30px rgba(61, 48, 40, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.motivationalBanner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(200, 134, 26, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.bannerIcon {
+  width: 3.5rem;
+  height: 3.5rem;
+  background: rgba(200, 134, 26, 0.2);
+  border-radius: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #C8861A;
+  flex-shrink: 0;
+}
+
+.bannerContent {
+  flex: 1;
+}
+
+.rankText {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.rankText strong {
+  color: #C8861A;
+  font-size: 1.25rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.motivationText {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+.bannerStats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: right;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.75rem;
+}
+
+.tabsContainer {
+  display: flex;
+  gap: 0.5rem;
+  background: #F0EDE8;
+  padding: 0.375rem;
+  border-radius: 1.25rem;
+}
+
+.tabButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #8E8271;
+  transition: all 0.2s ease;
+}
+
+.activeTab {
+  background: white;
+  color: #3D3028;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: white;
+  border: 1px solid #E8DFD0;
+  padding: 0.625rem 1.25rem;
+  border-radius: 1.25rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.searchInput {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  width: 100%;
+  color: #3D3028;
+}
+
+.podiumContainer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+  padding-top: 2rem;
+}
+
+.podiumItem {
+  flex: 1;
+  max-width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.avatarWrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.avatarWrapper img {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  object-cover: cover;
+  border: 4px solid white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.gold .avatarWrapper img {
+  width: 7rem;
+  height: 7rem;
+  border-color: #FFD700;
+}
+
+.silver .avatarWrapper img {
+  border-color: #C0C0C0;
+}
+
+.bronze .avatarWrapper img {
+  border-color: #CD7F32;
+}
+
+.badge {
+  position: absolute;
+  bottom: -0.5rem;
+  right: -0.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.crown {
+  position: absolute;
+  top: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%) rotate(-10deg);
+  font-size: 2rem;
+}
+
+.podiumName {
+  font-family: 'Georgia', serif;
+  font-weight: 700;
+  color: #3D3028;
+  margin-bottom: 0.25rem;
+}
+
+.podiumFaculty {
+  font-size: 0.75rem;
+  color: #8E8271;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.podiumScore {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: #C8861A;
+  font-size: 0.875rem;
+}
+
+.podiumBase {
+  width: 100%;
+  background: #E8DFD0;
+  height: 4rem;
+  border-radius: 1rem 1rem 0 0;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 900;
+  color: rgba(61, 48, 40, 0.1);
+}
+
+.gold .podiumBase {
+  height: 6rem;
+  background: #F7E7CE;
+}
+
+.listContainer {
+  background: white;
+  border: 1px solid #E8DFD0;
+  border-radius: 2rem;
+  padding: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  border-radius: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.listItem:hover {
+  background: #FDFCF9;
+}
+
+.currentUserItem {
+  background: #FDFCF9;
+  border: 1px solid #C8861A;
+}
+
+.rankSection {
+  width: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.rankNumber {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: #3D3028;
+}
+
+.movementIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userSection {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userAvatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #F0EDE8;
+}
+
+.userName {
+  font-weight: 700;
+  color: #3D3028;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.userFaculty {
+  font-size: 0.75rem;
+  color: #8E8271;
+  font-weight: 600;
+}
+
+.youBadge {
+  background: #C8861A;
+  color: white;
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.5rem;
+  text-transform: uppercase;
+}
+
+.statsSection {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.streakBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #F97316;
+  background: #FFF7ED;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.75rem;
+}
+
+.scoreBadge {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: #3D3028;
+  font-size: 0.875rem;
+  min-width: 80px;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .podiumContainer {
+    gap: 0.5rem;
+  }
+  
+  .podiumItem {
+    max-width: none;
+  }
+  
+  .gold .avatarWrapper img {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+  
+  .avatarWrapper img {
+    width: 4rem;
+    height: 4rem;
+  }
+  
+  .listItem {
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  .statsSection {
+    gap: 0.75rem;
+  }
+  
+  .streakBadge {
+    display: none;
+  }
+  
+  .scoreBadge {
+    font-size: 0.75rem;
+    min-width: 60px;
+  }
+}

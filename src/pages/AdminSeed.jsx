@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
 import { enrichMetadata } from '../services/enrichmentService';
+import { gutenbergService } from '../services/gutenbergService';
 import * as catalog from '../lib/oerCatalog';
 import styles from './AdminSeed.module.css';
 
@@ -13,6 +14,7 @@ const ZIMBABWE_PRIORITY_OER = [
     publisher_name: 'MOHCC / FAO',
     faculty: 'Agriculture',
     subject: 'AGR',
+    ddc_code: '630',
     cover_image_url: 'https://picsum.photos/seed/zimagri/400/600',
     file_url: 'https://www.fao.org/3/i3325e/i3325e.pdf',
     access_model: 'dare_access',
@@ -27,6 +29,7 @@ const ZIMBABWE_PRIORITY_OER = [
     publisher_name: 'NAC',
     faculty: 'Health',
     subject: 'MED',
+    ddc_code: '610',
     cover_image_url: 'https://picsum.photos/seed/zimhealth/400/600',
     file_url: 'https://iris.who.int/bitstream/handle/10665/373828/9789240083851-eng.pdf',
     access_model: 'dare_access',
@@ -49,6 +52,8 @@ const ALL_RESOURCES = [
 
 export default function AdminSeed() {
   const [status, setStatus] = useState('idle');
+  const [gutenbergStatus, setGutenbergStatus] = useState('idle');
+  const [libretextsStatus, setLibretextsStatus] = useState('idle');
   const [logs, setLogs] = useState([]);
   const [progress, setProgress] = useState(0);
 
@@ -88,6 +93,7 @@ export default function AdminSeed() {
             subject: enrichment?.disciplines?.[0]?.code || resource.subject,
             zimche_programme_codes: enrichment?.zimbabwe_relevance?.applicable_programmes || resource.zimche_programme_codes,
             ai_level: enrichment?.nqf_level?.level ? parseInt(enrichment.nqf_level.level.replace('nqf_', '')) : resource.ai_level,
+            status: 'published',
             updated_at: new Date().toISOString()
           };
 
@@ -127,31 +133,129 @@ export default function AdminSeed() {
     addLog('✨ Population complete!', 'success');
   };
 
+  const handleGutenbergIngest = async () => {
+    if (gutenbergStatus === 'processing') return;
+    
+    setGutenbergStatus('processing');
+    setLogs([]);
+    addLog('📚 Starting Project Gutenberg Ingestion...', 'info');
+
+    try {
+      let currentPage = 1;
+      const MAX_PAGES = 5; // Limit for safety
+
+      while (currentPage <= MAX_PAGES) {
+        addLog(`📄 Processing Gutenberg Page ${currentPage}...`, 'info');
+        const result = await gutenbergService.ingestBooks(currentPage, addLog);
+        
+        if (!result.next) {
+          addLog('🏁 Reached end of Gutenberg catalog.', 'success');
+          break;
+        }
+        
+        currentPage++;
+        // Small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      setGutenbergStatus('complete');
+      addLog('✨ Gutenberg Ingestion complete!', 'success');
+    } catch (err) {
+      setGutenbergStatus('error');
+      addLog(`❌ Gutenberg Ingest failed: ${err.message}`, 'error');
+    }
+  };
+
+  const handleLibreTextsImport = async () => {
+    if (libretextsStatus === 'processing') return;
+    
+    setLibretextsStatus('processing');
+    setLogs([]);
+    addLog('🧪 Starting LibreTexts Import (Edge Function)...', 'info');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('libretexts-import');
+      
+      if (error) throw error;
+      
+      addLog(`✅ ${data.message}`, 'success');
+      setLibretextsStatus('complete');
+    } catch (err) {
+      setLibretextsStatus('error');
+      addLog(`❌ LibreTexts Import failed: ${err.message}`, 'error');
+    }
+  };
+
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+      <header className={styles.header} style={{ 
+        background: 'var(--soil)', 
+        color: 'white', 
+        padding: '4rem 5%', 
+        position: 'relative', 
+        overflow: 'hidden',
+        borderBottom: 'none'
+      }}>
+        {/* Real Book Background Image */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          opacity: 0.15
+        }}>
+          <img 
+            src="https://images.unsplash.com/photo-1513001900722-370f803f498d?auto=format&fit=crop&q=80&w=2000" 
+            alt="Library Seeder Background" 
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            referrerPolicy="no-referrer"
+          />
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to bottom, rgba(45, 34, 28, 0.8), var(--soil))"
+          }} />
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', position: 'relative', zIndex: 10 }}>
           <div>
-            <h1 className={styles.title}>Library Seeder</h1>
-            <p className={styles.subtitle}>Populate the digital library with enriched OER resources.</p>
+            <h1 className={styles.title} style={{ color: 'white', fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-display)' }}>Library Seeder</h1>
+            <p className={styles.subtitle} style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.1rem' }}>Populate the digital library with enriched OER resources.</p>
           </div>
-          <Link to="/admin/library" className={styles.clearBtn} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link to="/admin/library" className={styles.clearBtn} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>
             Manage Backend Books &rarr;
           </Link>
         </div>
-        <div className={styles.migrationNote}>
+        <div className={styles.migrationNote} style={{ position: 'relative', zIndex: 10, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)' }}>
           <strong>Note:</strong> Ensure you have applied the <code>enrichment_data</code> migration in your Supabase SQL Editor for full AI metadata support.
         </div>
       </header>
 
       <div className={styles.card}>
-        <div className={styles.controls}>
+        <div className={styles.controls} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
           <button 
             onClick={handleSeed} 
-            disabled={status === 'processing'}
+            disabled={status === 'processing' || gutenbergStatus === 'processing'}
             className={styles.button}
           >
             {status === 'processing' ? 'Processing...' : 'Start Population'}
+          </button>
+
+          <button 
+            onClick={handleGutenbergIngest} 
+            disabled={status === 'processing' || gutenbergStatus === 'processing'}
+            className={styles.button}
+            style={{ background: '#C8861A', color: 'white' }}
+          >
+            {gutenbergStatus === 'processing' ? 'Ingesting Gutenberg...' : 'Ingest Gutenberg (Top 5 Pages)'}
+          </button>
+
+          <button 
+            onClick={handleLibreTextsImport} 
+            disabled={status === 'processing' || gutenbergStatus === 'processing' || libretextsStatus === 'processing'}
+            className={styles.button}
+            style={{ background: '#006D77', color: 'white' }}
+          >
+            {libretextsStatus === 'processing' ? 'Importing LibreTexts...' : 'Import LibreTexts (Edge Function)'}
           </button>
           
           {status === 'processing' && (

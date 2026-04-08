@@ -1,7 +1,6 @@
-import { Component } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
 
-export default class ErrorBoundary extends Component {
+class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -12,64 +11,31 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught:', error, errorInfo);
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
-
-  handleReset = () => {
-    this.setState({ hasError: false, error: null });
-  };
 
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{
-          padding: '80px 20px',
-          textAlign: 'center',
-          fontFamily: 'var(--font-display, Georgia, serif)',
-          maxWidth: '500px',
-          margin: '0 auto'
-        }}>
-          <h2 style={{ fontSize: '1.5rem', color: 'var(--soil, #3e2723)', marginBottom: '12px' }}>
-            Something went wrong
-          </h2>
-          <p style={{ color: 'var(--clay, #8d6e63)', marginBottom: '24px', lineHeight: '1.6' }}>
-            An unexpected error occurred. Please try refreshing the page.
-          </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+          <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 text-center">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1>
+            <p className="text-gray-600 mb-6">
+              We're sorry, but an unexpected error occurred. Please try refreshing the page.
+            </p>
             <button
-              onClick={this.handleReset}
-              style={{
-                padding: '10px 24px',
-                background: 'var(--soil, #3e2723)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-                fontSize: '0.95rem'
-              }}
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
-              Try Again
+              Refresh Page
             </button>
-            <Link
-              to="/"
-              style={{
-                padding: '10px 24px',
-                background: 'transparent',
-                color: 'var(--soil, #3e2723)',
-                border: '1px solid var(--soil, #3e2723)',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                fontFamily: 'inherit',
-                fontSize: '0.95rem'
-              }}
-            >
-              Go Home
-            </Link>
           </div>
         </div>
       );
     }
+
     return this.props.children;
   }
 }
+
+export default ErrorBoundary;

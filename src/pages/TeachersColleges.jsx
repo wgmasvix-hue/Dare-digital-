@@ -13,7 +13,9 @@ import {
   BookOpen,
   FileText,
   Sparkles,
-  Search
+  Search,
+  Menu,
+  ChevronDown
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { geminiService } from "../services/geminiService";
@@ -133,18 +135,18 @@ const STATS = [
 ];
 
 const TEACHERS_COLLEGES = [
-  { id: 'mkoba', name: 'Mkoba Teachers College', level: 'Primary/Secondary' },
-  { id: 'belvedere', name: 'Belvedere Technical Teachers College', level: 'Secondary/Technical' },
-  { id: 'morgan', name: 'Morgan Zintec College', level: 'Primary' },
-  { id: 'uce', name: 'United College of Education (UCE)', level: 'Primary' },
-  { id: 'hillside', name: 'Hillside Teachers College', level: 'Secondary' },
-  { id: 'marymount', name: 'Marymount Teachers College', level: 'Primary/Secondary' },
-  { id: 'masvingo', name: 'Masvingo Teachers College', level: 'Primary' },
-  { id: 'bondolfi', name: 'Bondolfi Teachers College', level: 'Primary' },
-  { id: 'morgenster', name: 'Morgenster Teachers College', level: 'Primary' },
-  { id: 'nyadire', name: 'Nyadire Teachers College', level: 'Primary' },
-  { id: 'madziwa', name: 'Madziwa Teachers College', level: 'Primary' },
-  { id: 'seke', name: 'Seke Teachers College', level: 'Primary' },
+  { id: 'mkoba', name: 'Mkoba Teachers College', level: 'Primary/Secondary', logo: 'https://picsum.photos/seed/mkoba/200' },
+  { id: 'belvedere', name: 'Belvedere Technical Teachers College', level: 'Secondary/Technical', logo: 'https://picsum.photos/seed/belvedere/200' },
+  { id: 'morgan', name: 'Morgan Zintec College', level: 'Primary', logo: 'https://picsum.photos/seed/morgan/200' },
+  { id: 'uce', name: 'United College of Education (UCE)', level: 'Primary', logo: 'https://picsum.photos/seed/uce/200' },
+  { id: 'hillside', name: 'Hillside Teachers College', level: 'Secondary', logo: 'https://picsum.photos/seed/hillside/200' },
+  { id: 'marymount', name: 'Marymount Teachers College', level: 'Primary/Secondary', logo: 'https://picsum.photos/seed/marymount/200' },
+  { id: 'masvingo', name: 'Masvingo Teachers College', level: 'Primary', logo: 'https://picsum.photos/seed/masvingo/200' },
+  { id: 'bondolfi', name: 'Bondolfi Teachers College', level: 'Primary', logo: 'https://picsum.photos/seed/bondolfi/200' },
+  { id: 'morgenster', name: 'Morgenster Teachers College', level: 'Primary', logo: 'https://picsum.photos/seed/morgenster/200' },
+  { id: 'nyadire', name: 'Nyadire Teachers College', level: 'Primary', logo: 'https://picsum.photos/seed/nyadire/200' },
+  { id: 'madziwa', name: 'Madziwa Teachers College', level: 'Primary', logo: 'https://picsum.photos/seed/madziwa/200' },
+  { id: 'seke', name: 'Seke Teachers College', level: 'Primary', logo: 'https://picsum.photos/seed/seke/200' },
 ];
 
 const SUBJECTS = [
@@ -1311,37 +1313,66 @@ export default function TeachersColleges() {
     <div style={{ 
       minHeight: "100vh", 
       background: COLORS.white,
-      paddingTop: "180px",
-      paddingBottom: "80px"
+      paddingTop: isMobile ? "120px" : "180px",
+      paddingBottom: isMobile ? "40px" : "80px"
     }}>
       {/* Hero Section */}
       <div style={{
-        maxWidth: "1200px", margin: "0 auto", padding: "0 24px",
-        marginBottom: "60px", textAlign: "center"
+        maxWidth: "1200px", 
+        margin: "0 auto 60px", 
+        padding: "80px 40px",
+        textAlign: "center",
+        position: "relative",
+        overflow: "hidden",
+        borderRadius: "40px",
+        backgroundColor: COLORS.forest,
+        color: COLORS.white,
+        boxShadow: "0 20px 50px rgba(0,0,0,0.1)"
       }}>
+        {/* Real Book Background Image */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          opacity: 0.2
+        }}>
+          <img 
+            src="https://images.unsplash.com/photo-1491841573634-28140fc7ced7?auto=format&fit=crop&q=80&w=2000" 
+            alt="Teachers College Background" 
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            referrerPolicy="no-referrer"
+          />
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: `linear-gradient(to bottom, ${COLORS.forest}80, ${COLORS.forest})`
+          }} />
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          style={{ position: "relative", zIndex: 10 }}
         >
           <span style={{
-            background: `${COLORS.amber}15`, color: COLORS.amber,
-            padding: "6px 16px", borderRadius: "30px", fontSize: "12px",
-            fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em",
-            marginBottom: "20px", display: "inline-block"
+            background: `${COLORS.amber}20`, color: COLORS.amberLight,
+            padding: "8px 20px", borderRadius: "30px", fontSize: "12px",
+            fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em",
+            marginBottom: "24px", display: "inline-block", border: `1px solid ${COLORS.amber}40`
           }}>
             Teacher Training Excellence
           </span>
           <h1 style={{
             fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 800,
-            color: COLORS.charcoal, fontFamily: "'Playfair Display', serif",
+            color: COLORS.white, fontFamily: "'Playfair Display', serif",
             lineHeight: 1.1, marginBottom: "24px"
           }}>
             Empowering Zimbabwe's <br />
-            <span style={{ color: COLORS.forest }}>Future Educators</span>
+            <span style={{ color: COLORS.sage }}>Future Educators</span>
           </h1>
           <p style={{
-            fontSize: "18px", color: COLORS.stone, maxWidth: "700px",
-            margin: "0 auto 40px", lineHeight: 1.6
+            fontSize: "18px", color: "rgba(255,255,255,0.7)", maxWidth: "700px",
+            margin: "0 auto 40px", lineHeight: 1.6, fontWeight: 500
           }}>
             Dare Digital Library provides specialized tools for Teachers Colleges, 
             bridging the gap between theory and teaching practice with MoPSE-aligned AI.
@@ -1350,12 +1381,13 @@ export default function TeachersColleges() {
 
         {/* Stats */}
         <div style={{
-          display: "flex", justifyContent: "center", gap: "40px", flexWrap: "wrap"
+          display: "flex", justifyContent: "center", gap: "60px", flexWrap: "wrap",
+          position: "relative", zIndex: 10
         }}>
           {STATS.map((s, i) => (
             <div key={i} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "32px", fontWeight: 800, color: COLORS.forest }}>{s.value}</div>
-              <div style={{ fontSize: "12px", color: COLORS.stone, fontWeight: 600 }}>{s.label}</div>
+              <div style={{ fontSize: "36px", fontWeight: 800, color: COLORS.sage }}>{s.value}</div>
+              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -1476,12 +1508,25 @@ export default function TeachersColleges() {
                     border: "none",
                     cursor: "pointer",
                     display: "flex",
-                    flexDirection: "column",
-                    gap: "2px"
+                    alignItems: "center",
+                    gap: "12px"
                   }}
                 >
-                  <span>{inst.name}</span>
-                  <span style={{ fontSize: "10px", opacity: 0.7, fontWeight: 500 }}>{inst.level} Focus</span>
+                  <div style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    flexShrink: 0,
+                    background: COLORS.white,
+                    border: `1px solid ${COLORS.sagePale}`
+                  }}>
+                    <img src={inst.logo} alt={inst.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} referrerPolicy="no-referrer" />
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                    <span>{inst.name}</span>
+                    <span style={{ fontSize: "10px", opacity: 0.7, fontWeight: 500 }}>{inst.level} Focus</span>
+                  </div>
                 </button>
               ))}
             </div>

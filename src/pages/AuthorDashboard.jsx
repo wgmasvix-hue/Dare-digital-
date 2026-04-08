@@ -123,23 +123,37 @@ export default function AuthorDashboard() {
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 min-h-screen bg-[#FDFCF9]"
     >
       {/* HEADER */}
-      <motion.header variants={itemVariants} className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
+      <motion.header 
+        variants={itemVariants} 
+        className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 p-10 rounded-[32px] relative overflow-hidden bg-[#3D3028] text-white"
+      >
+        {/* Real Book Background Image */}
+        <div className="absolute inset-0 z-0 opacity-20">
+          <img 
+            src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=2000" 
+            alt="Author Dashboard Background" 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#3D3028] via-[#3D3028]/80 to-transparent" />
+        </div>
+
+        <div className="relative z-10">
           <div className="flex items-center gap-2 text-[#C8861A] font-semibold mb-2">
             <PenTool className="w-4 h-4" />
             <span className="text-xs uppercase tracking-widest">Author Dashboard</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif text-[#3D3028] mb-2">
+          <h1 className="text-4xl md:text-5xl font-serif text-white mb-2">
             Hello, {profile?.first_name || 'Author'}
           </h1>
-          <p className="text-[#8E8271]">
+          <p className="text-white/70">
             Manage your publications and track your impact across the library.
           </p>
         </div>
         
         <Link 
           to="/author/upload" 
-          className="bg-[#3D3028] text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-[#4D4038] transition-all shadow-lg shadow-stone-900/10"
+          className="relative z-10 bg-[#C8861A] text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-[#D8962A] transition-all shadow-xl shadow-black/20"
         >
           <Plus size={18} /> New Publication
         </Link>

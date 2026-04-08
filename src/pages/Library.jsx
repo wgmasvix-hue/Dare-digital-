@@ -1,28 +1,45 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { 
   Sparkles, 
   LayoutGrid, 
   List as ListIcon, 
   Filter, 
-  AlertCircle
+  AlertCircle,
+  History
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { transformBooks, BOOK_SELECT, OPENSTAX_CURATED } from '../lib/transformBook';
 import { ALL_ADDITIONAL_OER } from '../lib/oerCatalog';
+import { useGamification } from '../context/GamificationContext';
 import BookCard from '../components/library/BookCard';
 import DigitizationRequestModal from '../components/library/DigitizationRequestModal';
 import FilterPanel from '../components/library/FilterPanel';
 import SearchBar from '../components/library/SearchBar';
 
-const ALL_LOCAL_OER = [...OPENSTAX_CURATED, ...ALL_ADDITIONAL_OER];
+const ALL_LOCAL_OER = (() => {
+  const combined = [...OPENSTAX_CURATED, ...ALL_ADDITIONAL_OER];
+  const seenIds = new Set();
+  return combined.filter(book => {
+    if (!book.id || seenIds.has(book.id)) return false;
+    seenIds.add(book.id);
+    return true;
+  });
+})();
+if (typeof window !== 'undefined') {
+  window.ALL_LOCAL_OER = ALL_LOCAL_OER;
+}
 import styles from './Library.module.css';
 
 import { openStaxService } from '../services/openStaxService';
 import { geminiService } from '../services/geminiService';
+import { gutenbergService } from '../services/gutenbergService';
+import { openLibraryService } from '../services/openLibraryService';
+import { arxivService } from '../services/arxivService';
 
 export default function Library() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { bookProgress } = useGamification();
   
   // Filter States
   const [filters, setFilters] = useState({
@@ -31,7 +48,7 @@ export default function Library() {
     level: searchParams.get('level') || 'All',
     pillar: searchParams.get('pillar') || 'All',
     access: searchParams.get('access') || 'All',
-    source: searchParams.get('source') || 'Partner Resources',
+    source: searchParams.get('source') || 'All',
     format: searchParams.get('format') || 'All',
     university: searchParams.get('university') || 'All',
     yearFrom: searchParams.get('yearFrom') || '',
@@ -57,6 +74,8 @@ export default function Library() {
   
   // Data States
   const [publications, setPublications] = useState([]);
+  const [localSearch, setLocalSearch] = useState('');
+  const [localCategory, setLocalCategory] = useState('All');
   const [semanticResults, setSemanticResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -88,27 +107,37 @@ export default function Library() {
       
       let dbData = [];
       let openStaxData = [];
+      let gutenbergData = [];
+      let openStaxApiData = [];
+      let openLibraryData = [];
+      let arxivData = [];
       let dbCount = 0;
       let openStaxCount = 0;
+      let gutenbergCount = 0;
+      let openStaxApiCount = 0;
+      let openLibraryCount = 0;
+      let arxivCount = 0;
 
-      // 1. Fetch from Supabase (Internal DB)
-      if (filters.source === 'All' || filters.source === 'Dare Library') {
+      // 1. Fetch from Supabase (Internal DB - Books)
+      if (filters.source === 'All' || filters.source === 'Dare Library' || filters.source === 'Project Gutenberg' || filters.source === 'Partner Resources') {
         const needsDirectQuery = filters.isbn || filters.yearFrom || filters.yearTo || 
-          filters.zimAuthored || filters.africanContext ||
+          filters.zimAuthored || filters.africanContext || filters.source === 'Project Gutenberg' ||
+          filters.source === 'Partner Resources' ||
           (sortBy !== 'relevance' && sortBy !== 'title' && filters.q);
 
         if (!needsDirectQuery) {
           const rpcParams = {
-            search_query: filters.q || null,
+            p_query: filters.q || null,
             p_faculty: filters.faculty === 'All' ? null : filters.faculty,
             p_level: filters.level === 'All' ? null : filters.level,
             p_limit: LIMIT,
-            p_offset: currentOffset
+            p_offset: currentOffset,
+            p_sort: sortBy
           };
-          const result = await supabase.rpc('search_publications', rpcParams);
-          if (!result.error) {
-            dbData = result.data || [];
-            dbCount = dbData.length < LIMIT ? dbData.length + currentOffset : 1000;
+          const { data, count, error } = await supabase.rpc('search_publications', rpcParams, { count: 'exact' });
+          if (!error) {
+            dbData = data || [];
+            dbCount = count || 0;
           }
         }
 
@@ -117,16 +146,33 @@ export default function Library() {
             .from('books')
             .select(BOOK_SELECT, { count: 'exact' });
 
-          if (filters.faculty !== 'All') query = query.ilike('subject', `%${filters.faculty}%`);
+          if (filters.source === 'Project Gutenberg') {
+            query = query.eq('source', 'Project Gutenberg');
+          } else if (filters.source === 'Partner Resources') {
+            query = query.in('source', ['LibreTexts', 'OpenStax', 'Project Gutenberg']);
+          }
+
+          if (filters.faculty !== 'All') {
+            const facultyLower = filters.faculty.toLowerCase();
+            // Use a more flexible ILIKE pattern for faculty matching
+            query = query.or(`subject.ilike.%${filters.faculty}%,faculty.ilike.%${filters.faculty}%,subject.ilike.%${facultyLower.split(' ')[0]}%,faculty.ilike.%${facultyLower.split(' ')[0]}%`);
+          }
           if (filters.level !== 'All') query = query.ilike('programme', `%${filters.level}%`);
           if (filters.pillar !== 'All') query = query.contains('ai_topics', [filters.pillar]);
           if (filters.university !== 'All') query = query.ilike('institution_id', `%${filters.university}%`);
           if (filters.access !== 'All') {
-            if (filters.access === 'Dare Access') query = query.is('institution_id', null);
-            else if (filters.access === 'Licensed') query = query.not('institution_id', 'is', null);
+            if (filters.access === 'Dare Access') {
+              query = query.in('access_model', ['dare_access', 'open_access']);
+            } else if (filters.access === 'Licensed') {
+              query = query.eq('access_model', 'licensed');
+            } else if (filters.access === 'Purchased') {
+              query = query.eq('is_purchased', true);
+            }
           }
           if (filters.isbn) query = query.or(`description.ilike.%${filters.isbn}%,title.ilike.%${filters.isbn}%`);
-          if (filters.q) query = query.ilike('title', `%${filters.q}%`);
+          if (filters.q) {
+            query = query.or(`title.ilike.%${filters.q}%,description.ilike.%${filters.q}%,author_names.ilike.%${filters.q}%`);
+          }
           if (filters.yearFrom) query = query.gte('created_at', `${filters.yearFrom}-01-01`);
           if (filters.yearTo) query = query.lte('created_at', `${filters.yearTo}-12-31`);
 
@@ -149,8 +195,48 @@ export default function Library() {
         }
       }
 
+      // 1.5 Fetch from DSpace Documents (Research)
+      let dspaceData = [];
+      let dspaceCount = 0;
+      if (filters.source === 'All' || filters.source === 'Research' || filters.source === 'Dare Library') {
+        let docQuery = supabase
+          .from('documents')
+          .select('*', { count: 'exact' })
+          .not('synced_from_dspace_at', 'is', null);
+
+        if (filters.q) {
+          docQuery = docQuery.or(`title.ilike.%${filters.q}%,creator.ilike.%${filters.q}%,description.ilike.%${filters.q}%`);
+        }
+        
+        if (filters.faculty !== 'All') {
+           docQuery = docQuery.or(`description.ilike.%${filters.faculty}%,title.ilike.%${filters.faculty}%`);
+        }
+
+        docQuery = docQuery.range(currentOffset, currentOffset + LIMIT - 1);
+        const { data, count, error } = await docQuery;
+        if (!error) {
+          dspaceData = (data || []).map(doc => ({
+            id: doc.id,
+            title: doc.title,
+            author_names: doc.creator || 'Unknown Author',
+            description: doc.description,
+            publisher_name: doc.institution || doc.publisher || 'DSpace Repository',
+            year_published: doc.date ? new Date(doc.date).getFullYear() : null,
+            format: doc.format || 'pdf',
+            access_model: 'open_access',
+            source: 'Research',
+            resource_type: 'Research',
+            file_url: doc.url,
+            is_dspace: true,
+            cover_image_url: null
+          }));
+          dspaceCount = count || 0;
+        }
+      }
+
       // 2. Fetch from Local OER Catalog
-      if (filters.source === 'All' || filters.source === 'Partner Resources' || filters.source === 'Featured Items') {
+      if ((filters.source === 'All' || filters.source === 'Partner Resources' || filters.source === 'Featured Items') && 
+          (filters.access === 'All' || filters.access === 'Dare Access')) {
         if (!filters.zimAuthored && !filters.africanContext && !filters.isbn) {
           let filteredOER = ALL_LOCAL_OER;
           
@@ -161,7 +247,16 @@ export default function Library() {
           
           // Filter by faculty
           if (filters.faculty !== 'All') {
-            filteredOER = filteredOER.filter(b => b.faculty?.toLowerCase() === filters.faculty.toLowerCase());
+            const facultyLower = filters.faculty.toLowerCase();
+            filteredOER = filteredOER.filter(b => {
+              const bFaculty = (b.faculty || "").toLowerCase();
+              const bSubject = (b.subject || "").toLowerCase();
+              // Flexible matching for faculty names (e.g., "Agriculture" matches "Agriculture & Environmental")
+              return bFaculty.includes(facultyLower) || 
+                     facultyLower.includes(bFaculty) ||
+                     bSubject.includes(facultyLower) ||
+                     facultyLower.includes(bSubject);
+            });
           }
           
           // Filter by query
@@ -181,26 +276,101 @@ export default function Library() {
         }
       }
 
-      // 3. Merge Results
+      // 3. Fetch from Gutenberg API
+      if ((filters.source === 'All' || filters.source === 'Partner Resources' || filters.source === 'Gutenberg' || filters.source === 'Project Gutenberg') && 
+          (filters.access === 'All' || filters.access === 'Dare Access')) {
+        try {
+          const page = Math.floor(currentOffset / LIMIT) + 1;
+          const gData = await gutenbergService.searchBooks(filters.q, page);
+          gutenbergData = gData.books;
+          gutenbergCount = gData.count;
+        } catch (gErr) {
+          console.error('Gutenberg fetch error:', gErr);
+          setError('Gutenberg library is currently unavailable. Please try again or explore our AI tools for alternative resources.');
+        }
+      }
+
+      // 4. Fetch from OpenStax API
+      if ((filters.source === 'All' || filters.source === 'Partner Resources') && 
+          (filters.access === 'All' || filters.access === 'Dare Access')) {
+        try {
+          const page = Math.floor(currentOffset / LIMIT) + 1;
+          const osData = await openStaxService.searchBooks({ 
+            query: filters.q, 
+            page, 
+            limit: LIMIT 
+          });
+          openStaxApiData = osData.data;
+          openStaxApiCount = osData.total;
+        } catch (osErr) {
+          console.error('OpenStax fetch error:', osErr);
+        }
+      }
+
+      // 5. Fetch from Open Library API
+      if ((filters.source === 'All' || filters.source === 'Partner Resources' || filters.source === 'Open Library') && 
+          (filters.access === 'All' || filters.access === 'Dare Access')) {
+        try {
+          const page = Math.floor(currentOffset / LIMIT) + 1;
+          const olData = await openLibraryService.searchBooks(filters.q || 'Zimbabwe', page);
+          openLibraryData = olData.books;
+          openLibraryCount = olData.numFound;
+        } catch (olErr) {
+          console.error('Open Library fetch error:', olErr);
+        }
+      }
+
+      // 6. Fetch from arXiv API
+      if ((filters.source === 'All' || filters.source === 'Partner Resources' || filters.source === 'arXiv Research') && 
+          (filters.access === 'All' || filters.access === 'Dare Access')) {
+        try {
+          const page = Math.floor(currentOffset / LIMIT) + 1;
+          const axData = await arxivService.searchResearch(filters.q || 'Zimbabwe', page);
+          arxivData = axData.books;
+          arxivCount = axData.totalResults;
+        } catch (axErr) {
+          console.error('arXiv fetch error:', axErr);
+        }
+      }
+
+      // 7. Merge Results
       let combinedData = [];
       if (filters.source === 'Partner Resources') {
-        combinedData = openStaxData;
-        setTotalCount(openStaxCount);
+        combinedData = [...dbData, ...openStaxData, ...gutenbergData, ...openStaxApiData, ...openLibraryData, ...arxivData];
+        setTotalCount(dbCount + openStaxCount + gutenbergCount + openStaxApiCount + openLibraryCount + arxivCount);
+      } else if (filters.source === 'Research') {
+        combinedData = dspaceData;
+        setTotalCount(dspaceCount);
+      } else if (filters.source === 'Gutenberg' || filters.source === 'Project Gutenberg') {
+        combinedData = gutenbergData;
+        setTotalCount(gutenbergCount);
+      } else if (filters.source === 'Open Library') {
+        combinedData = openLibraryData;
+        setTotalCount(openLibraryCount);
+      } else if (filters.source === 'arXiv Research') {
+        combinedData = arxivData;
+        setTotalCount(arxivCount);
       } else if (filters.source === 'Dare Library') {
-        combinedData = dbData;
-        setTotalCount(dbCount);
+        combinedData = [...dbData, ...dspaceData];
+        setTotalCount(dbCount + dspaceCount);
       } else if (filters.source === 'Featured Items') {
         combinedData = [...dbData, ...openStaxData];
         setTotalCount(dbCount + openStaxCount);
       } else {
         // When merging, we use the sum of counts as a reasonable estimate
         const seenTitles = new Set(dbData.map(b => b.title?.toLowerCase()));
+        const uniqueDSpace = dspaceData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
         const uniqueOpenStax = openStaxData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
-        combinedData = [...dbData, ...uniqueOpenStax];
+        const uniqueGutenberg = gutenbergData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
+        const uniqueOpenStaxApi = openStaxApiData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
+        const uniqueOpenLibrary = openLibraryData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
+        const uniqueArxiv = arxivData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
+        
+        combinedData = [...dbData, ...uniqueDSpace, ...uniqueOpenStax, ...uniqueGutenberg, ...uniqueOpenStaxApi, ...uniqueOpenLibrary, ...uniqueArxiv];
         
         // Only update total count on initial load to avoid jumping numbers
         if (!isLoadMore) {
-          setTotalCount(dbCount + openStaxCount);
+          setTotalCount(dbCount + dspaceCount + openStaxCount + gutenbergCount + openStaxApiCount + openLibraryCount + arxivCount);
         }
       }
 
@@ -350,6 +520,16 @@ export default function Library() {
     }
   };
 
+  // Local filtering logic
+  const filteredPublications = publications.filter(pub => {
+    const matchesCategory = localCategory === 'All' || 
+      pub.category?.toLowerCase() === localCategory.toLowerCase() ||
+      pub.subject?.toLowerCase().includes(localCategory.toLowerCase()) ||
+      pub.faculty?.toLowerCase().includes(localCategory.toLowerCase());
+    
+    return matchesCategory;
+  });
+
   return (
     <div className={styles.libraryContainer}>
       {/* SIDEBAR FILTERS */}
@@ -377,37 +557,96 @@ export default function Library() {
         </button>
 
         {/* Modern Tabs for Source Filtering */}
-        <div className="flex items-center gap-2 mb-8 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-2xl w-fit">
-          {['All', 'Featured Items', 'Dare Library', 'Partner Resources', 'Buku'].map((source) => (
+        <div className="flex overflow-x-auto pb-2 mb-4 scrollbar-hide">
+          <div className="flex items-center gap-2 p-1 bg-bg-subtle rounded-2xl w-fit whitespace-nowrap">
+            {['All', 'Featured Items', 'Dare Library', 'Research', 'Partner Resources', 'Project Gutenberg'].map((source) => (
+              <button
+                key={source}
+                onClick={() => handleFilterChange('source', source)}
+                className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${
+                  filters.source === source 
+                    ? 'bg-bg-base text-primary shadow-sm' 
+                    : 'text-text-muted hover:text-text-main'
+                }`}
+              >
+                {source}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Continue Learning Section */}
+        {Object.keys(bookProgress).length > 0 && filters.source === 'All' && !filters.q && (
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <History size={20} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-text-main">Continue Learning</h2>
+                <p className="text-xs font-bold text-text-muted uppercase tracking-widest">Pick up where you left off</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {publications
+                .filter(p => bookProgress[p.id] > 0)
+                .slice(0, 4)
+                .map(book => (
+                  <BookCard 
+                    key={`continue-${book.id}`} 
+                    publication={book} 
+                    variant="tile" 
+                    progress={bookProgress[book.id]}
+                  />
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* Category Filters (Local) */}
+        <div className="flex flex-wrap items-center gap-2 mb-8">
+          {['All', 'Vocational', 'Polytechnic', 'Science', 'Mathematics', 'Business', 'Technology', 'Arts'].map((cat) => (
             <button
-              key={source}
-              onClick={() => handleFilterChange('source', source)}
-              className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                filters.source === source 
-                  ? 'bg-white dark:bg-slate-700 text-[#C8861A] shadow-sm' 
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              key={cat}
+              onClick={() => setLocalCategory(cat)}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${
+                localCategory === cat
+                  ? 'bg-primary border-primary text-white shadow-md'
+                  : 'bg-bg-base border-border text-text-muted hover:border-primary/50'
               }`}
             >
-              {source}
+              {cat}
             </button>
           ))}
         </div>
 
         {/* Search Header */}
-        <div className={styles.searchHeader}>
-          <div className="flex items-center justify-between mb-4">
+        <div className={`${styles.searchHeader} relative overflow-hidden rounded-3xl p-8 mb-8`}>
+          {/* Real Book Background Image */}
+          <div className="absolute inset-0 z-0">
+            <img 
+              src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=2000" 
+              alt="Library Search Background" 
+              className="w-full h-full object-cover opacity-10"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-bg-subtle/90 via-bg-subtle/80 to-bg-subtle/90" />
+          </div>
+
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Library</h1>
-              <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+              <h1 className="text-2xl font-bold text-text-main">Library</h1>
+              <div className="flex items-center gap-2 bg-bg-subtle p-1 rounded-lg">
                 <button 
                   onClick={() => setUseSemanticSearch(false)}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${!useSemanticSearch ? 'bg-white dark:bg-slate-700 text-emerald-600 shadow-sm' : 'text-slate-500'}`}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${!useSemanticSearch ? 'bg-bg-base text-secondary shadow-sm' : 'text-text-muted'}`}
                 >
                   Keyword
                 </button>
                 <button 
                   onClick={() => setUseSemanticSearch(true)}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${useSemanticSearch ? 'bg-white dark:bg-slate-700 text-emerald-600 shadow-sm' : 'text-slate-500'}`}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${useSemanticSearch ? 'bg-bg-base text-secondary shadow-sm' : 'text-text-muted'}`}
                 >
                   Semantic (AI)
                 </button>
@@ -419,28 +658,36 @@ export default function Library() {
                   setSemanticResults(null);
                   fetchPublications(false);
                 }}
-                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 underline"
+                className="text-xs font-bold text-secondary hover:underline"
               >
                 Clear AI Results
               </button>
             )}
           </div>
           <SearchBar 
-            value={isAiSearch ? aiQuery : filters.q}
-            onChange={(val) => isAiSearch ? setAiQuery(val) : handleFilterChange('q', val)}
-            onSearch={isAiSearch ? handleAiSearch : () => fetchPublications(false)}
+            value={isAiSearch ? aiQuery : localSearch}
+            onChange={(val) => isAiSearch ? setAiQuery(val) : setLocalSearch(val)}
+            onSearch={isAiSearch ? handleAiSearch : () => {
+              handleFilterChange('q', localSearch);
+              fetchPublications(false);
+            }}
             isAiMode={isAiSearch}
             onToggleAi={() => setIsAiSearch(!isAiSearch)}
             aiThinking={aiThinking}
             suggestions={suggestions}
             onSelectSuggestion={(term) => {
-              if (isAiSearch) setAiQuery(term);
-              else handleFilterChange('q', term);
+              if (isAiSearch) {
+                setAiQuery(term);
+              } else {
+                setLocalSearch(term);
+                handleFilterChange('q', term);
+              }
               setSuggestions([]);
             }}
             showSuggestions={showSuggestions}
             setShowSuggestions={setShowSuggestions}
           />
+          </div>
         </div>
 
         {error && (
@@ -450,33 +697,34 @@ export default function Library() {
               <p>{error}</p>
             </div>
             <button onClick={() => fetchPublications(false)}>Try Again</button>
+            {error.includes('Gutenberg') && <Link to="/ai-tools" className={styles.backLink}>Explore AI Tools</Link>}
           </div>
         )}
 
         {/* Controls */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">
+            <span className="text-xs font-mono font-bold text-text-muted uppercase tracking-widest">
               {totalCount} Titles Found
             </span>
-            <div className="h-4 w-[1px] bg-slate-200 dark:bg-slate-800" />
+            <div className="h-4 w-[1px] bg-border" />
             <div className="flex items-center gap-2">
               <button 
-                className={`p-2 rounded-lg transition-all ${viewMode === 'tile' ? 'bg-[#3D3028] text-white' : 'text-slate-400 hover:bg-slate-100'}`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'tile' ? 'bg-primary text-white' : 'text-text-muted hover:bg-bg-subtle'}`}
                 onClick={() => setViewMode('tile')}
                 title="Modern Tile View"
               >
                 <LayoutGrid size={18} />
               </button>
               <button 
-                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-[#3D3028] text-white' : 'text-slate-400 hover:bg-slate-100'}`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-text-muted hover:bg-bg-subtle'}`}
                 onClick={() => setViewMode('grid')}
                 title="Compact Grid View"
               >
                 <Sparkles size={18} />
               </button>
               <button 
-                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#3D3028] text-white' : 'text-slate-400 hover:bg-slate-100'}`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-primary text-white' : 'text-text-muted hover:bg-bg-subtle'}`}
                 onClick={() => setViewMode('list')}
                 title="List View"
               >
@@ -486,9 +734,9 @@ export default function Library() {
           </div>
           
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sort By</span>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Sort By</span>
             <select 
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-sm font-medium outline-none focus:border-[#C8861A] transition-all"
+              className="bg-bg-base border border-border rounded-xl px-4 py-2 text-sm font-medium outline-none focus:border-primary transition-all text-text-main"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
@@ -509,24 +757,38 @@ export default function Library() {
         }>
           {loading && publications.length === 0 ? (
             // Skeletons
-            Array(6).fill(0).map((_, i) => (
-              <div key={i} className={styles.skeletonCard}>
-                <div className={styles.skeletonCover} />
-                <div className={styles.skeletonInfo}>
-                  <div className={`${styles.skeletonLine} ${styles.w80}`} />
-                  <div className={`${styles.skeletonLine} ${styles.w60}`} />
-                  <div className={`${styles.skeletonLine} ${styles.w40}`} />
-                </div>
-              </div>
+            Array(12).fill(0).map((_, i) => (
+              <BookCard key={i} loading={true} variant={viewMode} />
             ))
-          ) : (
-            publications.map(book => (
+          ) : filteredPublications.length > 0 ? (
+            filteredPublications.map(book => (
               <BookCard 
                 key={book.id} 
                 publication={book} 
                 variant={viewMode} 
+                progress={bookProgress[book.id] || 0}
               />
             ))
+          ) : (
+            <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-bg-subtle rounded-3xl border-2 border-dashed border-border">
+              <div className="w-16 h-16 bg-bg-base rounded-2xl shadow-sm flex items-center justify-center text-text-muted mb-4">
+                <AlertCircle size={32} />
+              </div>
+              <h3 className="text-lg font-bold text-text-main mb-1">No books found</h3>
+              <p className="text-text-muted max-w-xs">
+                We couldn't find any books matching your current search or filters.
+              </p>
+              <button 
+                onClick={() => {
+                  setLocalSearch('');
+                  setLocalCategory('All');
+                  clearFilters();
+                }}
+                className="mt-6 px-6 py-2 bg-primary text-white rounded-xl font-bold text-sm hover:scale-105 transition-all"
+              >
+                Clear All Filters
+              </button>
+            </div>
           )}
         </div>
 

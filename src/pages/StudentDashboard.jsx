@@ -28,7 +28,8 @@ import {
   Target,
   Zap,
   Award,
-  Globe
+  Globe,
+  Trophy
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -47,14 +48,22 @@ import {
 } from 'recharts';
 import { motion } from 'motion/react';
 import DaraChatModal from '../components/library/DaraChatModal';
+import BadgeDisplay from '../components/gamification/BadgeDisplay';
 import { supabase } from '../lib/supabase';
 import { transformBooks, BOOK_SELECT } from '../lib/transformBook';
 import { getRecommendedByFaculty, getRecentlyAddedPipeline } from '../lib/featuredPipeline';
 import { useAuth } from '../hooks/useAuth';
+import { useGamification } from '../context/GamificationContext';
+import { getLeaderboardData, getMotivationalMessage } from '../services/leaderboardService';
 import BookCard from '../components/library/BookCard';
 
 export default function StudentDashboard() {
   const { user, profile, institution } = useAuth();
+  const { xp, streak, level, getLevelInfo, unlockBadge } = useGamification();
+  
+  useEffect(() => {
+    unlockBadge('first_search');
+  }, [unlockBadge]);
   
   const [continueReading, setContinueReading] = useState([]);
   const [readingLists, setReadingLists] = useState([]);
@@ -64,6 +73,7 @@ export default function StudentDashboard() {
   const [myUploads, setMyUploads] = useState([]);
   const [studyData, setStudyData] = useState([]);
   const [skillData, setSkillData] = useState([]);
+  const [leaderboardRank, setLeaderboardRank] = useState(null);
   const [stats, setStats] = useState({ booksStarted: 0, pagesRead: 0, hoursRead: 0, totalUploads: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -75,6 +85,14 @@ export default function StudentDashboard() {
     try {
       setLoading(true);
       setError(null);
+
+      // Fetch Leaderboard Position
+      const lbData = getLeaderboardData('weekly', xp, streak, user, profile);
+      const userRank = lbData.findIndex(u => u.isCurrentUser) + 1;
+      setLeaderboardRank({
+        rank: userRank,
+        message: getMotivationalMessage(userRank, lbData.length)
+      });
 
       // 0. My Uploads
       const { data: uploads } = await supabase
@@ -291,33 +309,62 @@ export default function StudentDashboard() {
       )}
 
       {/* Welcome Header */}
-      <motion.header variants={itemVariants} className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-2 text-[#C8861A] font-semibold mb-2">
-            <Sparkles className="w-4 h-4" />
-            <span className="text-xs uppercase tracking-widest">Student Dashboard</span>
+      <motion.header 
+        variants={itemVariants} 
+        className="relative overflow-hidden bg-primary p-12 rounded-[2.5rem] mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 shadow-premium"
+      >
+        {/* Real Book Background Image */}
+        <div className="absolute inset-0 z-0 opacity-20">
+          <img 
+            src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=2000" 
+            alt="Dashboard Header Background" 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-transparent" />
+        </div>
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 text-accent font-semibold mb-4">
+            <Sparkles className="w-5 h-5" />
+            <span className="text-xs uppercase tracking-[0.2em] font-bold">Student Dashboard</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif text-[#3D3028] mb-2">
-            {getGreeting()}, {profile?.first_name || 'Scholar'}
+          <h1 className="text-4xl md:text-6xl font-display font-black text-white mb-4 leading-tight">
+            {getGreeting()}, <br />
+            <span className="text-accent italic">{profile?.first_name || 'Scholar'}</span>
           </h1>
-          <div className="flex items-center gap-3">
-            {institution?.logo_url && (
-              <img src={institution.logo_url} alt={institution.name} className="w-8 h-8 object-contain rounded-md border border-[#E8DFD0] p-0.5 bg-white" />
+          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-2 pr-4 rounded-full border border-white/20 w-fit">
+            {institution?.logo_url ? (
+              <img src={institution.logo_url} alt={institution.name} className="w-8 h-8 object-contain rounded-full border border-white/20 p-0.5 bg-white" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white">
+                <GraduationCap size={16} />
+              </div>
             )}
-            <p className="text-[#8E8271]">
+            <p className="text-white/80 text-sm font-medium">
               {institution?.name || 'Independent Scholar'} • {profile?.programme || 'General Studies'}
             </p>
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="bg-white p-3 rounded-2xl shadow-sm border border-[#E8DFD0] flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
-              <Flame className="w-6 h-6" />
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/20 flex items-center gap-4 shadow-lg">
+            <div className="w-12 h-12 rounded-2xl bg-orange-500/20 flex items-center justify-center text-orange-400">
+              <Flame className="w-7 h-7" />
             </div>
             <div>
-              <p className="text-xs text-[#8E8271] uppercase font-bold tracking-tighter">Current Streak</p>
-              <p className="text-xl font-mono font-bold text-[#3D3028] leading-none">3 Days</p>
+              <p className="text-[10px] text-white/50 uppercase font-black tracking-widest mb-1">Current Streak</p>
+              <p className="text-2xl font-mono font-bold text-white leading-none">{streak} Days</p>
+            </div>
+          </div>
+          
+          <div className="bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/20 flex items-center gap-4 shadow-lg">
+            <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-400">
+              <Zap className="w-7 h-7" />
+            </div>
+            <div>
+              <p className="text-[10px] text-white/50 uppercase font-black tracking-widest mb-1">Total XP</p>
+              <p className="text-2xl font-mono font-bold text-white leading-none">{xp}</p>
             </div>
           </div>
         </div>
@@ -326,35 +373,24 @@ export default function StudentDashboard() {
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
         
-        {/* Daily Goal - Bento Item */}
+        {/* Leaderboard Rank - Bento Item */}
         <motion.div variants={itemVariants} className="lg:col-span-3 bg-[#3D3028] text-white p-8 rounded-3xl flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10">
-            <Target className="w-24 h-24" />
+            <Trophy className="w-24 h-24" />
           </div>
-          <div className="relative w-32 h-32 mb-6">
-            <svg className="w-full h-full" viewBox="0 0 100 100">
-              <circle className="text-white/10 stroke-current" strokeWidth="8" fill="transparent" r="40" cx="50" cy="50" />
-              <circle 
-                className="text-[#C8861A] stroke-current" 
-                strokeWidth="8" 
-                strokeLinecap="round" 
-                fill="transparent" 
-                r="40" 
-                cx="50" 
-                cy="50" 
-                strokeDasharray="251.2" 
-                strokeDashoffset={251.2 * (1 - 0.65)} 
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-mono font-bold">65%</span>
-              <span className="text-[10px] uppercase font-bold opacity-60">Daily Goal</span>
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="w-20 h-20 rounded-2xl bg-[#C8861A] flex items-center justify-center mb-4 shadow-lg rotate-3">
+              <Trophy className="w-10 h-10 text-white" />
             </div>
+            <p className="text-[10px] uppercase font-bold opacity-60 tracking-widest mb-1">Weekly Rank</p>
+            <h3 className="text-5xl font-mono font-bold mb-2">#{leaderboardRank?.rank || '??'}</h3>
+            <p className="text-center text-sm font-serif italic mb-6 px-2">
+              "{leaderboardRank?.message || 'Keep pushing, scholar!'}"
+            </p>
+            <Link to="/leaderboard" className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors text-center">
+              View Leaderboard
+            </Link>
           </div>
-          <p className="text-center text-sm font-serif italic mb-4">"Consistency is the key to mastery."</p>
-          <button className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors">
-            Set New Goal
-          </button>
         </motion.div>
 
         {/* Continue Reading - Bento Item */}
@@ -445,10 +481,19 @@ export default function StudentDashboard() {
           <div className="mt-4 pt-4 border-t border-[#E8DFD0] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 text-[#C8861A]" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8271]">Level 4 Scholar</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8271]">
+                {getLevelInfo().current?.title || 'Scholar'}
+              </span>
             </div>
-            <span className="text-[10px] font-mono font-bold text-[#3D3028]">2,450 XP</span>
+            <span className="text-[10px] font-mono font-bold text-[#3D3028]">{xp} XP</span>
           </div>
+        </motion.div>
+      </div>
+
+      {/* Badges Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
+        <motion.div variants={itemVariants} className="lg:col-span-12">
+          <BadgeDisplay />
         </motion.div>
       </div>
 

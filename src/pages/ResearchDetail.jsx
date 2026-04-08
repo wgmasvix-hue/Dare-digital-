@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, Navigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
   Share2, 
@@ -91,13 +91,7 @@ export default function ResearchDetail() {
   }
 
   if (!paper) {
-    return (
-      <div className={styles.error}>
-        <h2>Paper Not Found</h2>
-        <p>The research paper you are looking for does not exist or has been removed.</p>
-        <button onClick={() => navigate('/research')}>Back to Repository</button>
-      </div>
-    );
+    return <Navigate to="/premium" replace />;
   }
 
   return (

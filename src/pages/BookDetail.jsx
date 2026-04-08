@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, Navigate } from 'react-router-dom';
 import { 
   BookOpen, 
   Share2, 
@@ -18,12 +18,17 @@ import {
   Check,
   Sparkles,
   RefreshCw,
-  Brain
+  Brain,
+  Zap,
+  WifiOff
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { transformBook, transformBooks, BOOK_SELECT, OPENSTAX_CURATED } from '../lib/transformBook';
 import { ALL_ADDITIONAL_OER } from '../lib/oerCatalog';
 import { oerService } from '../services/oerService';
+import { gutenbergService } from '../services/gutenbergService';
+import { geminiService } from '../services/geminiService';
+import { offlineStorage } from '../lib/offlineStorage';
 import { useAuth } from '../hooks/useAuth';
 import BookCard from '../components/library/BookCard';
 import Toast from '../components/ui/Toast';
@@ -58,9 +63,16 @@ export default function BookDetail() {
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isRemixing, setIsRemixing] = useState(false);
+  const [remixedData, setRemixedData] = useState(null);
 
   useEffect(() => {
     fetchBookData();
+    // Check for existing remix
+    const existingRemix = offlineStorage.getRemix(id);
+    if (existingRemix) {
+      setRemixedData(existingRemix);
+    }
   }, [id, user, institution]);
 
   const fetchBookData = async () => {
@@ -69,7 +81,7 @@ export default function BookDetail() {
       setError(null);
       
       // 1. Check for Static/Mock Books (OpenStax, etc.)
-      if (id.startsWith('openstax-') || id.startsWith('fao-') || id.startsWith('who-') || id.startsWith('andrews-') || id.startsWith('ai-')) {
+      if (id.startsWith('openstax-') || id.startsWith('fao-') || id.startsWith('who-') || id.startsWith('andrews-') || id.startsWith('ai-') || id.startsWith('gutenberg-')) {
         const osBook = ALL_OER.find(b => b.id === id);
         
         if (osBook) {
@@ -77,17 +89,158 @@ export default function BookDetail() {
             ...osBook,
             cover_path: osBook.cover_image_url,
             file_path: osBook.file_url,
-            access_model: 'dare_access',
+            access_model: 'open_access',
             license_type: osBook.license_type || 'CC BY 4.0',
             source_url: `https://openstax.org`,
             table_of_contents: [],
             learning_objectives: []
           });
           setAccessStatus('granted');
-        } else {
-          // Fallback: Try fetching from API or handle error
-           // For now, if not in static list, try DB or error
-           // But let's assume if it starts with these prefixes it SHOULD be there or we handle it
+        } else if (id.startsWith('openstax-')) {
+          const identifier = id.replace('openstax-', '');
+          try {
+            const targetUrl = `https://archive.org/metadata/${identifier}`;
+            const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
+              body: { url: targetUrl }
+            });
+            if (proxyError) throw proxyError;
+            
+            const data = proxyResponse.data;
+            if (data.metadata) {
+              const meta = data.metadata;
+              const transformed = {
+                id: `openstax-${identifier}`,
+                title: meta.title,
+                author_names: Array.isArray(meta.creator) ? meta.creator.join(', ') : meta.creator || 'OpenStax',
+                description: meta.description || 'No description available.',
+                cover_path: `https://archive.org/services/img/${identifier}`,
+                file_url: `https://archive.org/download/${identifier}/${identifier}.pdf`,
+                file_path: `https://archive.org/download/${identifier}/${identifier}.pdf`,
+                language: meta.language || 'English',
+                source: 'OpenStax',
+                access_model: 'open_access',
+                license_type: 'CC BY',
+                table_of_contents: [],
+                learning_objectives: []
+              };
+              setBook(transformed);
+              setAccessStatus('granted');
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.error('Error fetching OpenStax metadata:', err);
+          }
+        } else if (id.startsWith('gutenberg-')) {
+          const gId = id.replace('gutenberg-', '');
+          try {
+            const targetUrl = `https://gutendex.com/books/?ids=${gId}`;
+            const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
+              body: { url: targetUrl }
+            });
+            if (proxyError) throw proxyError;
+
+            const data = proxyResponse.data;
+            if (data.results && data.results.length > 0) {
+              const gBook = data.results[0];
+              const transformed = {
+                id: `gutenberg-${gBook.id}`,
+                title: gBook.title,
+                author_names: gBook.authors.map(a => a.name).join(', ') || 'Unknown Author',
+                description: `Digitized by Project Gutenberg. Subjects: ${gBook.subjects.join(', ')}`,
+                cover_path: gBook.formats['image/jpeg'] || 'https://picsum.photos/seed/book/400/600',
+                file_url: gBook.formats['application/epub+zip'] || gBook.formats['text/html'] || gBook.formats['application/pdf'],
+                file_path: gBook.formats['application/epub+zip'] || gBook.formats['text/html'] || gBook.formats['application/pdf'],
+                language: gBook.languages[0] || 'English',
+                source: 'Project Gutenberg',
+                access_model: 'public_domain',
+                license_type: 'Public Domain',
+                table_of_contents: [],
+                learning_objectives: []
+              };
+              setBook(transformed);
+              setAccessStatus('granted');
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.error('Error fetching Gutenberg book:', err);
+          }
+        } else if (id.startsWith('ol-') || id.startsWith('olb-')) {
+          const identifier = id.startsWith('ol-') ? id.replace('ol-', '/works/') : id.replace('olb-', '/books/');
+          try {
+            const targetUrl = `https://openlibrary.org${identifier}.json`;
+            const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
+              body: { url: targetUrl }
+            });
+            if (proxyError) throw proxyError;
+
+            const data = proxyResponse.data;
+            if (data) {
+              const transformed = {
+                id: id,
+                title: data.title,
+                author_names: 'Open Library Author',
+                description: data.description?.value || data.description || 'No description available.',
+                cover_path: data.covers ? `https://covers.openlibrary.org/b/id/${data.covers[0]}-L.jpg` : `https://picsum.photos/seed/${id}/400/600`,
+                file_url: `https://openlibrary.org${identifier}`,
+                file_path: `https://openlibrary.org${identifier}`,
+                language: 'English',
+                source: 'Open Library',
+                access_model: 'open_access',
+                license_type: 'Dare Access',
+                table_of_contents: [],
+                learning_objectives: []
+              };
+              setBook(transformed);
+              setAccessStatus('granted');
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.error('Error fetching Open Library metadata:', err);
+          }
+        } else if (id.startsWith('arxiv-')) {
+          const identifier = id.replace('arxiv-', '');
+          try {
+            const targetUrl = `https://export.arxiv.org/api/query?id_list=${identifier}`;
+            const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
+              body: { url: targetUrl }
+            });
+            if (proxyError) throw proxyError;
+
+            const text = proxyResponse.data as string;
+            const entryMatch = text.match(/<entry>([\s\S]*?)<\/entry>/);
+            if (entryMatch) {
+              const entry = entryMatch[1];
+              const titleMatch = entry.match(/<title>(.*?)<\/title>/);
+              const summaryMatch = entry.match(/<summary>(.*?)<\/summary>/);
+              const authorMatch = [...entry.matchAll(/<name>(.*?)<\/name>/g)];
+              const pdfMatch = entry.match(/<link title="pdf" href="(.*?)"/);
+              
+              const transformed = {
+                id: id,
+                title: titleMatch ? titleMatch[1].replace(/\n/g, ' ').trim() : 'Unknown Title',
+                author_names: authorMatch.map(m => m[1]).join(', ') || 'Unknown Author',
+                description: summaryMatch ? summaryMatch[1].replace(/\n/g, ' ').trim() : 'No summary available.',
+                cover_path: `https://picsum.photos/seed/${id}/400/600`,
+                file_url: pdfMatch ? pdfMatch[1] : `https://arxiv.org/pdf/${identifier}.pdf`,
+                file_path: pdfMatch ? pdfMatch[1] : `https://arxiv.org/pdf/${identifier}.pdf`,
+                language: 'English',
+                source: 'arXiv Research',
+                access_model: 'open_access',
+                license_type: 'Dare Access',
+                table_of_contents: [],
+                learning_objectives: []
+              };
+              setBook(transformed);
+              setAccessStatus('granted');
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.error('Error fetching arXiv metadata:', err);
+          }
         }
         // If found, return early? No, we might want related books.
         // But for static books, related logic is different.
@@ -152,19 +305,40 @@ export default function BookDetail() {
       setAccessStatus('granted');
 
       // 5. Fetch Related Books
-      const filterField = pubData.faculty ? 'faculty' : 'subject';
-      const filterValue = pubData.faculty || pubData.subject;
+      const fetchRelatedBooks = async () => {
+        try {
+          // Try to use the recommendation edge function if ddc_code exists
+          if (pubData.ddc_code) {
+            const { data: recData, error: recError } = await supabase.functions.invoke('recommendations', {
+              body: { resource_id: id }
+            });
 
-      if (filterValue) {
-        const { data: relatedData } = await supabase
-          .from('books')
-          .select(BOOK_SELECT)
-          .eq(filterField, filterValue)
-          .neq('id', id)
-          .limit(4);
-          
-        setRelatedBooks(transformBooks(relatedData || []));
-      }
+            if (!recError && recData?.recommendations?.length > 0) {
+              setRelatedBooks(transformBooks(recData.recommendations));
+              return;
+            }
+          }
+
+          // Fallback to existing faculty/subject based logic
+          const filterField = pubData.faculty ? 'faculty' : 'subject';
+          const filterValue = pubData.faculty || pubData.subject;
+
+          if (filterValue) {
+            const { data: relatedData } = await supabase
+              .from('books')
+              .select(BOOK_SELECT)
+              .eq(filterField, filterValue)
+              .neq('id', id)
+              .limit(4);
+              
+            setRelatedBooks(transformBooks(relatedData || []));
+          }
+        } catch (e) {
+          console.warn('Failed to fetch related books:', e);
+        }
+      };
+      
+      fetchRelatedBooks();
 
     } catch (err) {
       console.error('Error fetching book details:', err);
@@ -204,6 +378,59 @@ export default function BookDetail() {
     }
   };
 
+  const handleRemix = async () => {
+    if (!book || isRemixing) return;
+
+    try {
+      setIsRemixing(true);
+      setToast({ message: "Remixing content for Zimbabwean Curriculum (HBC)...", type: "info" });
+
+      const context = `
+        Title: ${book.title}
+        Author: ${book.author_names}
+        Description: ${book.description}
+        Subject: ${book.faculty || book.subject}
+      `;
+
+      const prompt = `
+        You are an expert in the Zimbabwean Heritage-Based Curriculum (HBC). 
+        Remix the following book metadata to align perfectly with Zimbabwean educational standards, cultural context, and local heritage.
+        
+        Provide:
+        1. A "Zim-Curriculum Summary" (how this book fits into specific Zim subjects/levels).
+        2. "Local Contextual Insights" (how the concepts apply to Zimbabwe's economy, history, or environment).
+        3. 5 "HBC Learning Objectives" tailored for Zimbabwean students.
+        4. A "Heritage Connection" (linking the content to Zimbabwean values/Unhu/Ubuntu).
+
+        Return the response as a JSON object with keys: zimSummary, localInsights, hbcObjectives (array), heritageConnection.
+      `;
+
+      const response = await geminiService.chat(prompt, [], { responseMimeType: 'application/json' });
+      const remixResult = JSON.parse(response);
+      
+      // Save for offline access
+      offlineStorage.saveRemix(book.id, remixResult);
+      setRemixedData(remixResult);
+      
+      setToast({ message: "Content remixed successfully and saved for offline access!", type: "success" });
+    } catch (err) {
+      console.error('Failed to remix content:', err);
+      setToast({ message: "Failed to remix content. Please check your connection.", type: "error" });
+    } finally {
+      setIsRemixing(false);
+    }
+  };
+
+  const handleSaveOffline = () => {
+    if (!book) return;
+    const success = offlineStorage.saveBookOffline(book.id, book);
+    if (success) {
+      setToast({ message: "Book metadata saved for offline access!", type: "success" });
+    } else {
+      setToast({ message: "Failed to save for offline.", type: "error" });
+    }
+  };
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -222,18 +449,14 @@ export default function BookDetail() {
         <div className={styles.errorActions}>
           <button onClick={fetchBookData} className={styles.retryBtn}>Try Again</button>
           <Link to="/library" className={styles.backLink}>Return to Library</Link>
+          <Link to="/ai-tools" className={styles.backLink}>Explore AI Tools</Link>
         </div>
       </div>
     );
   }
 
   if (!book) {
-    return (
-      <div className={styles.errorContainer}>
-        <h2>Book not found</h2>
-        <Link to="/library" className={styles.backLink}>Return to Library</Link>
-      </div>
-    );
+    return <Navigate to="/premium" replace />;
   }
 
   const facultyColor = FACULTY_COLORS[book.faculty?.toLowerCase()] || FACULTY_COLORS.default;
@@ -241,8 +464,19 @@ export default function BookDetail() {
   const displayCover = book.cover_path || defaultCover;
 
   return (
-    <div className={styles.container}>
-      <div className={styles.backBreadcrumb}>
+    <div className={`${styles.container} relative`}>
+      {/* Real Book Background Image (Subtle) */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden h-[500px]">
+        <img 
+          src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=2000" 
+          alt="Book Detail Background" 
+          className="w-full h-full object-cover opacity-5"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-bg-base" />
+      </div>
+
+      <div className={`${styles.backBreadcrumb} relative z-10`}>
         <button 
           onClick={() => {
             if (book?.publisher_name === 'OpenStax' || book?.source === 'OpenStax') {
@@ -334,6 +568,59 @@ export default function BookDetail() {
             <div className={styles.synopsisContent}>
               <p className={styles.description}>{book.description || 'No description available.'}</p>
               
+              {/* ZIMBABWEAN REMIX SECTION */}
+              {remixedData && (
+                <div className="mt-8 p-6 bg-soil/10 border border-soil/20 rounded-3xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <Sparkles size={64} className="text-soil" />
+                  </div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-soil rounded-xl text-white">
+                      <Zap size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-display font-black text-soil uppercase tracking-tight">Zim-Curriculum Remix</h3>
+                      <p className="text-[10px] font-bold text-soil/60 uppercase tracking-widest">Heritage-Based Alignment (HBC)</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6 relative z-10">
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-widest text-soil/70 mb-2">Curriculum Summary</h4>
+                      <p className="text-sm leading-relaxed text-soil/90 italic">{remixedData.zimSummary}</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-soil/70 mb-2">Local Context</h4>
+                        <p className="text-sm leading-relaxed text-soil/90">{remixedData.localInsights}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-soil/70 mb-2">Heritage Connection</h4>
+                        <p className="text-sm leading-relaxed text-soil/90">{remixedData.heritageConnection}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-widest text-soil/70 mb-2">HBC Learning Objectives</h4>
+                      <ul className="grid md:grid-cols-2 gap-2">
+                        {remixedData.hbcObjectives.map((obj, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-soil/80">
+                            <Check size={14} className="mt-1 flex-shrink-0 text-soil" />
+                            <span>{obj}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div className="pt-4 flex items-center gap-2 text-[10px] font-bold text-soil/50 uppercase tracking-widest">
+                      <WifiOff size={12} />
+                      <span>Available Offline</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* AI ANALYSIS SECTION */}
               {(book.ai_summary || book.ai_topics?.length > 0) && (
                 <div className={styles.aiAnalysisSection}>
@@ -455,7 +742,7 @@ export default function BookDetail() {
 
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>Customer Reviews</h2>
+              <h2 className={styles.sectionTitle}>Reader Reviews</h2>
               <button className={styles.writeReviewBtn}>Write a Review</button>
             </div>
             
@@ -491,7 +778,7 @@ export default function BookDetail() {
 
           {relatedBooks.length > 0 && (
             <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>Customers who viewed this item also viewed</h2>
+              <h2 className={styles.sectionTitle}>Readers who viewed this item also viewed</h2>
               <div className={styles.relatedGrid}>
                 {relatedBooks.map(related => (
                   <BookCard key={related.id} publication={related} variant="grid" />
@@ -527,9 +814,25 @@ export default function BookDetail() {
 
             <div className={styles.mainActions}>
               {accessStatus === 'granted' ? (
-                <Link to={`/reader/${book.id}`} className={styles.readBtn}>
-                  <BookOpen size={20} /> Read Now
-                </Link>
+                <div className="flex flex-col gap-3">
+                  <Link to={`/book-action/${book.id}`} state={{ book }} className={styles.readBtn}>
+                    <BookOpen size={20} /> Read Now
+                  </Link>
+                  <button 
+                    onClick={handleRemix} 
+                    className="w-full py-4 bg-soil text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-soil/20"
+                    disabled={isRemixing}
+                  >
+                    <Sparkles size={16} className={isRemixing ? "animate-spin" : ""} />
+                    {isRemixing ? 'Remixing...' : 'Remix for Zimbabwe (HBC)'}
+                  </button>
+                  <button 
+                    onClick={handleSaveOffline} 
+                    className="w-full py-3 bg-bg-subtle border border-border text-text-main rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-border transition-all flex items-center justify-center gap-2"
+                  >
+                    <WifiOff size={16} /> Save for Offline
+                  </button>
+                </div>
               ) : accessStatus === 'preview' ? (
                 <>
                   <Link to={`/reader/${book.id}?preview=true`} className={styles.previewBtn}>

@@ -189,7 +189,7 @@ const ResourceDetail = ({ resource, onClose, onToast, aiDataSaverActive }) => {
                   { label: "Year", val: resource.year, icon: Globe },
                   { label: "Source", val: resource.source, icon: ExternalLink },
                   { label: "Citations", val: resource.citations, icon: BookOpen },
-                  { label: "Access", val: resource.isOpenAccess ? "Open Access" : "Licensed", icon: ShieldCheck },
+                  { label: "Access", val: resource.isOpenAccess ? "Dare Access" : "Licensed", icon: ShieldCheck },
                 ].map(({ label, val, icon: Icon }) => (
                   <div key={label} className="flex justify-between items-center text-sm">
                     <div className="flex items-center gap-2 text-slate-400 font-medium">
@@ -465,7 +465,7 @@ export default function DareLibrary() {
 
     if (activeFilters.level !== 'All' && r.level !== activeFilters.level) return false;
     if (activeFilters.access !== 'All') {
-       if ((activeFilters.access === 'Dare Access' || activeFilters.access === 'Open Access') && !r.isOpenAccess) return false;
+       if (activeFilters.access === 'Dare Access' && !r.isOpenAccess) return false;
        if (activeFilters.access === 'Purchased' && r.isOpenAccess) return false;
        if (activeFilters.access === 'Free' && r.access_model !== 'free') return false;
     }
@@ -820,36 +820,121 @@ export default function DareLibrary() {
         />
 
         {/* ── MAIN CONTENT ── */}
-        <main style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column" }}>
+        <main style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column" }} className="bg-slate-50/30 dark:bg-slate-900/30">
           
-          {/* Horizontal Tabs */}
-          <div style={{ 
-            padding: "16px 24px 0", 
-            borderBottom: "1px solid var(--color-border)",
-            background: "var(--color-bg-base)",
-            position: "sticky",
-            top: 0,
-            zIndex: 50
-          }}>
-            <div className="tabs-pill mb-4">
-              {[
-                { id: "browse", label: "Browse Library" },
-                { id: "collections", label: "Subject Collections" },
-                { id: "analytics", label: "Usage Analytics" },
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveView(tab.id)}
-                  className={`tab-pill ${activeView === tab.id ? 'active' : ''}`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {activeView === "browse" && (
             <>
+              {/* Hero Section */}
+              <div className="relative overflow-hidden bg-slate-900 py-20 sm:py-32">
+                {/* Animated Background Elements */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <div className="absolute -top-[10%] -right-[10%] w-[40%] h-[40%] bg-amber-500/10 rounded-full blur-[120px] animate-pulse" />
+                  <div className="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+                  <div className="absolute inset-0 bg-[radial-gradient(#ffffff05_1px,transparent_1px)] [background-size:32px_32px]" />
+                </div>
+                
+                <div className="relative max-w-5xl mx-auto px-6 lg:px-8 text-center">
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                  >
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-8">
+                      <Sparkles size={12} />
+                      <span>The Future of Learning</span>
+                    </div>
+                    
+                    <h1 className="font-serif text-5xl sm:text-7xl font-bold text-white tracking-tight mb-8 leading-[1.1]">
+                      DARE Digital <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">Library</span>
+                    </h1>
+                    
+                    <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto mb-12 font-medium leading-relaxed opacity-90">
+                      Learn Smarter. Anywhere. <br className="hidden sm:block" />
+                      Access a curated collection of premium research, textbooks, and interactive resources tailored for the African context.
+                    </p>
+                    
+                    <div className="flex flex-wrap justify-center gap-6 mb-16">
+                      <div className="flex items-center gap-3 text-slate-400">
+                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400">
+                          <Globe size={20} />
+                        </div>
+                        <div className="text-left">
+                          <div className="text-white text-sm font-bold">Global Reach</div>
+                          <div className="text-[10px] uppercase tracking-wider">OER Resources</div>
+                        </div>
+                      </div>
+                      <div className="w-px h-10 bg-white/10 hidden sm:block" />
+                      <div className="flex items-center gap-3 text-slate-400">
+                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-400">
+                          <Sparkles size={20} />
+                        </div>
+                        <div className="text-left">
+                          <div className="text-white text-sm font-bold">AI Powered</div>
+                          <div className="text-[10px] uppercase tracking-wider">Smart Summaries</div>
+                        </div>
+                      </div>
+                      <div className="w-px h-10 bg-white/10 hidden sm:block" />
+                      <div className="flex items-center gap-3 text-slate-400">
+                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-indigo-400">
+                          <ShieldCheck size={20} />
+                        </div>
+                        <div className="text-left">
+                          <div className="text-white text-sm font-bold">Verified</div>
+                          <div className="text-[10px] uppercase tracking-wider">Peer Reviewed</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Search Bar Integration */}
+                    <div className="max-w-3xl mx-auto relative z-30">
+                      <SearchBar 
+                        value={searchQuery}
+                        onChange={setSearchQuery}
+                        onSearch={handleSearch}
+                        isAiMode={isAiMode}
+                        onToggleAi={() => setIsAiMode(!isAiMode)}
+                        aiThinking={aiThinking}
+                        suggestions={searchSuggestions}
+                        onSelectSuggestion={(term) => {
+                          setSearchQuery(term);
+                          handleSearch(term);
+                        }}
+                        showSuggestions={showSuggestions}
+                        setShowSuggestions={setShowSuggestions}
+                      />
+                    </div>
+                  </motion.div>
+                </div>
+                
+                {/* Decorative bottom fade */}
+                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-50/50 dark:from-slate-900/50 to-transparent pointer-events-none" />
+              </div>
+
+              {/* Horizontal Tabs (Moved below Hero) */}
+              <div style={{ 
+                padding: "0 24px", 
+                borderBottom: "1px solid var(--color-border)",
+                background: "transparent",
+                position: "sticky",
+                top: 0,
+                zIndex: 50
+              }} className="backdrop-blur-md bg-white/70 dark:bg-slate-900/70">
+                <div className="tabs-pill py-4 max-w-7xl mx-auto">
+                  {[
+                    { id: "browse", label: "Browse Library" },
+                    { id: "collections", label: "Subject Collections" },
+                    { id: "analytics", label: "Usage Analytics" },
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveView(tab.id)}
+                      className={`tab-pill ${activeView === tab.id ? 'active' : ''}`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
               {/* AI Search Response */}
               <AnimatePresence>
                 {aiResponse && (

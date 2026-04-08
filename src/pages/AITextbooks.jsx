@@ -229,8 +229,19 @@ export default function AITextbooks() {
   return (
     <div className={styles.container}>
       {/* Header */}
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
+      <header className={`${styles.header} relative overflow-hidden`}>
+        {/* Real Book Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=2000" 
+            alt="AI Books Background" 
+            className="w-full h-full object-cover opacity-30"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-transparent" />
+        </div>
+
+        <div className={`${styles.headerContent} relative z-10`}>
           <div className={styles.titleGroup}>
             <div className={styles.iconWrapper}>
               <Cpu size={32} />

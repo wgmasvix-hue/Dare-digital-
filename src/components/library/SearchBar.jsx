@@ -41,24 +41,24 @@ export default function SearchBar({
       <div className="relative group">
         {/* Search Input Wrapper */}
         <div className={`
-          relative flex items-center transition-all duration-300 rounded-2xl border-2 overflow-hidden
+          relative flex items-center transition-all duration-500 rounded-2xl border-2 overflow-hidden
           ${isAiMode 
-            ? 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800 shadow-lg shadow-amber-500/10' 
-            : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 shadow-sm group-focus-within:border-amber-500/50 group-focus-within:shadow-md'}
+            ? 'bg-bg-subtle border-primary shadow-premium shadow-primary/10' 
+            : 'bg-bg-base border-border shadow-sm group-focus-within:border-primary group-focus-within:shadow-premium group-focus-within:ring-4 group-focus-within:ring-primary/10'}
         `}>
           
-          <div className="pl-5 pr-3 text-slate-400">
+          <div className="pl-5 pr-3 text-text-muted">
             {isAiMode ? (
-              <Sparkles className="text-amber-500 animate-pulse" size={20} />
+              <Sparkles className="text-primary animate-pulse" size={20} />
             ) : (
-              <Search size={20} className="group-focus-within:text-amber-500 transition-colors" />
+              <Search size={20} className="group-focus-within:text-primary transition-colors" />
             )}
           </div>
           
           <input 
             type="text" 
-            placeholder={isAiMode ? "Ask the AI Librarian (e.g. 'I need a book on sustainable farming')" : placeholder}
-            className="w-full py-4 bg-transparent border-none outline-none text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
+            placeholder={isAiMode ? "Ask the AI Librarian (e.g. 'Summarize education policy in Zimbabwe')" : "Search by title, author, or research topic..."}
+            className="w-full py-4 bg-transparent border-none outline-none text-text-main placeholder:text-text-muted font-medium"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onFocus={() => setShowSuggestions && setShowSuggestions(true)}
@@ -72,7 +72,7 @@ export default function SearchBar({
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="p-2 mr-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                className="p-2 mr-2 text-text-muted hover:text-text-main transition-colors"
                 onClick={() => onChange('')}
                 aria-label="Clear search"
               >
@@ -83,14 +83,14 @@ export default function SearchBar({
           
           {isAiMode && (
             <div className="flex items-center gap-2 mr-2">
-              <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold border border-emerald-500/20 whitespace-nowrap">
+              <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-lg text-[10px] font-bold border border-primary/20 whitespace-nowrap">
                 <Sparkles size={10} />
                 <span>DATA SAVER</span>
               </div>
               <button 
                 onClick={() => onSearch(value)}
                 disabled={aiThinking || !value.trim()}
-                className="px-6 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-200 dark:disabled:bg-slate-700 text-white rounded-xl font-bold transition-all flex items-center gap-2"
+                className="px-6 py-2 bg-primary hover:bg-primary-dark disabled:bg-bg-subtle text-white rounded-xl font-bold transition-all flex items-center gap-2"
               >
                 {aiThinking ? (
                   <>
@@ -115,16 +115,16 @@ export default function SearchBar({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-2xl z-50 overflow-hidden"
+              className="absolute top-full left-0 right-0 mt-2 bg-bg-base rounded-2xl border border-border shadow-2xl z-50 overflow-hidden"
             >
               <div className="p-2">
                 {suggestions.map((term, idx) => (
                   <button 
                     key={idx} 
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors group"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-text-main hover:bg-bg-subtle rounded-xl transition-colors group"
                     onClick={() => onSelectSuggestion && onSelectSuggestion(term)}
                   >
-                    <Search size={14} className="text-slate-400 group-hover:text-amber-500" />
+                    <Search size={14} className="text-text-muted group-hover:text-primary" />
                     <span className="font-medium">{term}</span>
                   </button>
                 ))}
@@ -140,12 +140,12 @@ export default function SearchBar({
             className={`
               flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase transition-all
               ${isAiMode 
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700' 
-                : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50'}
+                ? 'bg-bg-subtle text-text-muted hover:bg-border' 
+                : 'bg-primary/10 text-primary hover:bg-primary/20'}
             `}
             onClick={onToggleAi}
           >
-            <Sparkles size={14} className={isAiMode ? "text-slate-400" : "text-amber-500"} />
+            <Sparkles size={14} className={isAiMode ? "text-text-muted" : "text-primary"} />
             <span>{isAiMode ? 'Switch to Standard Search' : 'Try AI Librarian Search'}</span>
           </button>
         </div>

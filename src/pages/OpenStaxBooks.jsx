@@ -24,6 +24,7 @@ import { transformBook } from '../lib/transformBook';
 import BookCard from '../components/library/BookCard';
 import styles from './OpenStaxBooks.module.css';
 import { oerService } from '../services/oerService';
+import { gutenbergService } from '../services/gutenbergService';
 import { supabase } from '../lib/supabase';
 import { OPENSTAX_BOOKS } from '../data/openStaxBooks';
 import UploadResourceModal from '../components/library/UploadResourceModal';
@@ -49,6 +50,7 @@ export default function OpenStaxBooks() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFaculty, setActiveFaculty] = useState('all');
   const [ingesting, setIngesting] = useState(false);
+  const [ingestingGutenberg, setIngestingGutenberg] = useState(false);
   const [activeTab, setActiveTab] = useState('resources'); // 'resources' | 'buku'
   const [trialMode, setTrialMode] = useState(true);
   const [page, setPage] = useState(0);
@@ -97,11 +99,14 @@ export default function OpenStaxBooks() {
       let query = supabase
         .from('books')
         .select('*')
-        .eq('access_model', 'dare_access');
+        .or('access_model.eq.dare_access,access_model.eq.public_domain,access_model.eq.free,access_model.eq.open_access');
 
       if (activeFaculty !== 'all') {
         query = query.ilike('faculty', activeFaculty);
       }
+
+      // If we want to strictly show partner resources
+      query = query.in('source', ['OpenStax', 'LibreTexts', 'Project Gutenberg', 'Gutenberg']);
 
       if (searchQuery) {
         query = query.or(`title.ilike.%${searchQuery}%,author_names.ilike.%${searchQuery}%,subject.ilike.%${searchQuery}%`);
@@ -201,7 +206,7 @@ export default function OpenStaxBooks() {
         if (!data) {
            try {
                // Pass creator_id explicitly
-               await oerService.insertOER({ ...book, creator_id: userId });
+               await oerService.insertOER({ ...book, creator_id: userId, source: 'OpenStax' });
                count++;
            } catch (err) {
                console.error(`Failed to insert ${book.title}:`, err);
@@ -226,11 +231,39 @@ export default function OpenStaxBooks() {
     }
   };
 
+  const handleGutenbergSeed = async () => {
+    if (!confirm('This will fetch and ingest the first page of Project Gutenberg books. Continue?')) return;
+    setIngestingGutenberg(true);
+    try {
+      await gutenbergService.ingestBooks(1, (msg, type) => {
+        console.log(`[Gutenberg Ingest] ${type}: ${msg}`);
+      });
+      alert('Gutenberg books ingested successfully!');
+      await fetchOERBooks();
+    } catch (error) {
+      console.error('Gutenberg seeding error:', error);
+      alert(`Failed to seed Gutenberg: ${error.message}`);
+    } finally {
+      setIngestingGutenberg(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.header}>
-        <div className={styles.headerContent}>
+        {/* Real Book Background Image */}
+        <div className="absolute inset-0 z-0 opacity-10">
+          <img 
+            src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=2000" 
+            alt="Header Background" 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-bg-base via-transparent to-bg-base" />
+        </div>
+
+        <div className={`${styles.headerContent} relative z-10`}>
           <div className={styles.titleGroup}>
             <div className={styles.iconWrapper}>
               <Library size={32} />
@@ -257,7 +290,15 @@ export default function OpenStaxBooks() {
                 className={styles.ingestBtn}
                 style={{ padding: '12px 24px' }}
               >
-                <Database size={20} /> Initialize Library
+                <Database size={20} /> Initialize OpenStax
+              </button>
+              <button 
+                onClick={handleGutenbergSeed}
+                className={styles.ingestBtn}
+                disabled={ingestingGutenberg}
+                style={{ padding: '12px 24px', background: 'var(--amber)' }}
+              >
+                <Globe size={20} /> {ingestingGutenberg ? 'Ingesting...' : 'Initialize Gutenberg'}
               </button>
             </div>
           )}

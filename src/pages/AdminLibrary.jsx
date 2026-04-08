@@ -135,23 +135,50 @@ export default function AdminLibrary() {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+      <header className={styles.header} style={{ 
+        background: 'var(--soil)', 
+        color: 'white', 
+        padding: '4rem 5%', 
+        position: 'relative', 
+        overflow: 'hidden',
+        borderBottom: 'none'
+      }}>
+        {/* Real Book Background Image */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          opacity: 0.15
+        }}>
+          <img 
+            src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=2000" 
+            alt="Admin Library Background" 
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            referrerPolicy="no-referrer"
+          />
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to bottom, rgba(45, 34, 28, 0.8), var(--soil))"
+          }} />
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', position: 'relative', zIndex: 10 }}>
           <div>
-            <h1 className={styles.title}>Backend Book Manager</h1>
-            <p className={styles.subtitle}>Manage and publish books directly from the Supabase backend.</p>
+            <h1 className={styles.title} style={{ color: 'white', fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-display)' }}>Backend Book Manager</h1>
+            <p className={styles.subtitle} style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.1rem' }}>Manage and publish books directly from the Supabase backend.</p>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <Link to="/admin/seed" className={styles.clearBtn} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Link to="/admin/seed" className={styles.clearBtn} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>
               &larr; Back to Seeder
             </Link>
-            <button onClick={fetchBooks} className={styles.clearBtn} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button onClick={fetchBooks} className={styles.clearBtn} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>
               <RefreshCw size={16} className={loading ? styles.spin : ''} /> Refresh
             </button>
             <button 
               onClick={() => setIsModalOpen(true)}
               className={styles.button} 
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--amber)', color: 'var(--soil)', border: 'none' }}
             >
               <Plus size={16} /> Add Manually
             </button>

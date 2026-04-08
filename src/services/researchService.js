@@ -25,6 +25,41 @@ export const researchService = {
   },
 
   /**
+   * Fetch synced DSpace research from documents table
+   */
+  async getDSpaceResearch(filters = {}) {
+    try {
+      let query = supabase
+        .from('documents')
+        .select('*')
+        .not('synced_from_dspace_at', 'is', null)
+        .order('synced_from_dspace_at', { ascending: false });
+
+      if (filters.q) {
+        query = query.or(`title.ilike.%${filters.q}%,description.ilike.%${filters.q}%,creator.ilike.%${filters.q}%`);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      
+      return data.map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        author_names: doc.creator,
+        institution: doc.institution,
+        publication_date: doc.synced_from_dspace_at ? new Date(doc.synced_from_dspace_at).toISOString().split('T')[0] : 'Unknown',
+        subject: doc.document_type || 'Research',
+        abstract: doc.description,
+        url: doc.url,
+        is_dspace: true
+      }));
+    } catch (error) {
+      console.error('Error fetching DSpace research:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Submit a new research paper
    */
   async submitResearch(researchData) {

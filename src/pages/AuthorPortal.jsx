@@ -387,7 +387,18 @@ export default function AuthorPortal() {
       {/* Main Content */}
       <main className={styles.main}>
         <header className={styles.header}>
-          <div>
+          {/* Real Book Background Image */}
+          <div className="absolute inset-0 z-0 opacity-10">
+            <img 
+              src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=2000" 
+              alt="Header Background" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-bg-subtle via-transparent to-bg-subtle" />
+          </div>
+
+          <div className="relative z-10">
             <h1 className={styles.title}>
               {activeTab === 'dashboard' && 'Overview'}
               {activeTab === 'works' && 'My Works'}
@@ -404,7 +415,7 @@ export default function AuthorPortal() {
             </p>
           </div>
           {activeTab === 'works' && (
-            <button onClick={() => setView('wizard')} className={styles.newBtn}>
+            <button onClick={() => setView('wizard')} className={`${styles.newBtn} relative z-10`}>
               <Plus size={20} /> Submit New Work
             </button>
           )}

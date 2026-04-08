@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Check, X, AlertCircle } from 'lucide-react';
 
 const Toast = ({ message, type = "success", onClose }) => {
   useEffect(() => {
@@ -9,29 +10,14 @@ const Toast = ({ message, type = "success", onClose }) => {
   }, [onClose]);
 
   return (
-    <div className="fade-in" style={{
-      position: "fixed", bottom: 24, right: 24, zIndex: 300,
-      background: "white", padding: "12px 20px", borderRadius: "6px",
-      boxShadow: "0 8px 32px rgba(15,35,64,0.16)", 
-      borderLeft: `4px solid ${type === "success" ? "#1A7A4A" : "#C0392B"}`,
-      display: "flex", alignItems: "center", gap: 12, minWidth: 280,
-      animation: "fadeSlideIn 0.3s ease forwards"
-    }}>
-      <style>{`
-        @keyframes fadeSlideIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-      <div style={{
-        width: 20, height: 20, borderRadius: "50%",
-        background: type === "success" ? "#1A7A4A" : "#C0392B",
-        display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 12
-      }}>
-        {type === "success" ? "✓" : "!"}
+    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 min-w-[280px] bg-white p-4 rounded-xl shadow-2xl border-l-4 ${type === 'success' ? 'border-l-primary' : 'border-l-accent'}`}>
+      <div className={`flex items-center justify-center w-6 h-6 rounded-full text-white ${type === 'success' ? 'bg-primary' : 'bg-accent'}`}>
+        {type === 'success' ? <Check size={14} /> : <AlertCircle size={14} />}
       </div>
-      <div style={{ fontSize: 13, color: "#1A1A2E", fontWeight: 500, fontFamily: "'Source Sans 3', sans-serif" }}>{message}</div>
-      <button onClick={onClose} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#6B7280" }}>✕</button>
+      <div className="text-sm font-medium text-text-primary">{message}</div>
+      <button onClick={onClose} className="ml-auto text-text-muted hover:text-text-primary">
+        <X size={16} />
+      </button>
     </div>
   );
 };

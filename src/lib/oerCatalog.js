@@ -757,7 +757,7 @@ export const AI_PRIORITY_OER = [
     access_model: 'dare_access',
     year_published: 2024,
     description: "An insightful exploration of the principles and practices that define the future of software development and artificial intelligence.",
-    license_type: "Open Access",
+    license_type: "Dare Access",
     total_downloads: 0,
     average_rating: 0,
     ai_level: 1,

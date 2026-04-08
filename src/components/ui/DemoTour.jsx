@@ -59,8 +59,6 @@ export default function DemoTour({ isOpen, onClose }) {
     return () => clearInterval(timer);
   }, [isOpen, isAutoPlaying, currentStep]);
 
-  if (!isOpen) return null;
-
   const step = TOUR_STEPS[currentStep];
 
   const handleNext = () => {
@@ -81,24 +79,25 @@ export default function DemoTour({ isOpen, onClose }) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[1000] pointer-events-none">
-        {/* Overlay with hole (simplified for now, just a backdrop) */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] pointer-events-auto"
-          onClick={onClose}
-        />
+      {isOpen && (
+        <div className="fixed inset-0 z-[1000] pointer-events-none">
+          {/* Overlay with hole (simplified for now, just a backdrop) */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] pointer-events-auto"
+            onClick={onClose}
+          />
 
-        <div className="absolute inset-0 flex items-center justify-center p-4">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -20 }}
-            className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-8 max-w-md w-full pointer-events-auto relative overflow-hidden"
-          >
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: -20 }}
+              className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-8 max-w-md w-full pointer-events-auto relative overflow-hidden"
+            >
             {/* Progress Bar */}
             <div className="absolute top-0 left-0 h-1 bg-amber-500 transition-all duration-500" style={{ width: `${((currentStep + 1) / TOUR_STEPS.length) * 100}%` }} />
 
@@ -161,6 +160,7 @@ export default function DemoTour({ isOpen, onClose }) {
           </motion.div>
         </div>
       </div>
-    </AnimatePresence>
-  );
+    )}
+  </AnimatePresence>
+);
 }

@@ -19,21 +19,25 @@ serve(async (req) => {
   }
   `;
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+  if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.3,
+        responseMimeType: "application/json"
+      }
     })
   });
 
   const data = await response.json();
-  const result = JSON.parse(data.choices[0].message.content);
+  const result = JSON.parse(data.candidates[0].content.parts[0].text);
 
   await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/books?id=eq.${book.id}`, {
     method: "PATCH",
