@@ -1,0 +1,168 @@
+.chatContainer {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+}
+
+.chatTrigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--color-teal);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 25px -5px var(--color-teal-light);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.chatWindow {
+  width: 360px;
+  height: 500px;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.chatHeader {
+  padding: 16px 20px;
+  background: var(--color-teal);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.closeBtn:hover {
+  opacity: 1;
+}
+
+.messagesList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #f8fafc;
+}
+
+.messageWrapper {
+  display: flex;
+  gap: 10px;
+  max-width: 85%;
+}
+
+.messageWrapper.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.messageIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ai .messageIcon {
+  background: var(--color-teal-light);
+  color: var(--color-teal);
+}
+
+.user .messageIcon {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.messageText {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.ai .messageText {
+  background: white;
+  color: var(--text-main);
+  border-bottom-left-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.user .messageText {
+  background: var(--color-teal);
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+
+.inputArea {
+  padding: 16px;
+  background: white;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  gap: 10px;
+}
+
+.inputArea input {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.inputArea input:focus {
+  border-color: var(--color-teal);
+}
+
+.inputArea button {
+  background: var(--color-teal);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.inputArea button:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.inputArea button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

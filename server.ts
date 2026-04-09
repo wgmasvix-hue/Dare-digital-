@@ -36,10 +36,6 @@ async function startServer() {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  app.get("/", (req, res) => {
-    res.send("DARE API is running");
-  });
-
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const { createServer: createViteServer } = await import("vite");

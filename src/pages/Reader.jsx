@@ -300,7 +300,7 @@ export default function Reader() {
               });
               if (proxyError) throw proxyError;
 
-              const text = proxyResponse.data as string;
+              const text = proxyResponse.data;
               const entryMatch = text.match(/<entry>([\s\S]*?)<\/entry>/);
               if (entryMatch) {
                 const entry = entryMatch[1];
