@@ -38,6 +38,7 @@ import DSpaceIntegration from './pages/DSpaceIntegration';
 import DSpaceExplorer from './pages/DSpaceExplorer';
 import HBCTransformer from './pages/HBCTransformer';
 import AIModelsTools from './pages/AIModelsTools';
+import TutorPage from './pages/TutorPage';
 
 import AITextbooks from './pages/AITextbooks';
 import OpenStaxBooks from './pages/OpenStaxBooks';
@@ -88,6 +89,7 @@ createRoot(rootElement).render(
             <Route path="/book/:id" element={<BookDetail />} />
             <Route path="/book-action/:id" element={<BookActionPage />} />
             <Route path="/reader/:id" element={<Reader />} />
+            <Route path="/tutor" element={<TutorPage />} />
 
             {/* Protected Routes */}
             <Route path="/dashboard" element={

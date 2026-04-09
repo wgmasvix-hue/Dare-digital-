@@ -11,11 +11,18 @@ const truncateText = (text: string, maxLength = 30000) => {
 };
 
 const callGemini = async (contents: unknown, config: Record<string, unknown> = {}) => {
-  const { data, error } = await supabase.functions.invoke('gemini', {
-    body: { contents, config: { ...config, systemInstruction: (config.systemInstruction as string) || DARA_SYSTEM_PROMPT } }
+  // Use Supabase Edge Function for portability (Webzim compatible)
+  const { data, error } = await supabase.functions.invoke('dara-ai', {
+    body: {
+      message: typeof contents === 'string' ? contents : JSON.stringify(contents),
+      context: config.systemInstruction || DARA_SYSTEM_PROMPT,
+      provider: 'gemini',
+      model: config.model
+    }
   });
+
   if (error) throw error;
-  return data;
+  return { text: data.reply };
 };
 
 export const geminiService = {

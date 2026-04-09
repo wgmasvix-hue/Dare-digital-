@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server.ts",
-    "start": "tsx server.ts",
+    "dev": "vite",
+    "start": "vite",
     "build": "tsc && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -53,6 +53,7 @@
     "@types/react-dom": "latest",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
+    "@vercel/node": "^5.7.2",
     "@vitejs/plugin-react": "latest",
     "autoprefixer": "latest",
     "eslint": "latest",
