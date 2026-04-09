@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { HfInference } from '@huggingface/inference';
 import { supabase } from '../lib/supabase';
 import { geminiService } from '../services/geminiService';
 import { 
@@ -258,12 +257,16 @@ export default function AIModelsTools() {
     setModelStatus('loading');
     
     try {
-      const hf = new HfInference(import.meta.env.VITE_HF_API_KEY);
-      const result = await hf.textClassification({
-        model: 'distilbert-base-uncased-finetuned-sst-2-english',
-        inputs: offlineInput
+      const { data, error } = await supabase.functions.invoke('hf-inference', {
+        body: {
+          model: 'distilbert-base-uncased-finetuned-sst-2-english',
+          inputs: offlineInput
+        }
       });
       
+      if (error) throw error;
+      
+      const result = data;
       const topResult = result[0];
       setOfflineResult({
         isPositive: topResult.label === 'POSITIVE',
@@ -286,7 +289,7 @@ export default function AIModelsTools() {
       setOfflineResult({
         isPositive: false,
         confidence: 0,
-        feedback: "The AI model failed to load. Please check your API key or try again later."
+        feedback: "The AI model failed to load. Please check your Supabase Edge Function configuration."
       });
     } finally {
       setIsOfflineLoading(false);

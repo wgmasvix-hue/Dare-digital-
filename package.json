@@ -8,7 +8,8 @@
     "start": "tsx server.ts",
     "build": "tsc && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check-env": "node scripts/check_env.js"
   },
   "dependencies": {
     "@google/genai": "latest",
