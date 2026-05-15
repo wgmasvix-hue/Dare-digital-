@@ -43,35 +43,35 @@ const Badge = ({ text, color = "#64748B", icon: Icon, small = false }: { text: s
 );
 
 const BrandedPlaceholder = ({ title }: { title: string }) => (
-  <div className="w-full h-full bg-gradient-to-br from-bg-subtle to-bg-base flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+  <div className="w-full h-full bg-slate-50 flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
     {/* Decorative Background Elements */}
-    <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full -mr-20 -mt-20 blur-3xl" />
-    <div className="absolute bottom-0 left-0 w-40 h-40 bg-indigo-500/10 rounded-full -ml-20 -mb-20 blur-3xl" />
+    <div className="absolute top-0 right-0 w-40 h-40 bg-teal-500/10 rounded-full -mr-20 -mt-20 blur-3xl" />
+    <div className="absolute bottom-0 left-0 w-40 h-40 bg-amber-500/10 rounded-full -ml-20 -mb-20 blur-3xl" />
     
     <div className="relative z-10 flex flex-col items-center gap-6">
-      <div className="w-20 h-20 rounded-[1.5rem] bg-bg-base shadow-xl flex items-center justify-center text-primary transform -rotate-3 group-hover:rotate-0 transition-transform duration-500">
+      <div className="w-20 h-20 rounded-3xl bg-white shadow-xl flex items-center justify-center text-teal-600 transform -rotate-3 group-hover:rotate-0 transition-transform duration-500">
         <BookOpen size={40} strokeWidth={1.5} />
       </div>
       <div>
-        <h4 className="font-serif font-bold text-text-main text-base leading-tight mb-2 line-clamp-3 px-4">
+        <h4 className="font-serif font-bold text-slate-800 text-base leading-tight mb-2 line-clamp-3 px-4">
           {title}
         </h4>
-        <div className="w-10 h-1 bg-primary/30 rounded-full mx-auto mb-3" />
-        <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">
+        <div className="w-10 h-1 bg-teal-500/30 rounded-full mx-auto mb-3" />
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
           DARE Digital Library
         </p>
       </div>
     </div>
     
     {/* Subtle Pattern Overlay */}
-    <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" 
-         style={{ backgroundImage: 'radial-gradient(var(--color-text-main) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+         style={{ backgroundImage: 'radial-gradient(var(--color-slate-900) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
   </div>
 );
 
 interface BookCardProps {
   publication: Book;
-  variant?: 'grid' | 'featured' | 'tile';
+  variant?: 'grid' | 'featured' | 'tile' | 'list';
   onOpen?: (book: Book) => void;
   loading?: boolean;
   progress?: number;
@@ -80,19 +80,19 @@ interface BookCardProps {
 export default function BookCard({ publication, variant = 'grid', onOpen, loading = false, progress = 0 }: BookCardProps) {
   if (loading) {
     return (
-      <div className={`relative flex flex-col h-full bg-bg-base rounded-[2rem] overflow-hidden border border-border shadow-premium ${variant === 'featured' ? 'md:flex-row' : ''}`}>
-        <div className={`bg-bg-subtle relative overflow-hidden skeleton-shimmer ${
-          variant === 'featured' ? 'md:w-1/3 aspect-[3/4]' : 
+      <div className={`relative flex flex-col h-full bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm ${variant === 'featured' || variant === 'list' ? 'md:flex-row' : ''}`}>
+        <div className={`bg-slate-100 relative overflow-hidden animate-pulse ${
+          variant === 'featured' || variant === 'list' ? 'md:w-1/3 aspect-[3/4]' : 
           variant === 'tile' ? 'aspect-[4/5]' : 
           'aspect-[3/4]'
         }`} />
         <div className="p-6 flex flex-col flex-1 space-y-4">
-          <div className="h-4 bg-bg-subtle rounded w-1/4 skeleton-shimmer" />
-          <div className="h-8 bg-bg-subtle rounded w-3/4 skeleton-shimmer" />
-          <div className="h-4 bg-bg-subtle rounded w-1/2 skeleton-shimmer" />
-          <div className="mt-auto pt-4 border-t border-border flex justify-between">
-            <div className="h-3 bg-bg-subtle rounded w-1/4 skeleton-shimmer" />
-            <div className="h-3 bg-bg-subtle rounded w-1/4 skeleton-shimmer" />
+          <div className="h-4 bg-slate-100 rounded animate-pulse w-1/4" />
+          <div className="h-8 bg-slate-100 rounded animate-pulse w-3/4" />
+          <div className="h-4 bg-slate-100 rounded animate-pulse w-1/2" />
+          <div className="mt-auto pt-4 border-t border-slate-100 flex justify-between">
+            <div className="h-3 bg-slate-100 rounded animate-pulse w-1/4" />
+            <div className="h-3 bg-slate-100 rounded animate-pulse w-1/4" />
           </div>
         </div>
       </div>
@@ -112,7 +112,7 @@ export default function BookCard({ publication, variant = 'grid', onOpen, loadin
   const isFeatured = featured || is_featured;
 
   const displayFaculty = faculty || subject;
-  const defaultCover = null; // We'll handle the placeholder UI if this is null
+  const defaultCover = null; 
   const displayCover = cover_path || cover_image_url || defaultCover;
   
   const facultyKey = displayFaculty?.toLowerCase() || 'default';
@@ -132,10 +132,10 @@ export default function BookCard({ publication, variant = 'grid', onOpen, loadin
   };
 
   const cardContent = (
-    <div className={`relative flex flex-col h-full bg-bg-base rounded-[2rem] overflow-hidden border border-border transition-all duration-500 shadow-premium group-hover:shadow-premium-hover group-hover:border-primary/40 ${variant === 'featured' ? 'md:flex-row' : ''}`}>
+    <div className={`relative flex flex-col h-full bg-white rounded-3xl overflow-hidden border border-slate-200 transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:-translate-y-1 group-focus:ring-4 ring-teal-500/30 group-hover:border-teal-500/30 ${variant === 'featured' || variant === 'list' ? 'md:flex-row' : ''}`}>
       {/* Cover Section */}
-      <div className={`relative overflow-hidden bg-bg-subtle ${
-        variant === 'featured' ? 'md:w-1/3 aspect-[3/4]' : 
+      <div className={`relative overflow-hidden bg-slate-100 border-b md:border-b-0 md:border-r border-slate-100 ${
+        variant === 'featured' || variant === 'list' ? 'md:w-1/3 aspect-[3/4]' : 
         variant === 'tile' ? 'aspect-[4/5]' : 
         'aspect-[3/4]'
       }`}>
@@ -143,7 +143,7 @@ export default function BookCard({ publication, variant = 'grid', onOpen, loadin
           <img 
             src={displayCover} 
             alt={title} 
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             loading="lazy" 
             referrerPolicy="no-referrer"
             onError={(e) => {
@@ -169,15 +169,15 @@ export default function BookCard({ publication, variant = 'grid', onOpen, loadin
         />
 
         {/* Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6 gap-3">
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 gap-3">
            <button 
             onClick={handleCardClick}
-            className="w-full py-3 bg-white/10 backdrop-blur-xl hover:bg-white/20 text-white text-xs font-bold rounded-2xl flex items-center justify-center gap-2 transition-all border border-white/20 active:scale-95 shadow-lg"
+            className="w-full py-3 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white text-xs font-bold rounded-2xl flex items-center justify-center gap-2 transition-all border border-white/20 active:scale-95 shadow-md"
            >
              <Eye size={16} /> Quick View
            </button>
            <button 
-            className="w-full py-3 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-2xl flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95"
+            className="w-full py-3 bg-teal-500 hover:bg-teal-400 text-slate-900 text-xs font-bold rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
             onClick={(e) => {
               e.stopPropagation();
               onOpen?.({ ...publication, _showAiInsight: true });
@@ -190,22 +190,22 @@ export default function BookCard({ publication, variant = 'grid', onOpen, loadin
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-20">
           {isFeatured && (
-            <span className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-lg flex items-center gap-1">
+            <span className="bg-amber-500 text-slate-900 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm flex items-center gap-1">
               <Star size={8} fill="currentColor" /> Featured
             </span>
           )}
           {isNew && variant !== 'tile' && (
-            <span className="bg-primary text-white text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-lg">
+            <span className="bg-teal-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">
               New
             </span>
           )}
           {publication.dara_summary && (
-            <span className="bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-lg flex items-center gap-1">
-              <Sparkles size={8} /> AI Ready
+            <span className="bg-slate-900 text-white text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm flex items-center gap-1">
+              <Sparkles size={8} className="text-amber-400" /> AI Ready
             </span>
           )}
           <span 
-            className="flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-lg"
+            className="flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm"
             style={{ 
               backgroundColor: accessBadge.bg || accessBadge.color,
               color: accessBadge.bg ? accessBadge.color : 'white'
@@ -222,31 +222,31 @@ export default function BookCard({ publication, variant = 'grid', onOpen, loadin
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              className="h-full bg-primary shadow-[0_0_8px_rgba(245,158,11,0.6)]"
+              className="h-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.6)]"
             />
           </div>
         )}
       </div>
 
       {/* Info Section */}
-      <div className={`p-4 flex flex-col flex-1 ${variant === 'tile' ? 'p-3' : ''}`}>
+      <div className={`p-5 flex flex-col flex-1 ${variant === 'tile' ? 'p-4' : ''}`}>
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            {isZimbabwe && <Badge text="🇿🇼 Zim" color="#C5973A" small />}
-            {isPeerReviewed && <Badge text="Peer Reviewed" color="#1A7A4A" small />}
-            {publication.zimche_code && <Badge text="ZIMCHE" color="#1B3A6B" small />}
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            {isZimbabwe && <Badge text="🇿🇼 Zim" color="#14b8a6" small />}
+            {isPeerReviewed && <Badge text="Peer Reviewed" color="#3b82f6" small />}
+            {publication.zimche_code && <Badge text="ZIMCHE" color="#6366f1" small />}
           </div>
 
-          <h3 className={`font-serif font-bold text-text-main leading-tight mb-1 line-clamp-2 group-hover:text-primary transition-colors ${variant === 'featured' ? 'text-2xl' : 'text-base'}`}>
+          <h3 className={`font-serif font-black text-slate-900 leading-tight mb-1.5 line-clamp-2 group-hover:text-teal-600 transition-colors ${variant === 'featured' || variant === 'list' ? 'text-2xl' : 'text-lg'}`}>
             {title}
           </h3>
           
-          <p className="text-xs text-text-muted font-medium mb-3">
+          <p className="text-xs text-slate-500 font-bold mb-4 uppercase tracking-wider">
             {author_names}
           </p>
 
-          {variant === 'featured' && description && (
-            <p className="text-sm text-text-muted line-clamp-3 mb-4 italic">
+          {(variant === 'featured' || variant === 'list') && description && (
+            <p className="text-sm text-slate-600 line-clamp-3 mb-4 leading-relaxed">
               {description}
             </p>
           )}
@@ -254,25 +254,25 @@ export default function BookCard({ publication, variant = 'grid', onOpen, loadin
 
         {/* Footer */}
         {variant !== 'tile' && (
-          <div className="pt-3 border-t border-border flex items-center justify-between mt-auto">
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto">
             <div className="flex items-center gap-3">
               {average_rating !== undefined && average_rating > 0 && (
-                <div className="flex items-center gap-1 text-primary font-bold text-xs">
+                <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
                   <Star size={12} fill="currentColor" />
                   <span>{average_rating.toFixed(1)}</span>
                 </div>
               )}
               {total_downloads !== undefined && total_downloads > 0 && (
-                <div className="flex items-center gap-1 text-text-muted text-xs">
+                <div className="flex items-center gap-1 text-slate-400 font-bold text-xs">
                   <Eye size={12} />
                   <span>{total_downloads > 1000 ? `${(total_downloads/1000).toFixed(1)}k` : total_downloads}</span>
                 </div>
               )}
             </div>
             
-            <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-1">
+            <div className="text-[10px] font-black text-slate-300 hover:text-teal-600 uppercase tracking-widest flex items-center gap-1 transition-colors">
               {year_published} 
-              <ArrowRight size={10} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+              <ArrowRight size={10} className="-translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
             </div>
           </div>
         )}
@@ -285,15 +285,14 @@ export default function BookCard({ publication, variant = 'grid', onOpen, loadin
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      className={`group cursor-pointer ${variant === 'featured' ? 'col-span-full' : ''}`}
+      className={`group cursor-pointer ${variant === 'featured' || variant === 'list' ? 'col-span-full' : ''} h-full block focus:outline-none`}
     >
       {onOpen ? (
-        <div onClick={handleCardClick} role="button" tabIndex={0}>
+        <div onClick={handleCardClick} role="button" tabIndex={0} className="h-full block focus:outline-none">
           {cardContent}
         </div>
       ) : (
-        <Link to={`/book/${id}`} className="block no-underline">
+        <Link to={`/book/${id}`} className="block no-underline h-full focus:outline-none">
           {cardContent}
         </Link>
       )}

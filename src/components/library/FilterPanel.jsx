@@ -13,7 +13,6 @@ import {
   ScanLine,
   Sparkles
 } from 'lucide-react';
-import styles from './FilterPanel.module.css';
 
 const LEVELS = ['All', 'Certificate', 'Diploma', 'HND', 'Degree'];
 const PILLARS = ['All', 'Teaching', 'Research', 'Community Engagement', 'Innovation', 'Industrialisation'];
@@ -81,17 +80,17 @@ export default function FilterPanel({
   };
 
   return (
-    <div className={`flex flex-col h-full bg-bg-base border-r border-border transition-all duration-300 ease-in-out ${isOpen ? 'w-80' : 'w-0 overflow-hidden'} ${className}`}>
-      <div className="flex items-center justify-between p-6 border-b border-border">
+    <div className={`flex flex-col h-full bg-white border-r border-slate-200 transition-all duration-300 ease-in-out ${isOpen ? 'w-80' : 'w-0 overflow-hidden'} ${className}`}>
+      <div className="flex items-center justify-between p-6 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
             <Filter size={18} />
           </div>
-          <h3 className="font-serif font-bold text-lg text-text-main">Filters</h3>
+          <h3 className="font-serif font-bold text-lg text-slate-900">Filters</h3>
         </div>
         {hasActiveFilters && (
           <button 
-            className="text-xs font-bold text-primary hover:text-primary/80 uppercase tracking-wider transition-colors"
+            className="text-xs font-bold text-teal-600 hover:text-teal-700 uppercase tracking-wider transition-colors"
             onClick={onClearFilters}
           >
             Reset
@@ -99,16 +98,14 @@ export default function FilterPanel({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide pb-24">
         
         {/* AI Data Saver Mode */}
-        <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-4 border border-emerald-200 dark:border-emerald-800/30">
+        <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-emerald-600 rounded-lg text-white">
-                <Sparkles size={14} />
-              </div>
-              <span className="text-xs font-bold text-emerald-900 dark:text-emerald-50 uppercase tracking-wider">AI Data Saver</span>
+               <Sparkles size={16} className="text-emerald-600" />
+               <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider">AI Data Saver</span>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
@@ -117,18 +114,18 @@ export default function FilterPanel({
                 checked={filters.aiDataSaver || false}
                 onChange={(e) => onFilterChange('aiDataSaver', e.target.checked)}
               />
-              <div className="w-9 h-5 bg-bg-subtle peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+              <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
             </label>
           </div>
-          <p className="text-[10px] text-emerald-800 dark:text-emerald-300 font-medium leading-relaxed">
+          <p className="text-[10px] text-emerald-800 font-medium leading-relaxed">
             Prioritize AI summaries and quick views to save up to 95% of your mobile data.
           </p>
         </div>
 
         {/* Source Filter */}
         <div className="space-y-4">
-          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-primary" /> Resource Source
+          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+             Resource Source
           </h4>
           <div className="flex flex-wrap gap-2">
             {SOURCES.map(source => (
@@ -137,8 +134,8 @@ export default function FilterPanel({
                 onClick={() => onFilterChange('source', source)}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
                   filters.source === source 
-                    ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-105' 
-                    : 'bg-bg-subtle border-border text-text-muted hover:border-primary hover:bg-bg-base'
+                    ? 'bg-slate-900 border-slate-900 text-white shadow-md' 
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700'
                 }`}
               >
                 {source}
@@ -149,13 +146,13 @@ export default function FilterPanel({
 
         {/* ISBN Filter */}
         <div className="space-y-3">
-          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">ISBN Search</h4>
+          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">ISBN Search</h4>
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-500 transition-colors" size={16} />
             <input 
               type="text" 
               placeholder="e.g. 978-3-16..." 
-              className="w-full pl-10 pr-4 py-2.5 bg-bg-subtle border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-main"
+              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all text-slate-900 font-medium"
               value={filters.isbn || ''}
               onChange={(e) => onFilterChange('isbn', e.target.value)}
             />
@@ -164,8 +161,8 @@ export default function FilterPanel({
 
         {/* Faculty Filter */}
         <div className="space-y-4">
-          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-indigo-500" /> Faculty
+          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+             Faculty
           </h4>
           <div className="flex flex-wrap gap-2">
             {FACULTIES.map(faculty => (
@@ -174,8 +171,8 @@ export default function FilterPanel({
                 onClick={() => onFilterChange('faculty', faculty)}
                 className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all border ${
                   filters.faculty === faculty 
-                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-500/20 scale-105' 
-                    : 'bg-bg-subtle border-border text-text-muted hover:border-indigo-500 hover:bg-bg-base'
+                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' 
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700'
                 }`}
               >
                 {faculty}
@@ -186,8 +183,8 @@ export default function FilterPanel({
 
         {/* Access Type Filter */}
         <div className="space-y-4">
-          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-amber-500" /> Access Type
+          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+             Access Type
           </h4>
           <div className="flex flex-wrap gap-2">
             {ACCESS_TYPES.map(type => (
@@ -196,8 +193,8 @@ export default function FilterPanel({
                 onClick={() => onFilterChange('access', type)}
                 className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all border ${
                   filters.access === type 
-                    ? 'bg-amber-600 border-amber-600 text-white shadow-lg shadow-amber-500/20 scale-105' 
-                    : 'bg-bg-subtle border-border text-text-muted hover:border-amber-500 hover:bg-bg-base'
+                    ? 'bg-amber-500 border-amber-500 text-white shadow-md' 
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700'
                 }`}
               >
                 {type}
@@ -208,8 +205,8 @@ export default function FilterPanel({
 
         {/* Education 5.0 Pillars Filter */}
         <div className="space-y-4">
-          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-emerald-500" /> Education 5.0 Pillars
+          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+             Education 5.0 Pillars
           </h4>
           <div className="flex flex-wrap gap-2">
             {PILLARS.map(pillar => (
@@ -218,8 +215,8 @@ export default function FilterPanel({
                 onClick={() => onFilterChange('pillar', pillar)}
                 className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all border ${
                   filters.pillar === pillar 
-                    ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/20 scale-105' 
-                    : 'bg-bg-subtle border-border text-text-muted hover:border-emerald-500 hover:bg-bg-base'
+                    ? 'bg-emerald-500 border-emerald-500 text-white shadow-md' 
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700'
                 }`}
               >
                 {pillar}
@@ -229,37 +226,39 @@ export default function FilterPanel({
         </div>
 
         {/* Subject Filter */}
-        <div className="space-y-3">
-          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">Subject Area</h4>
-          <div className="flex flex-wrap gap-2">
-            {subjects.map(subject => {
-              const subjectName = typeof subject === 'string' ? subject : subject.name;
-              const isSelected = (filters.subjects || []).includes(subjectName);
-              
-              return (
-                <button
-                  key={subjectName}
-                  onClick={() => handleSubjectChange(subjectName)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${isSelected ? 'bg-primary border-primary text-white shadow-md shadow-primary/20' : 'bg-bg-base border-border text-text-muted hover:border-primary'}`}
-                >
-                  {subjectName}
-                </button>
-              );
-            })}
+        {subjects.length > 0 && (
+          <div className="space-y-3">
+            <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Subject Area</h4>
+            <div className="flex flex-wrap gap-2">
+              {subjects.map(subject => {
+                const subjectName = typeof subject === 'string' ? subject : subject.name;
+                const isSelected = (filters.subjects || []).includes(subjectName);
+                
+                return (
+                  <button
+                    key={subjectName}
+                    onClick={() => handleSubjectChange(subjectName)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all border ${isSelected ? 'bg-teal-500 border-teal-500 text-white shadow-md' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'}`}
+                  >
+                    {subjectName}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Format Filter */}
         <div className="space-y-3">
-          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">Resource Format</h4>
+          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Resource Format</h4>
           <div className="grid grid-cols-2 gap-2">
             {FORMATS.map(fmt => (
               <button
                 key={fmt.id}
                 onClick={() => onFilterChange('format', fmt.id)}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all gap-2 ${filters.format === fmt.id ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-bg-base border-border text-text-muted hover:border-primary/20'}`}
+                className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all gap-2 ${filters.format === fmt.id ? 'bg-slate-900 border-slate-900 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'}`}
               >
-                <fmt.icon size={18} className={filters.format === fmt.id ? 'text-primary' : 'text-text-muted'} />
+                <fmt.icon size={20} className={filters.format === fmt.id ? 'text-white' : 'text-slate-400'} />
                 <span className="text-[10px] font-bold uppercase tracking-wider">{fmt.label}</span>
               </button>
             ))}
@@ -268,20 +267,20 @@ export default function FilterPanel({
 
         {/* Year Published Filter */}
         <div className="space-y-3">
-          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">Publication Era</h4>
+          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Publication Era</h4>
           <div className="flex items-center gap-2">
             <input 
               type="number" 
               placeholder="From" 
-              className="w-full px-3 py-2 bg-bg-subtle border border-border rounded-lg text-sm outline-none focus:border-primary transition-all text-text-main"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium text-slate-900"
               value={filters.yearFrom || ''}
               onChange={(e) => onFilterChange('yearFrom', e.target.value)}
             />
-            <span className="text-text-muted">—</span>
+            <span className="text-slate-400">—</span>
             <input 
               type="number" 
               placeholder="To" 
-              className="w-full px-3 py-2 bg-bg-subtle border border-border rounded-lg text-sm outline-none focus:border-primary transition-all text-text-main"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium text-slate-900"
               value={filters.yearTo || ''}
               onChange={(e) => onFilterChange('yearTo', e.target.value)}
             />
@@ -290,21 +289,21 @@ export default function FilterPanel({
 
         {/* Local Context Filter */}
         <div className="space-y-3">
-          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">Contextual Filters</h4>
+          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Contextual Filters</h4>
           <div className="space-y-2">
             {[
               { id: 'zimAuthored', label: 'Zimbabwe Authored', icon: '🇿🇼' },
               { id: 'africanContext', label: 'African Context', icon: '🌍' },
               { id: 'peerReviewed', label: 'Peer Reviewed', icon: '🔬' }
             ].map(item => (
-              <label key={item.id} className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-bg-subtle cursor-pointer transition-colors">
+              <label key={item.id} className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors bg-white">
                 <div className="flex items-center gap-3">
                   <span className="text-lg">{item.icon}</span>
-                  <span className="text-sm font-medium text-text-main">{item.label}</span>
+                  <span className="text-sm font-bold text-slate-700">{item.label}</span>
                 </div>
                 <input 
                   type="checkbox" 
-                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                  className="w-4 h-4 rounded border-slate-300 text-teal-500 focus:ring-teal-500"
                   checked={filters[item.id] || false}
                   onChange={(e) => onFilterChange(item.id, e.target.checked)}
                 />
@@ -314,15 +313,15 @@ export default function FilterPanel({
         </div>
 
         {/* Digitization Promo */}
-        <div className="p-5 rounded-2xl bg-bg-subtle text-text-main space-y-3 relative overflow-hidden border border-border">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-primary/20 blur-2xl rounded-full -mr-10 -mt-10" />
-          <p className="text-xs font-medium text-text-muted">Can't find a book?</p>
-          <h5 className="font-serif font-bold text-sm">Request Digitization</h5>
+        <div className="p-6 rounded-3xl bg-slate-50 text-slate-900 space-y-3 relative overflow-hidden border border-slate-200">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-teal-500/10 blur-2xl rounded-full -mr-10 -mt-10" />
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Can't find a book?</p>
+          <h5 className="font-serif font-black text-lg leading-tight">Request Digitization</h5>
           <button 
             onClick={onRequestDigitization}
-            className="w-full py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2"
+            className="mt-2 w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 active:scale-95 shadow-sm"
           >
-            <ScanLine size={14} /> Submit Request
+            <ScanLine size={16} /> Submit Request
           </button>
         </div>
 

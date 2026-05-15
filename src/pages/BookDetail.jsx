@@ -26,26 +26,24 @@ import { supabase } from '../lib/supabase';
 import { transformBook, transformBooks, BOOK_SELECT, OPENSTAX_CURATED } from '../lib/transformBook';
 import { ALL_ADDITIONAL_OER } from '../lib/oerCatalog';
 import { oerService } from '../services/oerService';
-import { gutenbergService } from '../services/gutenbergService';
 import { geminiService } from '../services/geminiService';
 import { offlineStorage } from '../lib/offlineStorage';
 import { useAuth } from '../hooks/useAuth';
 import BookCard from '../components/library/BookCard';
 import Toast from '../components/ui/Toast';
-import styles from './BookDetail.module.css';
 
 const ALL_OER = [...OPENSTAX_CURATED, ...ALL_ADDITIONAL_OER];
 
 const FACULTY_COLORS = {
-  stem: 'var(--soil)',
-  agriculture: 'var(--leaf)',
-  health: 'var(--clay)',
-  business: 'var(--amber)',
-  education: 'var(--gold)',
-  engineering: '#2c3e50',
-  law: '#8e44ad',
-  humanities: '#d35400',
-  default: 'var(--bark)'
+  stem: '#3b82f6', // blue-500
+  agriculture: '#10b981', // emerald-500
+  health: '#ef4444', // red-500
+  business: '#f59e0b', // amber-500
+  education: '#eab308', // yellow-500
+  engineering: '#0f172a', // slate-900
+  law: '#8b5cf6', // violet-500
+  humanities: '#f97316', // orange-500
+  default: '#64748b' // slate-500
 };
 
 export default function BookDetail() {
@@ -81,7 +79,7 @@ export default function BookDetail() {
       setError(null);
       
       // 1. Check for Static/Mock Books (OpenStax, etc.)
-      if (id.startsWith('openstax-') || id.startsWith('fao-') || id.startsWith('who-') || id.startsWith('andrews-') || id.startsWith('ai-') || id.startsWith('gutenberg-')) {
+      if (id.startsWith('openstax-') || id.startsWith('fao-') || id.startsWith('who-') || id.startsWith('andrews-') || id.startsWith('ai-') || id.startsWith('gutenberg-') || id.startsWith('ol-') || id.startsWith('olb-') || id.startsWith('arxiv-')) {
         const osBook = ALL_OER.find(b => b.id === id);
         
         if (osBook) {
@@ -242,9 +240,6 @@ export default function BookDetail() {
             console.error('Error fetching arXiv metadata:', err);
           }
         }
-        // If found, return early? No, we might want related books.
-        // But for static books, related logic is different.
-        // Let's just return for now to keep it simple.
         if (osBook) {
             setLoading(false);
             return;
@@ -433,23 +428,25 @@ export default function BookDetail() {
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
-        <p>Loading book details...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 pt-24 pb-32">
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-teal-500 rounded-full animate-spin mb-4"></div>
+        <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">Loading book details...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.errorContainer}>
-        <AlertCircle size={48} color="var(--amber)" />
-        <h2>Error Loading Book</h2>
-        <p>{error}</p>
-        <div className={styles.errorActions}>
-          <button onClick={fetchBookData} className={styles.retryBtn}>Try Again</button>
-          <Link to="/library" className={styles.backLink}>Return to Library</Link>
-          <Link to="/ai-tools" className={styles.backLink}>Explore AI Tools</Link>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4 pt-24 pb-32 text-center">
+        <div className="w-20 h-20 bg-red-50 text-red-500 border border-red-100 flex items-center justify-center rounded-3xl mb-6 shadow-sm">
+          <AlertCircle size={32} />
+        </div>
+        <h2 className="text-2xl font-black text-slate-900 mb-2">Error Loading Book</h2>
+        <p className="text-slate-500 max-w-md mb-8">{error}</p>
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <button onClick={fetchBookData} className="w-full sm:w-auto px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-sm transition-all active:scale-95">Try Again</button>
+          <Link to="/library" className="w-full sm:w-auto px-6 py-3 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-bold rounded-xl shadow-sm transition-all active:scale-95">Return to Library</Link>
+          <Link to="/ai-tools" className="w-full sm:w-auto px-6 py-3 bg-teal-50 text-teal-700 border border-teal-100 hover:bg-teal-100 font-bold rounded-xl shadow-sm transition-all active:scale-95">Explore AI Tools</Link>
         </div>
       </div>
     );
@@ -464,157 +461,177 @@ export default function BookDetail() {
   const displayCover = book.cover_path || defaultCover;
 
   return (
-    <div className={`${styles.container} relative`}>
-      {/* Real Book Background Image (Subtle) */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden h-[500px]">
+    <div className="relative min-h-screen bg-slate-50 pb-32 pt-24 lg:pt-32 selection:bg-teal-500/30">
+      {/* Background Decor */}
+      <div className="absolute inset-x-0 top-0 h-[60vh] z-0 overflow-hidden pointer-events-none">
         <img 
           src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=2000" 
           alt="Book Detail Background" 
-          className="w-full h-full object-cover opacity-5"
+          className="w-full h-full object-cover opacity-[0.03] mix-blend-overlay"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-bg-base" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50" />
       </div>
 
-      <div className={`${styles.backBreadcrumb} relative z-10`}>
-        <button 
-          onClick={() => {
-            if (book?.publisher_name === 'OpenStax' || book?.source === 'OpenStax') {
-              navigate('/library');
-            } else if (book?.id?.startsWith('res-')) {
-              navigate('/research');
-            } else if (book?.subject?.toLowerCase().includes('artificial intelligence') || book?.id?.startsWith('ai-')) {
-              navigate('/ai-textbooks');
-            } else {
-              navigate('/library');
-            }
-          }}
-          className={styles.backBtnLink}
-        >
-          <ArrowLeft size={16} /> Back to Library
-        </button>
-      </div>
-
-      <div className={styles.grid}>
-        {/* LEFT COLUMN: Cover */}
-        <div className={styles.leftColumn}>
-          <div 
-            className={styles.coverWrapper}
-            style={{ '--spine-color': facultyColor }}
+      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Navigation Breadcrumb */}
+        <div className="mb-8">
+          <button 
+            onClick={() => {
+              if (book?.publisher_name === 'OpenStax' || book?.source === 'OpenStax') {
+                navigate('/library');
+              } else if (book?.id?.startsWith('res-')) {
+                navigate('/research');
+              } else if (book?.subject?.toLowerCase().includes('artificial intelligence') || book?.id?.startsWith('ai-')) {
+                navigate('/ai-textbooks');
+              } else {
+                navigate('/library');
+              }
+            }}
+            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 font-bold text-sm transition-colors py-2 group"
           >
-            <img src={displayCover} alt={book.title} className={styles.coverImage} />
-          </div>
+            <div className="p-1 rounded-md group-hover:bg-slate-200 transition-colors">
+              <ArrowLeft size={16} /> 
+            </div>
+            Back to Library
+          </button>
         </div>
 
-        {/* MIDDLE COLUMN: Info */}
-        <div className={styles.middleColumn}>
-          <div className={styles.headerInfo}>
-            <h1 className={styles.title}>{book.title}</h1>
-            
-            <div className={styles.metaRow}>
-              <span className={styles.author}>
-                by <span className={styles.authorName}>{book.author_names}</span> (Author)
-              </span>
-            </div>
-
-            <div className={styles.rating}>
-              <div className={styles.stars}>
-                {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    size={16} 
-                    fill={i < Math.round(book.average_rating || 4.5) ? "var(--amber)" : "none"} 
-                    stroke={i < Math.round(book.average_rating || 4.5) ? "none" : "var(--clay)"}
-                  />
-                ))}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+          {/* LEFT COLUMN: Cover */}
+          <div className="lg:col-span-3">
+            <div className="sticky top-32">
+              <div 
+                className="relative aspect-[3/4] w-full max-w-sm mx-auto lg:mx-0 rounded-r-3xl rounded-l-md shadow-2xl shadow-slate-900/20 overflow-hidden transform transition-all duration-500 hover:-translate-y-2 group"
+                style={{ borderLeft: `8px solid ${facultyColor}` }}
+              >
+                <img src={displayCover} alt={book.title} className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/opacity-0 group-hover:bg-black/10 transition-colors duration-500" />
               </div>
-              <span className={styles.ratingCount}>
-                {(book.average_rating || 4.5).toFixed(1)} <span className={styles.ratingLink}>({book.ratings_count || 12} ratings)</span>
-              </span>
-            </div>
-
-            <div className={styles.badges}>
-              <span className={styles.badge} style={{ borderColor: facultyColor, color: facultyColor }}>
-                {book.faculty}
-              </span>
-              {book.ai_level && (
-                <span className={styles.badge} style={{ borderColor: '#8e44ad', color: '#8e44ad' }}>
-                  AI Level {book.ai_level}
-                </span>
-              )}
-              {(book.zimche_programme_codes?.length > 0 || book.zimche_code) && (
-                <span className={styles.badge} style={{ borderColor: '#27ae60', color: '#27ae60' }}>
-                  ZIMCHE: {book.zimche_code || book.zimche_programme_codes?.[0]}
-                </span>
-              )}
-              <span className={styles.badge}>{book.level || book.target_level || 'General'}</span>
             </div>
           </div>
 
-          <div className={styles.formatSelector}>
-            <div className={`${styles.formatBox} ${styles.formatActive}`}>
-              <span className={styles.formatType}>Digital Edition</span>
-              <span className={styles.formatPrice}>Institutional Access</span>
-            </div>
-            {book.file_url && book.file_url.endsWith('.epub') && (
-              <div className={styles.formatBox}>
-                <span className={styles.formatType}>EPUB</span>
-                <span className={styles.formatPrice}>Included</span>
+          {/* MIDDLE COLUMN: Info */}
+          <div className="lg:col-span-6 space-y-12">
+            <div className="space-y-6">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 leading-[1.1] tracking-tight">{book.title}</h1>
+              
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-3">
+                <span className="text-slate-500 text-sm font-bold uppercase tracking-widest">
+                  by <span className="text-slate-900 ml-1">{book.author_names}</span>
+                </span>
+                <span className="text-slate-300 mx-2 hidden sm:inline">•</span>
+                <div className="flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100">
+                  <div className="flex text-amber-500">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        size={14} 
+                        fill={i < Math.round(book.average_rating || 4.5) ? "currentColor" : "none"} 
+                        stroke={i < Math.round(book.average_rating || 4.5) ? "none" : "currentColor"}
+                        className={i >= Math.round(book.average_rating || 4.5) ? "text-amber-200" : ""}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-amber-700 font-bold text-xs ml-1">
+                    {(book.average_rating || 4.5).toFixed(1)} <span className="opacity-70">({book.ratings_count || 12})</span>
+                  </span>
+                </div>
               </div>
-            )}
-          </div>
 
-          <div className={styles.section}>
-            <div className={styles.synopsisContent}>
-              <p className={styles.description}>{book.description || 'No description available.'}</p>
+              <div className="flex flex-wrap gap-2 pt-2">
+                <span className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-slate-100 border border-slate-200 text-slate-600 shadow-sm" style={{ color: facultyColor }}>
+                  {book.faculty}
+                </span>
+                {book.ai_level && (
+                  <span className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-violet-50 border border-violet-200 text-violet-700 shadow-sm">
+                    AI Level {book.ai_level}
+                  </span>
+                )}
+                {(book.zimche_programme_codes?.length > 0 || book.zimche_code) && (
+                  <span className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-sm">
+                    ZIMCHE: {book.zimche_code || book.zimche_programme_codes?.[0]}
+                  </span>
+                )}
+                <span className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-slate-900 border border-slate-900 text-white shadow-sm">
+                  {book.level || book.target_level || 'General'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-4">
+              <div className="flex-1 min-w-[200px] p-5 rounded-2xl bg-teal-50 border-2 border-teal-500 relative overflow-hidden group">
+                <div className="relative z-10">
+                  <span className="block text-xs font-black text-teal-600 uppercase tracking-widest mb-1">Digital Edition</span>
+                  <span className="block text-xl font-black text-slate-900">Institutional Access</span>
+                </div>
+                <div className="absolute right-0 bottom-0 p-4 opacity-10 transform translate-x-4 translate-y-4 group-hover:scale-110 transition-transform">
+                   <ShieldCheck size={64} className="text-teal-600" />
+                </div>
+              </div>
+              {book.file_url && book.file_url.endsWith('.epub') && (
+                <div className="flex-1 min-w-[200px] p-5 rounded-2xl bg-white border border-slate-200 relative overflow-hidden group">
+                  <div className="relative z-10">
+                    <span className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-1">EPUB</span>
+                    <span className="block text-xl font-black text-slate-900">Included</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="prose prose-slate max-w-none prose-lg">
+              <h2 className="font-serif font-black text-2xl text-slate-900 mb-6 border-b border-slate-200 pb-4">Synopsis</h2>
+              <p className="text-slate-600 leading-relaxed font-medium">{book.description || 'No description available.'}</p>
               
               {/* ZIMBABWEAN REMIX SECTION */}
               {remixedData && (
-                <div className="mt-8 p-6 bg-soil/10 border border-soil/20 rounded-3xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <Sparkles size={64} className="text-soil" />
+                <div className="mt-12 p-8 bg-amber-50 border border-amber-200 rounded-3xl relative overflow-hidden shadow-sm">
+                  <div className="absolute top-0 right-0 p-6 opacity-10">
+                    <Sparkles size={120} className="text-amber-500" />
                   </div>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-soil rounded-xl text-white">
-                      <Zap size={20} />
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl text-white shadow-lg shadow-amber-500/30 flex items-center justify-center transform -rotate-6">
+                      <Zap size={28} />
                     </div>
                     <div>
-                      <h3 className="text-xl font-display font-black text-soil uppercase tracking-tight">Zim-Curriculum Remix</h3>
-                      <p className="text-[10px] font-bold text-soil/60 uppercase tracking-widest">Heritage-Based Alignment (HBC)</p>
+                      <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight m-0">Zim-Curriculum Remix</h3>
+                      <p className="text-xs font-black text-amber-600 uppercase tracking-widest m-0 mt-1">Heritage-Based Alignment (HBC)</p>
                     </div>
                   </div>
 
-                  <div className="space-y-6 relative z-10">
-                    <div>
-                      <h4 className="text-xs font-black uppercase tracking-widest text-soil/70 mb-2">Curriculum Summary</h4>
-                      <p className="text-sm leading-relaxed text-soil/90 italic">{remixedData.zimSummary}</p>
+                  <div className="space-y-8 relative z-10">
+                    <div className="bg-white/60 p-6 rounded-2xl border border-white">
+                      <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 m-0">Curriculum Summary</h4>
+                      <p className="text-base font-medium leading-relaxed text-slate-800 m-0">{remixedData.zimSummary}</p>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
                       <div>
-                        <h4 className="text-xs font-black uppercase tracking-widest text-soil/70 mb-2">Local Context</h4>
-                        <p className="text-sm leading-relaxed text-soil/90">{remixedData.localInsights}</p>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 m-0">Local Context</h4>
+                        <p className="text-sm font-medium leading-relaxed text-slate-700 m-0">{remixedData.localInsights}</p>
                       </div>
                       <div>
-                        <h4 className="text-xs font-black uppercase tracking-widest text-soil/70 mb-2">Heritage Connection</h4>
-                        <p className="text-sm leading-relaxed text-soil/90">{remixedData.heritageConnection}</p>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 m-0">Heritage Connection</h4>
+                        <p className="text-sm font-medium leading-relaxed text-slate-700 m-0">{remixedData.heritageConnection}</p>
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="text-xs font-black uppercase tracking-widest text-soil/70 mb-2">HBC Learning Objectives</h4>
-                      <ul className="grid md:grid-cols-2 gap-2">
+                      <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 m-0">HBC Learning Objectives</h4>
+                      <ul className="grid md:grid-cols-2 gap-4 m-0 p-0 list-none">
                         {remixedData.hbcObjectives.map((obj, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-soil/80">
-                            <Check size={14} className="mt-1 flex-shrink-0 text-soil" />
+                          <li key={i} className="flex items-start gap-3 text-sm font-medium text-slate-700 m-0">
+                            <div className="mt-0.5 w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                              <Check size={12} strokeWidth={3} />
+                            </div>
                             <span>{obj}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
                     
-                    <div className="pt-4 flex items-center gap-2 text-[10px] font-bold text-soil/50 uppercase tracking-widest">
-                      <WifiOff size={12} />
+                    <div className="pt-6 border-t border-amber-200/50 flex items-center gap-2 text-xs font-black text-amber-600/80 uppercase tracking-widest">
+                      <WifiOff size={16} />
                       <span>Available Offline</span>
                     </div>
                   </div>
@@ -623,45 +640,53 @@ export default function BookDetail() {
 
               {/* AI ANALYSIS SECTION */}
               {(book.ai_summary || book.ai_topics?.length > 0) && (
-                <div className={styles.aiAnalysisSection}>
-                  <div className={styles.aiHeader}>
-                    <div className={styles.aiTitle}>
-                      <Sparkles size={18} className={styles.aiIcon} />
-                      <h3>AI Analysis & Insights</h3>
+                <div className="mt-12 p-8 bg-slate-900 rounded-3xl relative overflow-hidden shadow-2xl">
+                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--color-white) 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+                  
+                  <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center border border-teal-500/30">
+                        <Sparkles size={24} />
+                      </div>
+                      <h3 className="text-xl font-black text-white m-0 tracking-wide">AI Insights</h3>
                     </div>
                     {user && (user.id === book.creator_id || user.email === 'wgmasvix@gmail.com') && (
                       <button 
                         onClick={handleRegenerateAi} 
-                        className={styles.regenerateBtn}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-bold transition-all flex items-center gap-2 border border-white/10"
                         disabled={isAnalyzing}
                       >
-                        <RefreshCw size={14} className={isAnalyzing ? styles.spin : ''} />
+                        <RefreshCw size={16} className={isAnalyzing ? "animate-spin" : ""} />
                         {isAnalyzing ? 'Analyzing...' : 'Regenerate'}
                       </button>
                     )}
                   </div>
                   
                   {book.ai_summary && (
-                    <div className={styles.aiSummary}>
-                      <p>{book.ai_summary}</p>
+                    <div className="mb-8">
+                      <p className="text-slate-300 leading-relaxed font-medium m-0">{book.ai_summary}</p>
                     </div>
                   )}
 
-                  <div className={styles.aiMetaGrid}>
+                  <div className="grid sm:grid-cols-2 gap-6 bg-white/5 border border-white/10 rounded-2xl p-6">
                     {book.ai_difficulty && (
-                      <div className={styles.aiMetaItem}>
-                        <span className={styles.aiLabel}>Complexity</span>
-                        <span className={`${styles.aiValue} ${styles[`difficulty${book.ai_difficulty}`]}`}>
+                      <div>
+                        <span className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Complexity</span>
+                        <span className={`inline-block px-3 py-1 rounded-lg text-sm font-bold ${
+                          book.ai_difficulty === 'introductory' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                          book.ai_difficulty === 'intermediate' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                          'bg-red-500/20 text-red-400 border border-red-500/30'
+                        }`}>
                           {book.ai_difficulty.charAt(0).toUpperCase() + book.ai_difficulty.slice(1)}
                         </span>
                       </div>
                     )}
                     {book.ai_topics?.length > 0 && (
-                      <div className={styles.aiMetaItem}>
-                        <span className={styles.aiLabel}>Key Topics</span>
-                        <div className={styles.aiTags}>
+                      <div>
+                        <span className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Key Topics</span>
+                        <div className="flex flex-wrap gap-2">
                           {book.ai_topics.map((topic, i) => (
-                            <span key={i} className={styles.aiTag}>{topic}</span>
+                            <span key={i} className="px-2.5 py-1 bg-slate-800 text-slate-300 border border-slate-700 rounded-md text-xs font-bold">{topic}</span>
                           ))}
                         </div>
                       </div>
@@ -671,213 +696,243 @@ export default function BookDetail() {
               )}
 
               {book.learning_objectives && (
-                <div className={styles.highlights}>
-                  <h3 className={styles.subTitle}>What you'll learn</h3>
-                  <ul className={styles.highlightsList}>
+                <div className="mt-12">
+                  <h3 className="font-serif font-black text-2xl text-slate-900 mb-6 border-b border-slate-200 pb-4 m-0">What you'll learn</h3>
+                  <ul className="grid sm:grid-cols-2 gap-4 m-0 p-0 list-none">
                     {book.learning_objectives.map((obj, i) => (
-                      <li key={i}><Check size={14} /> {obj}</li>
+                      <li key={i} className="flex items-start gap-3 text-base text-slate-700 m-0">
+                        <div className="mt-1 w-6 h-6 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+                           <Check size={14} strokeWidth={3} />
+                        </div>
+                        <span className="font-medium">{obj}</span>
+                      </li>
                     ))}
                   </ul>
                 </div>
               )}
             </div>
-          </div>
 
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Product Details</h2>
-            <div className={styles.productDetailsGrid}>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Publisher</span>
-                <span className={styles.detailValue}>{book.publisher_name || 'Independent'}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Publication Year</span>
-                <span className={styles.detailValue}>{book.year_published || 'N/A'}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Format</span>
-                <span className={styles.detailValue}>{book.format?.toUpperCase() || 'PDF'}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Pages</span>
-                <span className={styles.detailValue}>{book.page_count || 'Varies'}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Language</span>
-                <span className={styles.detailValue}>English</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>License</span>
-                <span className={styles.detailValue}>{book.license_type || 'Standard'}</span>
+            <div className="pt-12">
+              <h2 className="font-serif font-black text-2xl text-slate-900 mb-6 border-b border-slate-200 pb-4">Product Details</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <div>
+                  <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Publisher</span>
+                  <span className="block text-sm font-bold text-slate-900">{book.publisher_name || 'Independent'}</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Publication Year</span>
+                  <span className="block text-sm font-bold text-slate-900">{book.year_published || 'N/A'}</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Format</span>
+                  <span className="block text-sm font-bold text-slate-900">{book.format?.toUpperCase() || 'PDF'}</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pages</span>
+                  <span className="block text-sm font-bold text-slate-900">{book.page_count || 'Varies'}</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Language</span>
+                  <span className="block text-sm font-bold text-slate-900">English</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">License</span>
+                  <span className="block text-sm font-bold text-slate-900">{book.license_type || 'Standard'}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Table of Contents</h2>
-            <div className={styles.tocContainer}>
-              {(book.table_of_contents && Array.isArray(book.table_of_contents) && book.table_of_contents.length > 0) ? (
-                <ul className={styles.tocList}>
-                  {book.table_of_contents.map((chapter, index) => (
-                    <li key={index} className={styles.tocItem}>
-                      <span className={styles.chapterNum}>{String(index + 1).padStart(2, '0')}</span>
-                      <span className={styles.chapterTitle}>{chapter}</span>
-                      <span className={styles.chapterPage}>p. {10 + (index * 25)}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <ul className={styles.tocList}>
-                  {['Introduction & Foundations', 'Core Principles & Frameworks', 'Case Studies in Zimbabwe', 'Advanced Methodologies', 'Future Perspectives & Innovation'].map((chapter, index) => (
-                    <li key={index} className={styles.tocItem}>
-                      <span className={styles.chapterNum}>{String(index + 1).padStart(2, '0')}</span>
-                      <span className={styles.chapterTitle}>{chapter}</span>
-                      <span className={styles.chapterPage}>p. {10 + (index * 30)}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+            <div className="pt-12 border-t border-slate-200">
+              <h2 className="font-serif font-black text-2xl text-slate-900 mb-6 border-b border-slate-200 pb-4">Table of Contents</h2>
+              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+                {(book.table_of_contents && Array.isArray(book.table_of_contents) && book.table_of_contents.length > 0) ? (
+                  <ul className="divide-y divide-slate-100 m-0 p-0 list-none">
+                    {book.table_of_contents.map((chapter, index) => (
+                      <li key={index} className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors group">
+                        <span className="text-xl font-black text-slate-200 group-hover:text-teal-200 transition-colors w-8 text-right">{String(index + 1).padStart(2, '0')}</span>
+                        <span className="flex-1 font-bold text-slate-700 group-hover:text-slate-900">{chapter}</span>
+                        <span className="text-xs font-bold text-slate-400">p. {10 + (index * 25)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <ul className="divide-y divide-slate-100 m-0 p-0 list-none">
+                    {['Introduction & Foundations', 'Core Principles & Frameworks', 'Case Studies in Zimbabwe', 'Advanced Methodologies', 'Future Perspectives & Innovation'].map((chapter, index) => (
+                      <li key={index} className="flex items-center gap-4 p-5 hover:bg-slate-50 transition-colors group">
+                        <span className="text-2xl font-black text-slate-200 group-hover:text-teal-200 transition-colors w-10 text-right">{String(index + 1).padStart(2, '0')}</span>
+                        <span className="flex-1 font-bold text-slate-700 group-hover:text-slate-900 text-lg">{chapter}</span>
+                        <span className="text-xs font-bold text-slate-400 tracking-widest uppercase">p. {10 + (index * 30)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>Reader Reviews</h2>
-              <button className={styles.writeReviewBtn}>Write a Review</button>
-            </div>
-            
-            <div className={styles.reviewsList}>
-              {reviews.length > 0 ? reviews.map(review => (
-                <div key={review.id} className={styles.reviewCard}>
-                  <div className={styles.reviewHeader}>
-                    <div className={styles.reviewUser}>
-                      <div className={styles.userAvatar}>{review.user[0]}</div>
-                      <div>
-                        <p className={styles.userName}>{review.user}</p>
-                        <p className={styles.reviewDate}>{review.date}</p>
+            <div className="pt-12">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="font-serif font-black text-2xl text-slate-900 m-0">Reader Reviews</h2>
+                <button className="px-5 py-2.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-900 text-sm font-bold rounded-xl shadow-sm transition-all active:scale-95">Write a Review</button>
+              </div>
+              
+              <div className="space-y-4">
+                {reviews.length > 0 ? reviews.map(review => (
+                  <div key={review.id} className="bg-white p-6 border border-slate-200 rounded-3xl shadow-sm">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 font-black flex items-center justify-center text-lg">{review.user[0]}</div>
+                        <div>
+                          <p className="font-bold text-slate-900 leading-none mb-1">{review.user}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{review.date}</p>
+                        </div>
+                      </div>
+                      <div className="flex text-amber-400">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            size={14} 
+                            fill={i < review.rating ? "currentColor" : "none"} 
+                            stroke={i < review.rating ? "none" : "currentColor"}
+                            className={i >= review.rating ? "text-slate-200" : ""}
+                          />
+                        ))}
                       </div>
                     </div>
-                    <div className={styles.reviewStars}>
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          size={12} 
-                          fill={i < review.rating ? "var(--amber)" : "none"} 
-                          stroke={i < review.rating ? "none" : "var(--clay)"}
-                        />
-                      ))}
-                    </div>
+                    <p className="text-slate-600 font-medium">{review.comment}</p>
                   </div>
-                  <p className={styles.reviewComment}>{review.comment}</p>
-                </div>
-              )) : (
-                <p className={styles.noReviews}>No reviews yet. Be the first to review this book!</p>
-              )}
-            </div>
-          </div>
-
-          {relatedBooks.length > 0 && (
-            <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>Readers who viewed this item also viewed</h2>
-              <div className={styles.relatedGrid}>
-                {relatedBooks.map(related => (
-                  <BookCard key={related.id} publication={related} variant="grid" />
-                ))}
+                )) : (
+                  <div className="p-12 border-2 border-dashed border-slate-200 rounded-3xl text-center bg-white">
+                    <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                       <Star size={32} />
+                    </div>
+                    <h4 className="text-lg font-black text-slate-900 mb-2">No reviews yet</h4>
+                    <p className="text-sm font-medium text-slate-500">Be the first to review this book and help other readers!</p>
+                  </div>
+                )}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* RIGHT COLUMN: Actions Panel (Buy Box) */}
-        <aside className={styles.rightColumn}>
-          <div className={styles.actionCard}>
-            <div className={styles.accessStatus}>
-              {accessStatus === 'granted' && (
-                <div className={styles.statusGranted}>
-                  <BookOpen size={20} />
-                  <span>Access Granted</span>
+            {relatedBooks.length > 0 && (
+              <div className="pt-12">
+                <h2 className="font-serif font-black text-2xl text-slate-900 mb-8 border-b border-slate-200 pb-4">Readers who viewed this item also viewed</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {relatedBooks.map(related => (
+                    <div key={related.id} className="h-full">
+                       <BookCard publication={related} variant="grid" />
+                    </div>
+                  ))}
                 </div>
-              )}
-              {accessStatus === 'preview' && (
-                <div className={styles.statusPreview}>
-                  <Lock size={20} />
-                  <span>Preview Only</span>
-                </div>
-              )}
-              {accessStatus === 'denied' && (
-                <div className={styles.statusDenied}>
-                  <ShieldCheck size={20} />
-                  <span>Institution Access Required</span>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.mainActions}>
-              {accessStatus === 'granted' ? (
-                <div className="flex flex-col gap-3">
-                  <Link to={`/book-action/${book.id}`} state={{ book }} className={styles.readBtn}>
-                    <BookOpen size={20} /> Read Now
-                  </Link>
-                  <button 
-                    onClick={handleRemix} 
-                    className="w-full py-4 bg-soil text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-soil/20"
-                    disabled={isRemixing}
-                  >
-                    <Sparkles size={16} className={isRemixing ? "animate-spin" : ""} />
-                    {isRemixing ? 'Remixing...' : 'Remix for Zimbabwe (HBC)'}
-                  </button>
-                  <button 
-                    onClick={handleSaveOffline} 
-                    className="w-full py-3 bg-bg-subtle border border-border text-text-main rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-border transition-all flex items-center justify-center gap-2"
-                  >
-                    <WifiOff size={16} /> Save for Offline
-                  </button>
-                </div>
-              ) : accessStatus === 'preview' ? (
-                <>
-                  <Link to={`/reader/${book.id}?preview=true`} className={styles.previewBtn}>
-                    Preview First 25 Pages
-                  </Link>
-                  <div className={styles.upgradePrompt}>
-                    <p>Full access requires an institutional license.</p>
-                    <Link to="/institutions" className={styles.upgradeLink}>Learn more</Link>
-                  </div>
-                </>
-              ) : (
-                <div className={styles.deniedMessage}>
-                  <p>Your institution does not have a license for this title.</p>
-                  <button className={styles.requestBtn}>Request Access</button>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.secondaryActions}>
-              <button className={styles.actionBtn} onClick={handleAddToList}>
-                <Plus size={18} /> Add to List
-              </button>
-              <button className={styles.actionBtn} onClick={handleShare}>
-                {isCopied ? <Check size={18} color="var(--green)" /> : <Share2 size={18} />} 
-                {isCopied ? 'Copied!' : 'Share'}
-              </button>
-            </div>
-
-            <div className={styles.secureTransaction}>
-              <ShieldCheck size={14} />
-              <span>Secure transaction</span>
-            </div>
-
-            <div className={styles.attribution}>
-              <p className={styles.attrText}>
-                License: {book.license_type || 'All Rights Reserved'}
-              </p>
-              {book.source_url && (
-                <a href={book.source_url} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>
-                  View Source <Globe size={12} />
-                </a>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-        </aside>
+
+          {/* RIGHT COLUMN: Actions Panel (Buy Box) */}
+          <aside className="lg:col-span-3">
+            <div className="sticky top-32 bg-white rounded-3xl p-6 shadow-xl border border-slate-100 space-y-6">
+              
+              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                {accessStatus === 'granted' && (
+                  <>
+                    <div className="text-teal-500">
+                      <BookOpen size={24} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                       <span className="block text-sm font-black text-slate-900">Access Granted</span>
+                       <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Read unlimited</span>
+                    </div>
+                  </>
+                )}
+                {accessStatus === 'preview' && (
+                  <>
+                    <div className="text-amber-500">
+                      <Lock size={24} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                       <span className="block text-sm font-black text-slate-900">Preview Only</span>
+                       <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Limited access</span>
+                    </div>
+                  </>
+                )}
+                {accessStatus === 'denied' && (
+                  <>
+                    <div className="text-red-500">
+                      <ShieldCheck size={24} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                       <span className="block text-sm font-black text-slate-900">Access Denied</span>
+                       <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">License required</span>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {accessStatus === 'granted' ? (
+                  <>
+                    <Link to={`/book-action/${book.id}`} state={{ book }} className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 active:scale-95">
+                      <BookOpen size={18} /> Read Now
+                    </Link>
+                    <button 
+                      onClick={handleRemix} 
+                      className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-95"
+                      disabled={isRemixing}
+                    >
+                      <Zap size={18} className={isRemixing ? "animate-bounce" : ""} />
+                      {isRemixing ? 'Remixing...' : 'Remix for Zimbabwe (HBC)'}
+                    </button>
+                    <button 
+                      onClick={handleSaveOffline} 
+                      className="w-full py-4 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      <WifiOff size={18} /> Save for Offline
+                    </button>
+                  </>
+                ) : accessStatus === 'preview' ? (
+                  <>
+                    <Link to={`/reader/${book.id}?preview=true`} className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 active:scale-95">
+                      Preview First 25 Pages
+                    </Link>
+                    <div className="text-center pt-2">
+                      <p className="text-xs font-bold text-slate-500 mb-2">Full access requires an institutional license.</p>
+                      <Link to="/institutions" className="text-sm font-black text-teal-600 hover:underline">Learn more</Link>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center pt-2">
+                    <p className="text-sm font-bold text-slate-600 mb-4">Your institution does not have a license for this title.</p>
+                    <button className="w-full py-3 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-900 rounded-xl text-sm font-bold transition-all active:scale-95">Request Access</button>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100">
+                <button className="py-3 px-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2" onClick={handleAddToList}>
+                  <Plus size={16} /> Add to List
+                </button>
+                <button className="py-3 px-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2" onClick={handleShare}>
+                  {isCopied ? <Check size={16} className="text-emerald-500" /> : <Share2 size={16} />} 
+                  {isCopied ? 'Copied!' : 'Share'}
+                </button>
+              </div>
+
+              <div className="pt-6">
+                <div className="flex items-center gap-2 text-slate-400 mb-3">
+                  <ShieldCheck size={14} />
+                  <span className="text-xs font-bold uppercase tracking-widest">Secure Environment</span>
+                </div>
+
+                <div className="text-xs font-bold text-slate-500 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <p className="mb-2">License: {book.license_type || 'All Rights Reserved'}</p>
+                  {book.source_url && (
+                    <a href={book.source_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-teal-600 hover:underline">
+                      View Original Source <Globe size={12} />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>

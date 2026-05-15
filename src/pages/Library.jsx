@@ -29,7 +29,6 @@ const ALL_LOCAL_OER = (() => {
 if (typeof window !== 'undefined') {
   window.ALL_LOCAL_OER = ALL_LOCAL_OER;
 }
-import styles from './Library.module.css';
 
 import { openStaxService } from '../services/openStaxService';
 import { geminiService } from '../services/geminiService';
@@ -92,8 +91,6 @@ export default function Library() {
       setError(null);
       
       if (useSemanticSearch && semanticResults) {
-        // If we have semantic results, we don't need to fetch from DB
-        // But we might want to paginate them if there are many
         if (!isLoadMore) {
           setPublications(semanticResults);
           setTotalCount(semanticResults.length);
@@ -118,7 +115,7 @@ export default function Library() {
       let openLibraryCount = 0;
       let arxivCount = 0;
 
-      // 1. Fetch from Supabase (Internal DB - Books)
+      // 1. Fetch from Supabase
       if (filters.source === 'All' || filters.source === 'Dare Library' || filters.source === 'Project Gutenberg' || filters.source === 'Partner Resources') {
         const needsDirectQuery = filters.isbn || filters.yearFrom || filters.yearTo || 
           filters.zimAuthored || filters.africanContext || filters.source === 'Project Gutenberg' ||
@@ -154,7 +151,6 @@ export default function Library() {
 
           if (filters.faculty !== 'All') {
             const facultyLower = filters.faculty.toLowerCase();
-            // Use a more flexible ILIKE pattern for faculty matching
             query = query.or(`subject.ilike.%${filters.faculty}%,faculty.ilike.%${filters.faculty}%,subject.ilike.%${facultyLower.split(' ')[0]}%,faculty.ilike.%${facultyLower.split(' ')[0]}%`);
           }
           if (filters.level !== 'All') query = query.ilike('programme', `%${filters.level}%`);
@@ -240,18 +236,15 @@ export default function Library() {
         if (!filters.zimAuthored && !filters.africanContext && !filters.isbn) {
           let filteredOER = ALL_LOCAL_OER;
           
-          // Filter by source
           if (filters.source === 'Featured Items') {
             filteredOER = filteredOER.filter(b => b.featured === true || b.is_featured === true);
           }
           
-          // Filter by faculty
           if (filters.faculty !== 'All') {
             const facultyLower = filters.faculty.toLowerCase();
             filteredOER = filteredOER.filter(b => {
               const bFaculty = (b.faculty || "").toLowerCase();
               const bSubject = (b.subject || "").toLowerCase();
-              // Flexible matching for faculty names (e.g., "Agriculture" matches "Agriculture & Environmental")
               return bFaculty.includes(facultyLower) || 
                      facultyLower.includes(bFaculty) ||
                      bSubject.includes(facultyLower) ||
@@ -259,7 +252,6 @@ export default function Library() {
             });
           }
           
-          // Filter by query
           if (filters.q) {
             const q = filters.q.toLowerCase();
             filteredOER = filteredOER.filter(b => 
@@ -268,7 +260,6 @@ export default function Library() {
             );
           }
           
-          // Handle pagination for OER
           const start = currentOffset;
           const end = start + LIMIT;
           openStaxData = filteredOER.slice(start, end);
@@ -357,7 +348,6 @@ export default function Library() {
         combinedData = [...dbData, ...openStaxData];
         setTotalCount(dbCount + openStaxCount);
       } else {
-        // When merging, we use the sum of counts as a reasonable estimate
         const seenTitles = new Set(dbData.map(b => b.title?.toLowerCase()));
         const uniqueDSpace = dspaceData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
         const uniqueOpenStax = openStaxData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
@@ -368,7 +358,6 @@ export default function Library() {
         
         combinedData = [...dbData, ...uniqueDSpace, ...uniqueOpenStax, ...uniqueGutenberg, ...uniqueOpenStaxApi, ...uniqueOpenLibrary, ...uniqueArxiv];
         
-        // Only update total count on initial load to avoid jumping numbers
         if (!isLoadMore) {
           setTotalCount(dbCount + dspaceCount + openStaxCount + gutenbergCount + openStaxApiCount + openLibraryCount + arxivCount);
         }
@@ -392,7 +381,6 @@ export default function Library() {
     }
   }, [filters, sortBy]);
 
-  // Update sort when query changes
   useEffect(() => {
     if (filters.q && sortBy === 'title') {
       setSortBy('relevance');
@@ -401,7 +389,6 @@ export default function Library() {
     }
   }, [filters.q, sortBy]);
 
-  // Infinite Scroll Observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -419,14 +406,12 @@ export default function Library() {
     return () => observer.disconnect();
   }, [loading, publications.length, totalCount, fetchPublications]);
 
-  // Initial Fetch & Filter Change
   useEffect(() => {
     offsetRef.current = 0;
     setOffset(0);
     fetchPublications(false);
   }, [fetchPublications]);
 
-  // Fetch Suggestions
   useEffect(() => {
     const query = isAiSearch ? aiQuery : filters.q;
     if (!query || query.length < 3) {
@@ -450,7 +435,6 @@ export default function Library() {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  // Sync filters to URL
   useEffect(() => {
     const params = {};
     Object.entries(filters).forEach(([k, v]) => {
@@ -500,7 +484,6 @@ export default function Library() {
 
       const result = await geminiService.searchBooks(aiQuery);
       
-      // Update filters based on AI response
       setSemanticResults(null);
       setFilters(prev => ({
         ...prev,
@@ -509,7 +492,6 @@ export default function Library() {
         level: result.level !== 'All' ? result.level : 'All'
       }));
       
-      // Switch back to standard search view to show results
       setIsAiSearch(false);
       setAiQuery('');
     } catch (err) {
@@ -520,7 +502,6 @@ export default function Library() {
     }
   };
 
-  // Local filtering logic
   const filteredPublications = publications.filter(pub => {
     const matchesCategory = localCategory === 'All' || 
       pub.category?.toLowerCase() === localCategory.toLowerCase() ||
@@ -531,9 +512,15 @@ export default function Library() {
   });
 
   return (
-    <div className={styles.libraryContainer}>
+    <div className="relative pt-24 lg:pt-28 pb-32 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 w-full min-h-screen bg-slate-50 flex flex-col md:flex-row gap-8">
       {/* SIDEBAR FILTERS */}
-      <aside className={`${styles.sidebar} ${isMobileFiltersOpen ? styles.mobileOpen : ''}`}>
+      <aside className={`fixed inset-y-0 left-0 z-40 w-80 bg-white border-r border-slate-200 p-6 overflow-y-auto transform transition-transform duration-300 md:relative md:translate-x-0 md:bg-transparent md:border-none md:p-0 md:overflow-visible md:w-72 shrink-0 ${isMobileFiltersOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
+        <div className="md:hidden flex items-center justify-between mb-6">
+          <h2 className="font-bold text-xl">Filters</h2>
+          <button onClick={() => setIsMobileFiltersOpen(false)} className="p-2 bg-slate-100 rounded-full text-slate-500">
+             <AlertCircle size={20} />
+          </button>
+        </div>
         <FilterPanel 
           filters={filters}
           onFilterChange={handleFilterChange}
@@ -543,14 +530,14 @@ export default function Library() {
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className={styles.main}>
+      <main className="flex-1 w-full min-w-0">
         <DigitizationRequestModal 
           isOpen={isDigitizationModalOpen} 
           onClose={() => setIsDigitizationModalOpen(false)} 
         />
         {/* Mobile Filter Toggle */}
         <button 
-          className={styles.mobileFilterToggle}
+          className="md:hidden flex items-center justify-center gap-2 w-full py-3 bg-white border border-slate-200 rounded-xl mb-6 text-sm font-bold shadow-sm"
           onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
         >
           <Filter size={18} /> Filters
@@ -558,15 +545,15 @@ export default function Library() {
 
         {/* Modern Tabs for Source Filtering */}
         <div className="flex overflow-x-auto pb-2 mb-4 scrollbar-hide">
-          <div className="flex items-center gap-2 p-1 bg-bg-subtle rounded-2xl w-fit whitespace-nowrap">
+          <div className="flex items-center gap-2 p-1 bg-white border border-slate-200 rounded-2xl w-fit whitespace-nowrap shadow-sm">
             {['All', 'Featured Items', 'Dare Library', 'Research', 'Partner Resources', 'Project Gutenberg'].map((source) => (
               <button
                 key={source}
                 onClick={() => handleFilterChange('source', source)}
-                className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${
+                className={`px-5 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${
                   filters.source === source 
-                    ? 'bg-bg-base text-primary shadow-sm' 
-                    : 'text-text-muted hover:text-text-main'
+                    ? 'bg-slate-900 text-white shadow-sm' 
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 {source}
@@ -579,12 +566,12 @@ export default function Library() {
         {Object.keys(bookProgress).length > 0 && filters.source === 'All' && !filters.q && (
           <div className="mb-12">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+              <div className="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center text-teal-600">
                 <History size={20} />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-text-main">Continue Learning</h2>
-                <p className="text-xs font-bold text-text-muted uppercase tracking-widest">Pick up where you left off</p>
+                <h2 className="text-xl font-bold text-slate-900">Continue Learning</h2>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Pick up where you left off</p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -611,8 +598,8 @@ export default function Library() {
               onClick={() => setLocalCategory(cat)}
               className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${
                 localCategory === cat
-                  ? 'bg-primary border-primary text-white shadow-md'
-                  : 'bg-bg-base border-border text-text-muted hover:border-primary/50'
+                  ? 'bg-teal-500 border-teal-500 text-white shadow-md'
+                  : 'bg-white border-slate-200 text-slate-500 hover:border-teal-500/50 hover:text-teal-600'
               }`}
             >
               {cat}
@@ -621,122 +608,127 @@ export default function Library() {
         </div>
 
         {/* Search Header */}
-        <div className={`${styles.searchHeader} relative overflow-hidden rounded-3xl p-8 mb-8`}>
+        <div className="relative overflow-hidden rounded-3xl p-8 mb-8 bg-slate-900 border border-slate-800 shadow-2xl">
           {/* Real Book Background Image */}
           <div className="absolute inset-0 z-0">
             <img 
               src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=2000" 
               alt="Library Search Background" 
-              className="w-full h-full object-cover opacity-10"
+              className="w-full h-full object-cover opacity-20 mix-blend-overlay"
               referrerPolicy="no-referrer"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-bg-subtle/90 via-bg-subtle/80 to-bg-subtle/90" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90" />
           </div>
 
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-text-main">Library</h1>
-              <div className="flex items-center gap-2 bg-bg-subtle p-1 rounded-lg">
-                <button 
-                  onClick={() => setUseSemanticSearch(false)}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${!useSemanticSearch ? 'bg-bg-base text-secondary shadow-sm' : 'text-text-muted'}`}
-                >
-                  Keyword
-                </button>
-                <button 
-                  onClick={() => setUseSemanticSearch(true)}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${useSemanticSearch ? 'bg-bg-base text-secondary shadow-sm' : 'text-text-muted'}`}
-                >
-                  Semantic (AI)
-                </button>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <h1 className="text-3xl font-black text-white px-2">Library</h1>
+                <div className="flex items-center gap-2 bg-slate-800/50 p-1 rounded-xl backdrop-blur-sm border border-slate-700/50">
+                  <button 
+                    onClick={() => setUseSemanticSearch(false)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${!useSemanticSearch ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-300'}`}
+                  >
+                    Keyword
+                  </button>
+                  <button 
+                    onClick={() => setUseSemanticSearch(true)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${useSemanticSearch ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-300'}`}
+                  >
+                    Semantic (AI)
+                  </button>
+                </div>
               </div>
+              {semanticResults && (
+                <button 
+                  onClick={() => {
+                    setSemanticResults(null);
+                    fetchPublications(false);
+                  }}
+                  className="text-xs font-bold text-amber-400 hover:underline"
+                >
+                  Clear AI Results
+                </button>
+              )}
             </div>
-            {semanticResults && (
-              <button 
-                onClick={() => {
-                  setSemanticResults(null);
+            
+            <div className="mt-6 max-w-3xl">
+              <SearchBar 
+                value={isAiSearch ? aiQuery : localSearch}
+                onChange={(val) => isAiSearch ? setAiQuery(val) : setLocalSearch(val)}
+                onSearch={isAiSearch ? handleAiSearch : () => {
+                  handleFilterChange('q', localSearch);
                   fetchPublications(false);
                 }}
-                className="text-xs font-bold text-secondary hover:underline"
-              >
-                Clear AI Results
-              </button>
-            )}
-          </div>
-          <SearchBar 
-            value={isAiSearch ? aiQuery : localSearch}
-            onChange={(val) => isAiSearch ? setAiQuery(val) : setLocalSearch(val)}
-            onSearch={isAiSearch ? handleAiSearch : () => {
-              handleFilterChange('q', localSearch);
-              fetchPublications(false);
-            }}
-            isAiMode={isAiSearch}
-            onToggleAi={() => setIsAiSearch(!isAiSearch)}
-            aiThinking={aiThinking}
-            suggestions={suggestions}
-            onSelectSuggestion={(term) => {
-              if (isAiSearch) {
-                setAiQuery(term);
-              } else {
-                setLocalSearch(term);
-                handleFilterChange('q', term);
-              }
-              setSuggestions([]);
-            }}
-            showSuggestions={showSuggestions}
-            setShowSuggestions={setShowSuggestions}
-          />
+                isAiMode={isAiSearch}
+                onToggleAi={() => setIsAiSearch(!isAiSearch)}
+                aiThinking={aiThinking}
+                suggestions={suggestions}
+                onSelectSuggestion={(term) => {
+                  if (isAiSearch) {
+                    setAiQuery(term);
+                  } else {
+                    setLocalSearch(term);
+                    handleFilterChange('q', term);
+                  }
+                  setSuggestions([]);
+                }}
+                showSuggestions={showSuggestions}
+                setShowSuggestions={setShowSuggestions}
+              />
+            </div>
           </div>
         </div>
 
         {error && (
-          <div className={styles.errorBanner}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <AlertCircle size={20} />
-              <p>{error}</p>
+          <div className="bg-red-50 border border-red-200 text-red-800 p-6 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <AlertCircle size={24} className="text-red-500" />
+              <p className="font-medium">{error}</p>
             </div>
-            <button onClick={() => fetchPublications(false)}>Try Again</button>
-            {error.includes('Gutenberg') && <Link to="/ai-tools" className={styles.backLink}>Explore AI Tools</Link>}
+            <div className="flex items-center gap-3 shrink-0">
+               <button className="px-4 py-2 bg-white border border-red-200 text-red-700 font-bold hover:bg-red-50 rounded-xl transition-colors shadow-sm" onClick={() => fetchPublications(false)}>Try Again</button>
+               {error.includes('Gutenberg') && <Link to="/ai-tools" className="px-4 py-2 bg-red-600 text-white font-bold hover:bg-red-700 rounded-xl transition-colors shadow-sm">Explore AI Tools</Link>}
+            </div>
           </div>
         )}
 
         {/* Controls */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <span className="text-xs font-mono font-bold text-text-muted uppercase tracking-widest">
+            <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest">
               {totalCount} Titles Found
             </span>
-            <div className="h-4 w-[1px] bg-border" />
-            <div className="flex items-center gap-2">
+            <div className="h-4 w-[1px] bg-slate-300" />
+            <div className="flex items-center gap-2 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
               <button 
-                className={`p-2 rounded-lg transition-all ${viewMode === 'tile' ? 'bg-primary text-white' : 'text-text-muted hover:bg-bg-subtle'}`}
+                className={`p-1.5 rounded-lg transition-all ${viewMode === 'tile' ? 'bg-slate-100 text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}
                 onClick={() => setViewMode('tile')}
                 title="Modern Tile View"
               >
-                <LayoutGrid size={18} />
+                <LayoutGrid size={16} />
               </button>
               <button 
-                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-text-muted hover:bg-bg-subtle'}`}
+                className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-slate-100 text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}
                 onClick={() => setViewMode('grid')}
                 title="Compact Grid View"
               >
-                <Sparkles size={18} />
+                <Sparkles size={16} />
               </button>
               <button 
-                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-primary text-white' : 'text-text-muted hover:bg-bg-subtle'}`}
+                className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-slate-100 text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}
                 onClick={() => setViewMode('list')}
                 title="List View"
               >
-                <ListIcon size={18} />
+                <ListIcon size={16} />
               </button>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Sort By</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sort By</span>
             <select 
-              className="bg-bg-base border border-border rounded-xl px-4 py-2 text-sm font-medium outline-none focus:border-primary transition-all text-text-main"
+              className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 outline-none focus:border-teal-500 focus:ring-4 ring-teal-500/20 transition-all shadow-sm"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
@@ -751,9 +743,9 @@ export default function Library() {
 
         {/* Results */}
         <div className={
-          viewMode === 'tile' ? styles.resultsTiles : 
-          viewMode === 'grid' ? styles.resultsGrid : 
-          styles.resultsList
+          viewMode === 'tile' ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6" : 
+          viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" : 
+          "flex flex-col gap-4"
         }>
           {loading && publications.length === 0 ? (
             // Skeletons
@@ -770,13 +762,13 @@ export default function Library() {
               />
             ))
           ) : (
-            <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-bg-subtle rounded-3xl border-2 border-dashed border-border">
-              <div className="w-16 h-16 bg-bg-base rounded-2xl shadow-sm flex items-center justify-center text-text-muted mb-4">
+            <div className="col-span-full py-32 flex flex-col items-center justify-center text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
+              <div className="w-20 h-20 bg-slate-50 rounded-3xl shadow-inner flex items-center justify-center text-slate-400 mb-6 border border-slate-100">
                 <AlertCircle size={32} />
               </div>
-              <h3 className="text-lg font-bold text-text-main mb-1">No books found</h3>
-              <p className="text-text-muted max-w-xs">
-                We couldn't find any books matching your current search or filters.
+              <h3 className="text-xl font-black text-slate-900 mb-2">No books found</h3>
+              <p className="text-slate-500 max-w-sm text-base">
+                We couldn't find any resources matching your current search or format filters.
               </p>
               <button 
                 onClick={() => {
@@ -784,7 +776,7 @@ export default function Library() {
                   setLocalCategory('All');
                   clearFilters();
                 }}
-                className="mt-6 px-6 py-2 bg-primary text-white rounded-xl font-bold text-sm hover:scale-105 transition-all"
+                className="mt-8 px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-base hover:bg-slate-800 hover:-translate-y-0.5 transition-all shadow-md active:translate-y-0"
               >
                 Clear All Filters
               </button>
@@ -793,10 +785,10 @@ export default function Library() {
         </div>
 
         {/* Infinite Scroll Sentinel */}
-        <div ref={loadMoreRef} className={styles.loadMoreContainer}>
+        <div ref={loadMoreRef} className="py-12 flex justify-center w-full">
           {loading && publications.length > 0 && (
-            <div className={styles.loadingMore}>
-              <div className={styles.spinnerSmall} />
+            <div className="inline-flex items-center gap-3 px-6 py-3 bg-white border border-slate-200 rounded-full shadow-sm text-sm font-bold text-slate-600">
+              <div className="w-4 h-4 border-2 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
               <span>Loading more titles...</span>
             </div>
           )}

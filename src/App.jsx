@@ -2,13 +2,12 @@ import { Outlet } from "react-router-dom"
 import NavBar from "./components/layout/NavBar"
 import Footer from "./components/layout/Footer"
 import { isSupabaseConfigured } from "./lib/supabase"
-import styles from "./App.module.css"
 
 export default function App() {
   const isConfigured = isSupabaseConfigured();
 
   return (
-    <div className={styles.appContainer}>
+    <div className="min-h-screen flex flex-col font-sans bg-slate-50 text-slate-900 selection:bg-teal-500/30">
       {!isConfigured && (
         <div className="bg-amber-100 border-b border-amber-200 text-amber-800 px-4 py-3 text-center text-sm">
           <strong>Setup Required:</strong> Missing Vercel Environment Variables (`VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY`). 
@@ -16,7 +15,7 @@ export default function App() {
         </div>
       )}
       <NavBar />
-      <main className={styles.mainContent}>
+      <main className="flex-1 w-full flex flex-col relative w-full h-full">
         <Outlet />
       </main>
       <Footer />

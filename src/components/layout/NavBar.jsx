@@ -2,111 +2,26 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Menu, 
-  X, 
-  User, 
-  ChevronDown, 
-  LogOut, 
-  BookOpen, 
-  History, 
-  Settings, 
-  LayoutDashboard,
-  Microscope,
-  Sprout,
-  Stethoscope,
-  Briefcase,
-  GraduationCap,
-  Cog,
-  Scale,
-  Feather,
-  Cpu,
-  Flame,
-  Zap,
-  Trophy,
-  Globe,
-  Compass,
-  Library,
-  Book,
-  Search,
-  ArrowRight,
-  Database,
-  Sparkles,
-  Building2
+  Menu, X, User, ChevronDown, LogOut, History, Settings, 
+  LayoutDashboard, Trophy, Search, Sparkles, Library, FlaskConical, Zap
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useGamification } from '../../context/GamificationContext';
 import GlobalSearch from './GlobalSearch';
-import ThemeToggle from '../common/ThemeToggle';
 import LogoIcon from '../common/LogoIcon';
-import styles from './NavBar.module.css';
-
-const NAV_GROUPS = [
-  {
-    id: 'explore',
-    label: 'Explore',
-    icon: <Compass size={18} />,
-    links: [
-      { to: '/library', label: 'Main Library', icon: <Library size={16} /> },
-      { to: '/openstax', label: 'Partner Resources', icon: <Globe size={16} /> },
-      { to: '/gutenberg', label: 'Gutenberg Books', icon: <Book size={16} /> },
-      { to: '/search', label: 'National Search', icon: <Search size={16} /> },
-    ]
-  },
-  {
-    id: 'portals',
-    label: 'Portals',
-    icon: <LayoutDashboard size={18} />,
-    links: [
-      { to: '/ai-textbooks', label: 'AI Textbooks', icon: <Cpu size={16} /> },
-      { to: '/research', label: 'Research Portal', icon: <Microscope size={16} /> },
-      { to: '/institutions', label: 'Institutions', icon: <Building2 size={16} /> },
-      { to: '/vocational', label: 'Vocational Hub', icon: <Cog size={16} /> },
-      { to: '/institutional', label: 'Institutional Admin', icon: <Briefcase size={16} /> },
-      { to: '/dspace', label: 'DSpace Submission', icon: <Database size={16} /> },
-      { to: '/dspace-explorer', label: 'DSpace Explorer', icon: <Search size={16} /> },
-      { to: '/hbc-transformer', label: 'HBC Transformer', icon: <Sparkles size={16} /> },
-      { to: '/ai-tools', label: 'AI Models & Tools', icon: <Zap size={16} /> },
-    ]
-  }
-];
-
-const FACULTIES = [
-  { name: 'STEM', icon: Microscope, id: 'stem', color: '#3b82f6' },
-  { name: 'Agriculture', icon: Sprout, id: 'agriculture', color: '#10b981' },
-  { name: 'Health', icon: Stethoscope, id: 'health', color: '#ef4444' },
-  { name: 'Business', icon: Briefcase, id: 'business', color: '#f59e0b' },
-  { name: 'Education', icon: GraduationCap, id: 'education', color: '#8b5cf6' },
-  { name: 'Engineering', icon: Cog, id: 'engineering', color: '#64748b' },
-  { name: 'Law', icon: Scale, id: 'law', color: '#1e293b' },
-  { name: 'Humanities', icon: Feather, id: 'humanities', color: '#ec4899' },
-  { name: 'AI & Tech', icon: Cpu, id: 'ai-future-tech', color: '#06b6d4' },
-];
 
 export default function NavBar() {
-  const { user, profile, institution, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { xp, streak, level, getLevelInfo } = useGamification();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isHidden, setIsHidden] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const isMobileMenuOpenRef = useRef(false);
-  const [activeGroup, setActiveGroup] = useState(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const navGroupsRef = useRef(null);
-  const prevScrollY = useRef(0);
   const location = useLocation();
 
   useEffect(() => {
-    isMobileMenuOpenRef.current = isMobileMenuOpen;
-  }, [isMobileMenuOpen]);
-
-  useEffect(() => {
     const handleScroll = () => {
-      if (isMobileMenuOpenRef.current) return;
-      const currentScrollY = window.scrollY;
-      setIsScrolled(currentScrollY > 20);
-      setIsHidden(currentScrollY > prevScrollY.current && currentScrollY > 100);
-      prevScrollY.current = currentScrollY;
+      setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -117,9 +32,6 @@ export default function NavBar() {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsProfileOpen(false);
       }
-      if (navGroupsRef.current && !navGroupsRef.current.contains(event.target)) {
-        setActiveGroup(null);
-      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -127,350 +39,170 @@ export default function NavBar() {
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
-    setActiveGroup(null);
     setIsProfileOpen(false);
   }, [location]);
 
-  const toggleGroup = (groupId) => {
-    setActiveGroup(activeGroup === groupId ? null : groupId);
-    setIsProfileOpen(false);
-  };
-
-  const toggleProfile = () => {
-    setIsProfileOpen(!isProfileOpen);
-    setActiveGroup(null);
-  };
-
-  const isActive = (path) => location.pathname === path;
-
   return (
-    <>
-      <nav className={`${styles.nav} ${isScrolled ? styles.scrolled : ''} ${isHidden ? styles.hidden : ''}`}>
-        {/* Knowledge Progress Bar */}
-        {user && (
-          <div className={styles.navProgressRail}>
-            <motion.div 
-              className={styles.navProgressBar}
-              initial={{ width: 0 }}
-              animate={{ width: `${getLevelInfo().progress}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
-            />
-          </div>
-        )}
-        
-        <div className={styles.container}>
-          {/* Logo */}
-          <Link to="/" className={styles.logoGroup}>
-            <div className={styles.logoWrapper}>
-              <LogoIcon size={32} className={styles.logoIcon} />
-            </div>
-            <div className={styles.logoText}>
-              <span className={styles.dare}>DARE</span>
-              <span className={styles.libraryLabel}>Library</span>
-            </div>
-          </Link>
+    <nav 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm py-2' : 'bg-transparent py-4'
+      }`}
+    >
+      {/* Knowledge Progress Bar (Top Edge) */}
+      {user && (
+        <div className="absolute top-0 left-0 w-full h-1 bg-slate-100">
+          <motion.div 
+            className="h-full bg-gradient-to-r from-teal-400 to-emerald-500"
+            initial={{ width: 0 }}
+            animate={{ width: `${getLevelInfo().progress}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          />
+        </div>
+      )}
 
-          {/* Desktop Navigation */}
-          <div className={styles.desktopLinks} ref={navGroupsRef}>
-            {NAV_GROUPS.map((group) => (
-              <div key={group.id} className={styles.navGroup}>
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-8 mt-1">
+        <Link to="/" className="flex items-center gap-3 shrink-0 focus:outline-none">
+          <div className={`p-2 rounded-xl transition-all ${isScrolled ? 'bg-teal-50 text-teal-600' : 'bg-slate-900 text-white'}`}>
+             <LogoIcon size={24} />
+          </div>
+          <div className="hidden sm:flex flex-col">
+            <span className="font-black text-lg leading-none tracking-tight text-slate-900">DARE</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Library</span>
+          </div>
+        </Link>
+
+        {/* Desktop Main Links */}
+        <div className="hidden md:flex items-center gap-1">
+          <Link to="/library" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
+            <Library size={16} /> Browse
+          </Link>
+          <Link to="/tutor" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
+            <Sparkles size={16} className="text-amber-500" /> DARA Tutor
+          </Link>
+          <Link to="/research" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
+            <FlaskConical size={16} /> Research
+          </Link>
+        </div>
+
+        {/* Search Bar - Center */}
+        <div className="flex-1 max-w-md hidden lg:block">
+          <GlobalSearch />
+        </div>
+
+        {/* Right Auth/Profile Config */}
+        <div className="flex items-center gap-4 shrink-0">
+          {user ? (
+            <>
+              <div className="hidden sm:flex items-center gap-3 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+                <div className="flex items-center gap-1 text-xs font-bold text-orange-600" title="Daily Streak">
+                  🔥 {streak}
+                </div>
+                <div className="w-[1px] h-4 bg-slate-300"></div>
+                <div className="flex items-center gap-1 text-xs font-bold text-blue-600" title="Experience Points">
+                  <Zap size={14} /> {xp}
+                </div>
+                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-900 text-white text-[10px] font-black">
+                  {level}
+                </div>
+              </div>
+
+              <div className="relative" ref={dropdownRef}>
                 <button 
-                  className={`${styles.groupTrigger} ${activeGroup === group.id ? styles.active : ''}`}
-                  onClick={() => toggleGroup(group.id)}
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2 focus:outline-none"
                 >
-                  <span className={styles.groupIcon}>{group.icon}</span>
-                  <span>{group.label}</span>
-                  <ChevronDown size={14} className={`${styles.chevron} ${activeGroup === group.id ? styles.rotate : ''}`} />
+                  <div className="w-10 h-10 rounded-full bg-teal-100 border border-teal-200 flex items-center justify-center text-teal-700 font-bold transition-transform hover:scale-105 active:scale-95">
+                    {profile?.first_name?.[0]?.toUpperCase() || <User size={20} />}
+                  </div>
                 </button>
 
                 <AnimatePresence>
-                  {activeGroup === group.id && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10, scale: 0.98, x: "-50%" }}
-                      animate={{ opacity: 1, y: 0, scale: 1, x: "-50%" }}
-                      exit={{ opacity: 0, y: 10, scale: 0.98, x: "-50%" }}
-                      className={styles.groupDropdown}
+                  {isProfileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-100 p-2"
                     >
-                      <div className={styles.dropdownGrid}>
-                        <div className={styles.dropdownCol}>
-                          <div className={styles.dropdownTitle}>
-                            {group.icon}
-                            <span>{group.label}</span>
-                          </div>
-                          <div className={styles.linksGrid}>
-                            {group.links.map((link) => (
-                              <Link key={link.to} to={link.to} className={`${styles.groupLink} ${isActive(link.to) ? styles.active : ''}`}>
-                                <div className={styles.linkIcon}>{link.icon}</div>
-                                <span>{link.label}</span>
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                        <div className={styles.dropdownCol}>
-                          <div className={styles.dropdownTitle}>Featured</div>
-                          <div className={styles.featuredCard}>
-                            <div className={styles.featuredTitle}>Curated Collections</div>
-                            <p className={styles.featuredDesc}>Zimbabwean academic resources and international journals.</p>
-                            <Link to="/library?sort=featured" className={styles.featuredAction}>
-                              <span>Browse Featured</span>
-                              <ArrowRight size={14} />
-                            </Link>
-                          </div>
-                        </div>
+                      <div className="px-4 py-3 border-b border-slate-100 mb-2">
+                        <p className="font-bold text-slate-900 truncate">{profile?.first_name || 'Student'}</p>
+                        <p className="text-xs text-slate-500 truncate">{user.email}</p>
                       </div>
+                      <Link to="/dashboard" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
+                        <LayoutDashboard size={16} /> Dashboard
+                      </Link>
+                      <Link to="/history" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
+                        <History size={16} /> Reading History
+                      </Link>
+                      <Link to="/leaderboard" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
+                        <Trophy size={16} /> Leaderboard
+                      </Link>
+                      <Link to="/settings" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
+                        <Settings size={16} /> Settings
+                      </Link>
+                      <div className="h-px bg-slate-100 my-2"></div>
+                      <button onClick={signOut} className="w-full flex items-center gap-3 px-4 py-2 hover:bg-red-50 rounded-xl text-sm font-medium text-red-600 transition-colors text-left">
+                        <LogOut size={16} /> Sign Out
+                      </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-            ))}
-            <Link to="/ai-tools" className={`${styles.link} ${isActive('/ai-tools') ? styles.active : ''}`}>
-              <Sparkles size={16} className={styles.aiIcon} />
-              <span>AI Tools</span>
-            </Link>
-            <Link to="/author" className={`${styles.link} ${isActive('/author') ? styles.active : ''}`}>Publish</Link>
-          </div>
-
-          {/* Search */}
-          <div className={styles.searchWrapper}>
-            <GlobalSearch />
-          </div>
-
-          {/* Right Section */}
-          <div className={styles.authSection}>
-            {user ? (
-              <>
-                <div className={styles.gamificationStats}>
-                  <div className={styles.statPill} title="Daily Streak">
-                    <Flame size={16} className={streak > 0 ? styles.activeStreak : ''} />
-                    <span>{streak}</span>
-                  </div>
-                  <div className={styles.statPill} title="Experience Points">
-                    <Zap size={16} className={styles.xpIcon} />
-                    <span>{xp}</span>
-                  </div>
-                  <div className={styles.levelPill}>
-                    <span className={styles.levelNum}>{level}</span>
-                  </div>
-                </div>
-
-                <div className={styles.userProfile} ref={dropdownRef}>
-                  <button className={styles.profileTrigger} onClick={toggleProfile}>
-                    <div className={styles.avatar}>
-                      {profile?.first_name?.[0] || <User size={18} />}
-                    </div>
-                    <div className={styles.userInfo}>
-                      <p className={styles.userName}>{profile?.first_name || user.email.split('@')[0]}</p>
-                      <div className={styles.instInfo}>
-                        <span className={styles.instName}>{institution?.institution_name || 'Individual'}</span>
-                        <span className={styles.tierBadge}>{profile?.role || 'Student'}</span>
-                      </div>
-                    </div>
-                    <ChevronDown size={14} className={`${styles.chevron} ${isProfileOpen ? styles.rotate : ''}`} />
-                  </button>
-
-                  <AnimatePresence>
-                    {isProfileOpen && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className={styles.dropdown}
-                      >
-                        <Link to="/dashboard" className={styles.dropdownItem}>
-                          <LayoutDashboard size={16} />
-                          <span>Dashboard</span>
-                        </Link>
-                        <Link to="/leaderboard" className={styles.dropdownItem}>
-                          <Trophy size={16} />
-                          <span>Leaderboard</span>
-                        </Link>
-                        <Link to="/history" className={styles.dropdownItem}>
-                          <History size={16} />
-                          <span>Reading History</span>
-                        </Link>
-                        <Link to="/settings" className={styles.dropdownItem}>
-                          <Settings size={16} />
-                          <span>Settings</span>
-                        </Link>
-                        <div className={styles.divider} />
-                        <button onClick={signOut} className={`${styles.dropdownItem} ${styles.signOut}`}>
-                          <LogOut size={16} />
-                          <span>Sign Out</span>
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </>
-            ) : (
-              <div className={styles.authButtons}>
-                <Link to="/login" className={styles.signIn}>Sign In</Link>
-                <Link to="/register" className={styles.register}>Join DARE</Link>
-              </div>
-            )}
-
-            <div className="hidden md:block">
-              <ThemeToggle />
-            </div>
-
-            <button 
-              className={styles.mobileToggle}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Key Areas Rail */}
-        <div className={styles.keyAreasBar}>
-          <div className={styles.keyAreasContainer}>
-            {FACULTIES.map((faculty) => (
-              <Link 
-                key={faculty.id} 
-                to={`/library?faculty=${faculty.name}`} 
-                className={styles.keyAreaItem}
-              >
-                <div className={styles.keyAreaIcon} style={{ backgroundColor: `${faculty.color}15`, color: faculty.color }}>
-                  <faculty.icon size={16} />
-                </div>
-                <span className={styles.keyAreaName}>{faculty.name}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <>
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className={styles.mobileOverlay}
-                onClick={() => setIsMobileMenuOpen(false)}
-              />
-              <motion.div 
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className={styles.mobileDrawer}
-              >
-                <div className={styles.mobileContent}>
-                  {user && (
-                    <div className={styles.mobileUserCard}>
-                      <div className={styles.mobileUserHeader}>
-                        <div className={styles.mobileAvatar}>
-                          {profile?.first_name?.[0] || <User size={24} />}
-                        </div>
-                        <div className={styles.mobileUserInfo}>
-                          <p className={styles.mobileUserName}>{profile?.first_name || user.email.split('@')[0]}</p>
-                          <p className={styles.mobileUserEmail}>{user.email}</p>
-                        </div>
-                      </div>
-                      
-                      <div className={styles.mobileStatsGrid}>
-                        <div className={styles.mobileStatBox}>
-                          <Flame size={20} className={streak > 0 ? styles.activeStreak : ''} />
-                          <span className={styles.mobileStatVal}>{streak}</span>
-                          <span className={styles.mobileStatLabel}>Streak</span>
-                        </div>
-                        <div className={styles.mobileStatBox}>
-                          <Zap size={20} className={styles.xpIcon} />
-                          <span className={styles.mobileStatVal}>{xp}</span>
-                          <span className={styles.mobileStatLabel}>XP</span>
-                        </div>
-                        <div className={styles.mobileStatBox}>
-                          <Trophy size={20} className="text-amber-500" />
-                          <span className={styles.mobileStatVal}>{level}</span>
-                          <span className={styles.mobileStatLabel}>Level</span>
-                        </div>
-                      </div>
-
-                      <div className={styles.mobileLevelProgress}>
-                        <div className={styles.mobileLevelInfo}>
-                          <span>{getLevelInfo().current.title}</span>
-                          <span className={styles.textMuted}>Next: {getLevelInfo().next.title}</span>
-                        </div>
-                        <div className={styles.mobileProgressBarRail}>
-                          <motion.div 
-                            className={styles.mobileProgressBar}
-                            initial={{ width: 0 }}
-                            animate={{ width: `${getLevelInfo().progress}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className={styles.mobileSection}>
-                    <h3 className={styles.mobileSectionTitle}>Explore Library</h3>
-                    <div className={styles.mobileNavGrid}>
-                      <Link to="/ai-tools" className={styles.mobileNavItem}>
-                        <div className={styles.mobileNavIcon} style={{ color: 'var(--amber)' }}><Zap size={20} /></div>
-                        <span>AI Tools</span>
-                      </Link>
-                      {NAV_GROUPS.flatMap(g => g.links).map(link => (
-                        <Link key={link.to} to={link.to} className={styles.mobileNavItem}>
-                          <div className={styles.mobileNavIcon}>{link.icon}</div>
-                          <span>{link.label}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className={styles.mobileSection}>
-                    <h3 className={styles.mobileSectionTitle}>Categories</h3>
-                    <div className={styles.mobileKeyAreasGrid}>
-                      {FACULTIES.map((faculty) => (
-                        <Link 
-                          key={faculty.id} 
-                          to={`/library?faculty=${faculty.name}`} 
-                          className={styles.mobileKeyAreaItem}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <div className={styles.mobileKeyAreaIcon} style={{ backgroundColor: `${faculty.color}15`, color: faculty.color }}>
-                            <faculty.icon size={18} />
-                          </div>
-                          <span className={styles.mobileKeyAreaName}>{faculty.name}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className={styles.mobileSection}>
-                    <h3 className={styles.mobileSectionTitle}>Theme</h3>
-                    <div className="px-2">
-                      <ThemeToggle />
-                    </div>
-                  </div>
-
-                  {!user && (
-                    <div className={styles.mobileAuth}>
-                      <Link to="/login" className={styles.mobileSignIn}>Sign In</Link>
-                      <Link to="/register" className={styles.mobileRegister}>Join DARE</Link>
-                    </div>
-                  )}
-
-                  {user && (
-                    <div className={styles.mobileSection}>
-                      <h3 className={styles.mobileSectionTitle}>Account</h3>
-                      <Link to="/dashboard" className={styles.mobileLink}>Dashboard</Link>
-                      <Link to="/profile" className={styles.mobileLink}>Profile</Link>
-                      <Link to="/settings" className={styles.mobileLink}>Settings</Link>
-                      <button onClick={signOut} className={`${styles.mobileLink} ${styles.signOut}`} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.5rem 0' }}>
-                        Sign Out
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
             </>
+          ) : (
+            <div className="hidden sm:flex items-center gap-3">
+              <Link to="/login" className="px-5 py-2.5 rounded-full font-bold text-sm text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer border border-transparent">
+                Sign In
+              </Link>
+              <Link to="/register" className="px-5 py-2.5 rounded-full font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-transform active:scale-95 cursor-pointer shadow-sm border border-slate-800">
+                Join DARE
+              </Link>
+            </div>
           )}
-        </AnimatePresence>
-      </nav>
-    </>
+
+          <button 
+            className="sm:hidden focus:outline-none p-2 text-slate-600"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Dropdown */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="sm:hidden bg-white border-b border-slate-200 px-6 py-6 overflow-hidden shadow-xl"
+          >
+            <div className="flex flex-col gap-4">
+              <div className="block lg:hidden mb-4 border border-slate-200 rounded-xl p-2 bg-slate-50">
+                <GlobalSearch />
+              </div>
+              <Link to="/library" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Library size={20} /> Browse Library</Link>
+              <Link to="/tutor" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Sparkles size={20} className="text-amber-500" /> DARA AI Tutor</Link>
+              <Link to="/research" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><FlaskConical size={20} /> Research Portal</Link>
+              <hr className="border-slate-100 my-2" />
+              {!user ? (
+                <div className="flex flex-col gap-3 mt-2">
+                  <Link to="/login" className="w-full py-3 rounded-full font-bold text-center bg-slate-100 text-slate-900 hover:bg-slate-200 transition-colors">Sign In</Link>
+                  <Link to="/register" className="w-full py-3 rounded-full font-bold text-center bg-teal-500 text-white hover:bg-teal-600 transition-colors shadow-md text-lg">Join DARE</Link>
+                </div>
+              ) : (
+                 <>
+                   <Link to="/dashboard" className="font-bold text-lg text-slate-900 py-2">Dashboard</Link>
+                   <Link to="/settings" className="font-bold text-lg text-slate-900 py-2">Settings</Link>
+                   <button onClick={signOut} className="font-bold text-lg text-red-500 text-left py-2">Sign Out</button>
+                 </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
   );
 }
