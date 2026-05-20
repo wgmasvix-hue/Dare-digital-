@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Settings, Users, FileText, Bot, Bell, Search,
   Plus, Download, ChevronRight, ChevronDown, Check, AlertCircle,
   BookOpen, GraduationCap, Building2, Globe, Mail, Phone, ExternalLink,
-  MoreHorizontal, Filter, ArrowRight, X, Loader2, Upload
+  MoreHorizontal, Filter, ArrowRight, X, Loader2, Upload, Sparkles
 } from 'lucide-react';
 import { geminiService } from '../services/geminiService';
 import { supabase } from '../lib/supabase';

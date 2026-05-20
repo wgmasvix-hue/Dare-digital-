@@ -15,31 +15,35 @@ export const supabase = isSupabaseConfigured()
   : (null as unknown as ReturnType<typeof createClient>); // Casting to appease TS, but guarded by isSupabaseConfigured in components
 
 if (supabase) {
-  // Monkey patch functions.invoke to use our local Express API Server
-  supabase.functions.invoke = async (functionName: string, options?: any) => {
-    try {
-      let url = `/api/edge-function/${functionName}`;
-      if (options?.method === 'GET' && options?.queryParams) {
-         const qs = new URLSearchParams(options.queryParams as Record<string, string>).toString();
-         url += '?' + qs;
+  // Shadow the functions getter to use our local Express API Server
+  Object.defineProperty(supabase, 'functions', {
+    value: {
+      invoke: async (functionName: string, options?: Record<string, unknown>) => {
+        try {
+          let url = `/api/edge-function/${functionName}`;
+          if (options?.method === 'GET' && options?.queryParams) {
+             const qs = new URLSearchParams(options.queryParams as Record<string, string>).toString();
+             url += '?' + qs;
+          }
+          const resp = await fetch(url, {
+            method: (options?.method as string) || 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: options?.method === 'GET' ? undefined : JSON.stringify(options?.body || {})
+          });
+          const data = await resp.json();
+          if (!resp.ok) {
+             return { data: null, error: new Error(data.error || 'Request failed') };
+          }
+          return { data, error: null };
+        } catch (e) {
+          console.error('Edge function network error:', e);
+          return { data: null, error: e as Error };
+        }
       }
-      const resp = await fetch(url, {
-        method: options?.method || 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: options?.method === 'GET' ? undefined : JSON.stringify(options?.body || {})
-      });
-      const data = await resp.json();
-      if (!resp.ok) {
-         return { data: null, error: new Error(data.error || 'Request failed') };
-      }
-      return { data, error: null };
-    } catch (e) {
-      console.error('Edge function network error:', e);
-      return { data: null, error: e as Error };
     }
-  };
+  });
 }
 
 if (!isSupabaseConfigured()) {

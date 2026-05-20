@@ -15,7 +15,7 @@ export default function AIChat() {
     if (isOpen && messages.length === 0) {
       setMessages([{
         role: 'ai',
-        text: "Mhoro! I'm DARA, your AI Tutor. How can I help you with your studies today?"
+        text: "Mhoro! I'm DARA, your Digital Academic Research Assistant. Grounded in the Education 5.0 framework, I'm here to facilitate Teaching, Research, Community Service, Innovation, and Industrialization. What are we exploring today?"
       }])
     }
   }, [isOpen])

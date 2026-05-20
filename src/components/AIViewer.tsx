@@ -2,6 +2,7 @@ import { useState } from "react";
 import { geminiService } from "../services/geminiService";
 import { Sparkles, FileText, HelpCircle, Lightbulb, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { motion, AnimatePresence } from "motion/react";
 
 import { InstitutionalContent } from "../types";
 
@@ -28,70 +29,94 @@ export default function AIViewer({ content }: { content: InstitutionalContent })
   };
 
   return (
-    <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-      <div className="flex flex-wrap gap-2 mb-4">
+    <div className="mt-6 p-6 bg-white/40 backdrop-blur-md rounded-3xl border border-white/50 shadow-inner">
+      <div className="flex flex-wrap gap-3 mb-6">
         <button 
           onClick={() => askAI("summary")} 
           disabled={loading}
-          className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg transition-all ${
+          className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all duration-300 ${
             activeType === 'summary' 
-              ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' 
-              : 'bg-white dark:bg-slate-900 text-slate-500 hover:text-amber-600 border border-slate-100 dark:border-slate-800'
+              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 -translate-y-0.5' 
+              : 'bg-white text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-100 shadow-sm'
           }`}
         >
-          <FileText size={14} />
+          <FileText size={16} />
           Summarize
         </button>
 
         <button 
           onClick={() => askAI("explain")} 
           disabled={loading}
-          className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg transition-all ${
+          className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all duration-300 ${
             activeType === 'explain' 
-              ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' 
-              : 'bg-white dark:bg-slate-900 text-slate-500 hover:text-amber-600 border border-slate-100 dark:border-slate-800'
+              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 -translate-y-0.5' 
+              : 'bg-white text-slate-500 hover:text-blue-700 hover:bg-blue-50 border border-slate-100 shadow-sm'
           }`}
         >
-          <Lightbulb size={14} />
+          <Lightbulb size={16} />
           Explain
         </button>
 
         <button 
           onClick={() => askAI("quiz")} 
           disabled={loading}
-          className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg transition-all ${
+          className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all duration-300 ${
             activeType === 'quiz' 
-              ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' 
-              : 'bg-white dark:bg-slate-900 text-slate-500 hover:text-amber-600 border border-slate-100 dark:border-slate-800'
+              ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/30 -translate-y-0.5' 
+              : 'bg-white text-slate-500 hover:text-amber-700 hover:bg-amber-50 border border-slate-100 shadow-sm'
           }`}
         >
-          <HelpCircle size={14} />
+          <HelpCircle size={16} />
           Quiz
         </button>
       </div>
 
-      <div className="relative min-h-[60px]">
-        {loading ? (
-          <div className="flex items-center gap-3 text-slate-400 py-4">
-            <Loader2 size={18} className="animate-spin text-amber-500" />
-            <span className="text-sm font-medium italic">DARA is thinking...</span>
-          </div>
-        ) : response ? (
-          <div className="prose prose-sm dark:prose-invert max-w-none animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="flex items-center gap-2 mb-2 text-amber-600 dark:text-amber-400">
-              <Sparkles size={14} />
-              <span className="text-[10px] font-black uppercase tracking-widest">AI Insight</span>
-            </div>
-            <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-              <ReactMarkdown>{response}</ReactMarkdown>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 text-slate-400 py-2">
-            <Sparkles size={14} className="opacity-50" />
-            <p className="text-xs italic">Select an option above to generate AI insights for this resource.</p>
-          </div>
-        )}
+      <div className="relative min-h-[80px]">
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <motion.div 
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-4 text-emerald-700/60 py-6"
+            >
+              <div className="relative">
+                <Loader2 size={24} className="animate-spin" />
+                <div className="absolute inset-0 bg-emerald-500 blur-md opacity-20 animate-pulse" />
+              </div>
+              <span className="text-sm font-bold uppercase tracking-widest animate-pulse">DARA is analyzing...</span>
+            </motion.div>
+          ) : response ? (
+            <motion.div 
+              key="response"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="prose prose-emerald max-w-none bg-white/60 p-6 rounded-2xl border border-white/80 shadow-sm"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 text-emerald-700">
+                  <Sparkles size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Digital Insights Output</span>
+                </div>
+                <div className="text-[9px] font-mono text-slate-400">Education 5.0 Core: {activeType?.toUpperCase()}</div>
+              </div>
+              <div className="text-sm text-slate-700 leading-relaxed font-sans">
+                <ReactMarkdown>{response}</ReactMarkdown>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col items-center justify-center gap-2 py-8 border-2 border-dashed border-slate-200 rounded-3xl"
+            >
+              <Sparkles size={24} className="text-slate-300" />
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">Select an objective above to begin</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

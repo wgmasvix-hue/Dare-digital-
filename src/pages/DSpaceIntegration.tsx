@@ -14,7 +14,12 @@ import {
   FileUp,
   X,
   Copy,
-  Search
+  Search,
+  Globe,
+  Zap,
+  ShieldCheck,
+  FlaskConical,
+  GraduationCap
 } from 'lucide-react';
 import { geminiService } from '../services/geminiService';
 import { supabase } from '../lib/supabase';
@@ -60,6 +65,51 @@ export default function DSpaceIntegration() {
     }
   }, [config.apiUrl]);
   const [showConfig, setShowConfig] = useState(false);
+  const [discoveryUrl, setDiscoveryUrl] = useState('');
+  const [isDiscovering, setIsDiscovering] = useState(false);
+  const [discoverySuccess, setDiscoverySuccess] = useState<string | null>(null);
+
+  const handleDiscover = async () => {
+    if (!discoveryUrl) return;
+    setIsDiscovering(true);
+    setDiscoverySuccess(null);
+    setError(null);
+    
+    try {
+      const paths = ['/server/api', '/api', '/rest'];
+      let foundUrl = null;
+      const baseUrl = discoveryUrl.replace(/\/$/, '').replace('http://', 'https://');
+      
+      for (const path of paths) {
+        const testUrl = `${baseUrl}${path}`;
+        try {
+          const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
+            body: { url: testUrl, method: 'GET' }
+          });
+          
+          const actualData = proxyResponse?.data;
+          if (!proxyError && (actualData?.dspaceVersion || actualData?._links)) {
+            foundUrl = testUrl;
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+      
+      if (foundUrl) {
+        setConfig(prev => ({ ...prev, apiUrl: foundUrl }));
+        setDiscoverySuccess(`Successfully discovered DSpace 7 API at: ${foundUrl}`);
+        setShowConfig(true);
+      } else {
+        throw new Error("Could not automatically discover DSpace 7+ API. Ensure your repository is DSpace 7 and CORS is handled by our proxy.");
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsDiscovering(false);
+    }
+  };
 
   // Input State
   const [rawText, setRawText] = useState('');
@@ -350,6 +400,79 @@ export default function DSpaceIntegration() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        <div className="mb-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-soil p-1 rounded-3xl overflow-hidden shadow-2xl"
+          >
+            <div className="bg-white rounded-[22px] p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div>
+                  <h2 className="text-2xl font-display font-black text-soil mb-4 flex items-center gap-2">
+                    <Zap className="text-amber" />
+                    Quick Connect Repository
+                  </h2>
+                  <p className="text-clay mb-6">
+                    Enter your institution's repository URL and DARE will attempt to automatically configure the integration for you.
+                  </p>
+                  
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-clay" size={20} />
+                      <input 
+                        type="text" 
+                        value={discoveryUrl}
+                        onChange={(e) => setDiscoveryUrl(e.target.value)}
+                        placeholder="e.g. repository.uz.ac.zw"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-border focus:border-amber outline-none transition-all"
+                      />
+                    </div>
+                    <button 
+                      onClick={handleDiscover}
+                      disabled={isDiscovering || !discoveryUrl}
+                      className="px-6 py-3 bg-amber text-soil font-bold rounded-xl hover:bg-amber/90 disabled:opacity-50 transition-all flex items-center gap-2"
+                    >
+                      {isDiscovering ? <Loader2 size={18} className="animate-spin" /> : <ShieldCheck size={18} />}
+                      Connect
+                    </button>
+                  </div>
+                  
+                  {discoverySuccess && (
+                    <p className="mt-3 text-xs font-bold text-green-600 flex items-center gap-1">
+                      <CheckCircle size={14} />
+                      {discoverySuccess}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-bg-base rounded-2xl border border-border/50">
+                    <FlaskConical className="text-amber mb-2" size={24} />
+                    <h3 className="font-bold text-soil text-sm">Research</h3>
+                    <p className="text-[10px] text-clay">Automated metadata extraction for journals and theses.</p>
+                  </div>
+                  <div className="p-4 bg-bg-base rounded-2xl border border-border/50">
+                    <GraduationCap className="text-amber mb-2" size={24} />
+                    <h3 className="font-bold text-soil text-sm">Education 5.0</h3>
+                    <p className="text-[10px] text-clay">Aligning academic outputs with industrialization goals.</p>
+                  </div>
+                  <div className="p-4 bg-bg-base rounded-2xl border border-border/50">
+                    <Database className="text-amber mb-2" size={24} />
+                    <h3 className="font-bold text-soil text-sm">Interoperability</h3>
+                    <p className="text-[10px] text-clay">Seamless sync between DSpace 7 and DARE Library.</p>
+                  </div>
+                  <div className="p-4 bg-bg-base rounded-2xl border border-border/50">
+                    <Zap className="text-amber mb-2" size={24} />
+                    <h3 className="font-bold text-soil text-sm">Real-time Sync</h3>
+                    <p className="text-[10px] text-clay">OAI-PMH based harvesting for up-to-date resources.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: Input */}

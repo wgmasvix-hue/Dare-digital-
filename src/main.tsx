@@ -1,7 +1,16 @@
-import { StrictMode } from 'react';
+import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import App from './App';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 import { ProtectedRoute } from './components/ProtectedRoute';
 import './index.css';
 import ErrorBoundary from './components/common/ErrorBoundary';
@@ -76,6 +85,7 @@ createRoot(rootElement).render(
     <ThemeProvider>
       <GamificationProvider>
         <Router>
+          <ScrollToTop />
           <ErrorBoundary>
             <Routes>
             <Route element={<App />}>

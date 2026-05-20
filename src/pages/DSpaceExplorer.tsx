@@ -94,7 +94,7 @@ export default function DSpaceExplorer() {
       targetUrl.searchParams.append('dsoType', type);
       targetUrl.searchParams.append('size', '20');
 
-      const { data, error: proxyError } = await supabase.functions.invoke('external-proxy', {
+      const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
         body: { 
           url: targetUrl.toString(),
           method: 'GET'
@@ -103,7 +103,9 @@ export default function DSpaceExplorer() {
       
       if (proxyError) throw proxyError;
       
-      const searchObjects = data._embedded?.searchObjects || [];
+      // Handle the new proxy response format { status, data, headers }
+      const actualData = proxyResponse.data;
+      const searchObjects = actualData?._embedded?.searchObjects || [];
       const items = searchObjects.map((obj: SearchResult) => obj._embedded.indexableObject);
       
       setResults(items);
@@ -123,13 +125,14 @@ export default function DSpaceExplorer() {
 
     try {
       // Fetch Bundles (for files) via Proxy
-      const { data: bundlesData, error: proxyError } = await supabase.functions.invoke('external-proxy', {
+      const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
         body: { 
           url: item._links.bundles.href,
           method: 'GET'
         }
       });
       
+      const bundlesData = proxyResponse?.data;
       if (!proxyError && bundlesData) {
         setBundles(bundlesData._embedded?.bundles || []);
       } else if (proxyError) {

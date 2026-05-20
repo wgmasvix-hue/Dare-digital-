@@ -742,6 +742,59 @@ export default function Library() {
         </div>
 
         {/* Results */}
+        {filters.source === 'Research' && !loading && publications.length === 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-12 bg-white rounded-3xl border border-amber/20 overflow-hidden shadow-xl"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              <div className="p-8">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber/10 text-amber font-bold text-[10px] uppercase tracking-widest rounded-full mb-4">
+                  <Database size={12} />
+                  Institutional Integration
+                </div>
+                <h3 className="text-2xl font-black text-soil mb-4 leading-tight">
+                  No local research synced yet.
+                </h3>
+                <p className="text-clay mb-8 text-sm leading-relaxed">
+                  Connect your institutional DSpace repository to automatically synchronize theses, journals, and local research papers with the DARE Open Access library.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <Link 
+                    to="/dspace" 
+                    className="px-6 py-3 bg-soil text-white font-bold rounded-xl hover:bg-soil/90 shadow-lg shadow-soil/20 transition-all flex items-center gap-2"
+                  >
+                    <RefreshCw size={18} />
+                    Connect DSpace
+                  </Link>
+                  <Link 
+                    to="/help" 
+                    className="px-6 py-3 bg-white border border-border text-soil font-bold rounded-xl hover:bg-bg-base transition-all"
+                  >
+                    Integration Guide
+                  </Link>
+                </div>
+              </div>
+              <div className="bg-bg-base p-8 flex items-center justify-center border-l border-border/50">
+                 <div className="relative w-full max-w-xs aspect-square">
+                    <div className="absolute inset-0 bg-amber/10 rounded-full animate-pulse" />
+                    <div className="absolute inset-4 bg-white rounded-3xl shadow-2xl flex flex-col items-center justify-center p-6 text-center">
+                       <Database size={48} className="text-amber mb-4" />
+                       <div className="h-2 w-24 bg-slate-100 rounded-full mb-2" />
+                       <div className="h-2 w-16 bg-slate-100 rounded-full mb-6" />
+                       <div className="flex gap-2">
+                          <div className="w-8 h-8 bg-amber/20 rounded-lg" />
+                          <div className="w-8 h-8 bg-amber/20 rounded-lg" />
+                          <div className="w-8 h-8 bg-amber/20 rounded-lg" />
+                       </div>
+                    </div>
+                 </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         <div className={
           viewMode === 'tile' ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6" : 
           viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" : 
