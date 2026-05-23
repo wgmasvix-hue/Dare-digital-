@@ -13,7 +13,7 @@ export default function Footer() {
         <div className={styles.topSection}>
           <div className={styles.brandCol}>
             <Link to="/" className={styles.logoGroup}>
-              <LogoIcon size={20} className={styles.logoIcon} />
+              <LogoIcon size={32} className={styles.logoIcon} />
               <div className={styles.logoText}>
                 <span className={styles.dare}>DARE</span>
                 <span className={styles.libraryLabel}>DIGITAL LIBRARY</span>

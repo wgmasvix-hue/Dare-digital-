@@ -58,8 +58,8 @@ export default function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/library" className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-full font-bold text-lg overflow-hidden transition-transform hover:scale-105 active:scale-95 w-full sm:w-auto">
-              <span className="relative z-10">Explore Library</span>
+            <Link to="/library?q=AI" className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-full font-bold text-lg overflow-hidden transition-transform hover:scale-105 active:scale-95 w-full sm:w-auto">
+              <span className="relative z-10">Explore AI Books</span>
               <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
               <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
@@ -101,7 +101,7 @@ export default function Home() {
             <p className="text-lg text-slate-500 font-medium max-w-xl">Curated academic resources powering the next generation of Zimbabwean innovators and leaders.</p>
           </div>
           <Link to="/library" className="group inline-flex items-center gap-2 font-bold text-teal-600 hover:text-teal-700 transition-colors">
-            View Entire Catalog 
+            View Entire Library 
             <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -138,6 +138,27 @@ export default function Home() {
               </Link>
             ))
           )}
+        </div>
+      </section>
+
+      {/* 1 Million Books Connected Promo Section */}
+      <section className="py-16 px-6 lg:px-12 max-w-7xl mx-auto border-t border-slate-200/60">
+        <div className="bg-gradient-to-r from-teal-500/10 via-emerald-500/5 to-transparent rounded-3xl p-8 lg:p-12 border border-teal-500/20 flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="text-left max-w-2xl">
+            <span className="inline-flex items-center gap-1.5 bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
+              <Globe size={12} className="text-teal-600 animate-pulse" /> Massive Global Catalog Synced
+            </span>
+            <h3 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-4">
+              Access 1,000,000+ Real Open-Source Books
+            </h3>
+            <p className="text-slate-600 text-base lg:text-lg font-medium leading-relaxed">
+              Our index links directly to millions of academic papers, digitized library scans, and classic public domain publications from Open Library, Project Gutenberg, arXiv, and OpenStax. Find and read any topic instantly!
+            </p>
+          </div>
+          <Link to="/open-books" className="group shrink-0 inline-flex items-center gap-3 px-8 py-4 bg-teal-500 hover:bg-teal-400 text-slate-900 rounded-full font-bold text-lg shadow-md transition-all active:scale-95">
+            <span>Query 1M+ Books</span>
+            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </section>
 

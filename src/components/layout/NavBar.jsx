@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Menu, X, User, ChevronDown, LogOut, History, Settings, 
-  LayoutDashboard, Trophy, Search, Sparkles, Library, FlaskConical, Zap, Database
+  LayoutDashboard, Trophy, Search, Sparkles, Library, FlaskConical, Zap, Database, Globe, ClipboardCheck
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useGamification } from '../../context/GamificationContext';
@@ -61,13 +61,17 @@ export default function NavBar() {
       )}
 
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-8 mt-1">
-        <Link to="/" className="flex items-center gap-3 shrink-0 focus:outline-none">
-          <div className={`p-2 rounded-xl transition-all ${isScrolled ? 'bg-teal-50 text-teal-600' : 'bg-slate-900 text-white'}`}>
-             <LogoIcon size={24} />
+        <Link to="/" className="flex items-center gap-3 shrink-0 focus:outline-none group">
+          <div className="p-1.5 rounded-2xl transition-all duration-300 bg-slate-50 border border-slate-200/60 shadow-inner group-hover:scale-105 group-hover:bg-white group-hover:border-slate-300">
+             <LogoIcon size={32} />
           </div>
           <div className="hidden sm:flex flex-col">
-            <span className="font-black text-lg leading-none tracking-tight text-slate-900">DARE</span>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Library</span>
+            <span className="font-display font-black text-xl leading-none tracking-wider text-slate-900 group-hover:text-primary transition-colors">
+              DARE
+            </span>
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-0.5 font-mono">
+              Digital Library
+            </span>
           </div>
         </Link>
 
@@ -75,6 +79,9 @@ export default function NavBar() {
         <div className="hidden md:flex items-center gap-1">
           <Link to="/library" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
             <Library size={16} /> Browse
+          </Link>
+          <Link to="/open-books" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-teal-50 hover:text-teal-700 transition-colors flex items-center gap-2">
+            <Globe size={16} className="text-teal-550 shrink-0" /> 1M+ Books
           </Link>
           <Link to="/dspace-explorer" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
             <Database size={16} /> Repository
@@ -84,6 +91,9 @@ export default function NavBar() {
           </Link>
           <Link to="/research" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
             <FlaskConical size={16} /> Research
+          </Link>
+          <Link to="/teacher-tools" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
+            <ClipboardCheck size={16} className="text-emerald-600" /> Lesson Planner
           </Link>
         </div>
 
@@ -187,9 +197,11 @@ export default function NavBar() {
                 <GlobalSearch />
               </div>
               <Link to="/library" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Library size={20} /> Browse Library</Link>
+              <Link to="/open-books" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Globe size={20} className="text-teal-500" /> 1M+ Open Source Books</Link>
               <Link to="/dspace-explorer" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Database size={20} /> Institutional Repository</Link>
               <Link to="/tutor" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Sparkles size={20} className="text-amber-500" /> DARA AI Tutor</Link>
               <Link to="/research" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><FlaskConical size={20} /> Research Portal</Link>
+              <Link to="/teacher-tools" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><ClipboardCheck size={20} className="text-emerald-500" /> Lesson Planner</Link>
               <hr className="border-slate-100 my-2" />
               {!user ? (
                 <div className="flex flex-col gap-3 mt-2">

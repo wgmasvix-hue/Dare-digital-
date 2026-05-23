@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { 
   BookOpen, Star, ShieldCheck, Globe, Lock, 
@@ -77,7 +77,9 @@ interface BookCardProps {
   progress?: number;
 }
 
-export default function BookCard({ publication, variant = 'grid', onOpen, loading = false, progress = 0 }: BookCardProps) {
+export default function BookCard({ publication, variant = 'tile', onOpen, loading = false, progress = 0 }: BookCardProps) {
+  const navigate = useNavigate();
+
   if (loading) {
     return (
       <div className={`relative flex flex-col h-full bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm ${variant === 'featured' || variant === 'list' ? 'md:flex-row' : ''}`}>
@@ -171,19 +173,24 @@ export default function BookCard({ publication, variant = 'grid', onOpen, loadin
         {/* Overlays */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 gap-3">
            <button 
-            onClick={handleCardClick}
-            className="w-full py-3 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white text-xs font-bold rounded-2xl flex items-center justify-center gap-2 transition-all border border-white/20 active:scale-95 shadow-md"
-           >
-             <Eye size={16} /> Quick View
-           </button>
-           <button 
             className="w-full py-3 bg-teal-500 hover:bg-teal-400 text-slate-900 text-xs font-bold rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
             onClick={(e) => {
               e.stopPropagation();
-              onOpen?.({ ...publication, _showAiInsight: true });
+              e.preventDefault();
+              navigate(`/book-action/${id}?action=edu5`, { state: { book: publication } });
             }}
            >
-             <Sparkles size={16} /> AI Insight
+             <Sparkles size={16} /> Edu 5.0 Dissector
+           </button>
+           <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              navigate(`/reader/${id}`);
+            }}
+            className="w-full py-3 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white text-xs font-bold rounded-2xl flex items-center justify-center gap-2 transition-all border border-white/20 active:scale-95 shadow-md"
+           >
+             <BookOpen size={16} /> Read Book
            </button>
         </div>
 
@@ -292,7 +299,7 @@ export default function BookCard({ publication, variant = 'grid', onOpen, loadin
           {cardContent}
         </div>
       ) : (
-        <Link to={`/book/${id}`} className="block no-underline h-full focus:outline-none">
+        <Link to={`/book-action/${id}?action=edu5`} state={{ book: publication }} className="block no-underline h-full focus:outline-none">
           {cardContent}
         </Link>
       )}

@@ -92,7 +92,7 @@ export default function DSpaceIntegration() {
             foundUrl = testUrl;
             break;
           }
-        } catch (e) {
+        } catch {
           continue;
         }
       }

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import styles from './Auth.module.css';
+import LogoIcon from '../components/common/LogoIcon';
 
 export default function InstitutionalLogin() {
   const navigate = useNavigate();
@@ -70,9 +71,18 @@ export default function InstitutionalLogin() {
         transition={{ duration: 0.5 }}
       >
         <div className={styles.header}>
-          <Link to="/" className={styles.logoGroup}>
-            <span className={styles.dare}>Dare</span>
-            <span className={styles.period}>.</span>
+          <Link to="/" className="flex items-center gap-3 justify-center mb-4 group focus:outline-none">
+            <div className="p-1.5 rounded-2xl bg-slate-50 border border-slate-100 shadow-inner group-hover:scale-105 group-hover:bg-white group-hover:border-slate-200 transition-all duration-300">
+               <LogoIcon size={38} />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="font-display font-black text-2xl leading-none tracking-wider text-slate-800 group-hover:text-primary transition-colors">
+                DARE
+              </span>
+              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em] mt-0.5 font-mono">
+                Digital Repository
+              </span>
+            </div>
           </Link>
           <h2 className={styles.title}>Institutional Access</h2>
           <p className={styles.subtitle}>

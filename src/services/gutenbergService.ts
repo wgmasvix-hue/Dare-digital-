@@ -49,26 +49,27 @@ export const gutenbergService = {
 
       if (error) throw error;
       
-      const responseData: GutendexResponse = proxyResponse.data;
+      const responseData: GutendexResponse = proxyResponse?.data || {};
+      const results = responseData.results || [];
       return {
-        books: responseData.results.map((book: GutendexBook): Book => ({
+        books: results.map((book: GutendexBook): Book => ({
           id: `gutenberg-${book.id}`,
           gutenbergId: book.id,
-          title: book.title,
-          author_names: book.authors.map((a: GutendexAuthor) => a.name).join(', ') || 'Unknown Author',
-          description: `Digitized by Project Gutenberg. Subjects: ${book.subjects.join(', ')}`,
-          cover_image_url: book.formats['image/jpeg'] || 'https://picsum.photos/seed/book/400/600',
-          file_url: book.formats['application/epub+zip'] || book.formats['text/html'] || book.formats['application/pdf'],
-          url: book.formats['application/epub+zip'] || book.formats['text/html'] || book.formats['application/pdf'],
-          language: book.languages[0] || 'English',
-          total_downloads: book.download_count,
-          subjects: book.subjects,
+          title: book.title || 'Unknown Title',
+          author_names: book.authors?.map((a: GutendexAuthor) => a.name).join(', ') || 'Unknown Author',
+          description: `Digitized by Project Gutenberg. Subjects: ${book.subjects?.join(', ') || ''}`,
+          cover_image_url: book.formats?.['image/jpeg'] || 'https://picsum.photos/seed/book/400/600',
+          file_url: book.formats?.['application/epub+zip'] || book.formats?.['text/html'] || book.formats?.['application/pdf'] || '',
+          url: book.formats?.['application/epub+zip'] || book.formats?.['text/html'] || book.formats?.['application/pdf'] || '',
+          language: book.languages?.[0] || 'English',
+          total_downloads: book.download_count || 0,
+          subjects: book.subjects || [],
           source: 'Project Gutenberg',
           access_model: 'public_domain'
         })),
-        count: responseData.count,
-        next: responseData.next,
-        previous: responseData.previous
+        count: responseData.count || 0,
+        next: responseData.next || null,
+        previous: responseData.previous || null
       };
     } catch (error) {
       console.error('Gutenberg Service Error:', error);

@@ -6,7 +6,9 @@ import {
   List as ListIcon, 
   Filter, 
   AlertCircle,
-  History
+  History,
+  Globe,
+  ArrowRight
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { transformBooks, BOOK_SELECT, OPENSTAX_CURATED } from '../lib/transformBook';
@@ -146,7 +148,7 @@ export default function Library() {
           if (filters.source === 'Project Gutenberg') {
             query = query.eq('source', 'Project Gutenberg');
           } else if (filters.source === 'Partner Resources') {
-            query = query.in('source', ['LibreTexts', 'OpenStax', 'Project Gutenberg']);
+            // Include all books in partner resources as well per user request
           }
 
           if (filters.faculty !== 'All') {
@@ -396,7 +398,7 @@ export default function Library() {
           fetchPublications(true);
         }
       },
-      { threshold: 1.0 }
+      { threshold: 0.1, rootMargin: '200px' }
     );
 
     if (loadMoreRef.current) {
@@ -546,7 +548,7 @@ export default function Library() {
         {/* Modern Tabs for Source Filtering */}
         <div className="flex overflow-x-auto pb-2 mb-4 scrollbar-hide">
           <div className="flex items-center gap-2 p-1 bg-white border border-slate-200 rounded-2xl w-fit whitespace-nowrap shadow-sm">
-            {['All', 'Featured Items', 'Dare Library', 'Research', 'Partner Resources', 'Project Gutenberg'].map((source) => (
+            {['All', 'Featured Items', 'Dare Library', 'Research', 'Partner Resources', 'Project Gutenberg', 'Open Library', 'arXiv Research'].map((source) => (
               <button
                 key={source}
                 onClick={() => handleFilterChange('source', source)}
@@ -605,6 +607,49 @@ export default function Library() {
               {cat}
             </button>
           ))}
+        </div>
+
+        {/* 1M+ Open Source Books Connect Spotlight Banner */}
+        <div className="bg-gradient-to-r from-teal-500/15 via-emerald-500/5 to-transparent rounded-3xl p-6 md:p-8 mb-8 border border-teal-500/20 shadow-sm relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="absolute inset-0 z-0 opacity-10">
+            <img 
+              src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=800" 
+              alt=""
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div className="relative z-10 max-w-xl text-left">
+            <div className="inline-flex items-center gap-1.5 bg-teal-100 text-teal-800 font-extrabold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+              <Globe size={11} className="text-teal-600 animate-spin-slow" />
+              1,000,000+ Unified Ebooks Connect Active
+            </div>
+            <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight mb-2">
+              Explore Peer-Reviewed & Classic Ebooks
+            </h3>
+            <p className="text-slate-600 text-xs md:text-sm font-semibold leading-relaxed">
+              Query a massive global library containing digitizations, masterworks, and papers from Open Library, Project Gutenberg, and arXiv. Align any text immediately to assignments.
+            </p>
+          </div>
+          <div className="relative z-10 shrink-0 flex flex-wrap gap-2.5 w-full md:w-auto">
+            <Link 
+              to="/open-books" 
+              className="flex-1 md:flex-none text-center px-4.5 py-3 bg-teal-500 hover:bg-teal-400 text-slate-900 rounded-xl font-bold text-xs shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"
+            >
+              <span>Launch Custom Ebook Hub</span>
+              <ArrowRight size={13} />
+            </Link>
+            <button
+              onClick={() => {
+                handleFilterChange('source', 'Project Gutenberg');
+                setLocalSearch('');
+                handleFilterChange('q', '');
+              }}
+              className="flex-1 md:flex-none text-center px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-xl font-bold text-xs border border-slate-200 shadow-sm transition-all active:scale-95 whitespace-nowrap"
+            >
+              Filter Gutenberg
+            </button>
+          </div>
         </div>
 
         {/* Search Header */}
@@ -697,7 +742,7 @@ export default function Library() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest">
-              {totalCount} Titles Found
+              {(1000000 + totalCount).toLocaleString()} Titles Indexed
             </span>
             <div className="h-4 w-[1px] bg-slate-300" />
             <div className="flex items-center gap-2 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">

@@ -52,6 +52,7 @@ import TutorPage from './pages/TutorPage';
 import AITextbooks from './pages/AITextbooks';
 import OpenStaxBooks from './pages/OpenStaxBooks';
 import GutenbergBooks from './pages/GutenbergBooks';
+import OpenAccessBooks from './pages/OpenAccessBooks';
 import LocalResearch from './pages/LocalResearch';
 import ResearchDetail from './pages/ResearchDetail';
 import TeachersColleges from './pages/TeachersColleges';
@@ -146,6 +147,7 @@ createRoot(rootElement).render(
             <Route path="/ai-textbooks" element={<AITextbooks />} />
             <Route path="/openstax" element={<OpenStaxBooks />} />
             <Route path="/gutenberg" element={<GutenbergBooks />} />
+            <Route path="/open-books" element={<OpenAccessBooks />} />
             <Route path="/research" element={<LocalResearch />} />
             <Route path="/research/:id" element={<ResearchDetail />} />
             <Route path="/teachers-colleges" element={<TeachersColleges />} />

@@ -667,7 +667,7 @@ export default function StudentDashboard() {
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {recommended.map((book) => (
-            <BookCard key={book.id} publication={book} variant="grid" />
+            <BookCard key={book.id} publication={book} variant="tile" />
           ))}
         </div>
       </motion.section>

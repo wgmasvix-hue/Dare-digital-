@@ -79,9 +79,9 @@ export default function SearchResults() {
                     <div key={book.id} className="relative group">
                       <BookCard publication={book} />
                       <div className="mt-4 flex gap-2">
-                        <button className="flex-1 py-2.5 bg-amber/10 text-amber rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber/20 transition-all flex items-center justify-center gap-2 border border-amber/20">
+                        <Link to={`/book-action/${book.id}?action=edu5`} state={{ book }} className="flex-1 py-2.5 bg-amber/10 text-amber rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber/20 transition-all flex items-center justify-center gap-2 border border-amber/20">
                           <Sparkles size={14} /> Ask DARE AI
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   ))}
@@ -108,12 +108,12 @@ export default function SearchResults() {
                       <p className="text-xs text-amber-600 font-bold mb-2">{item.author_names || item.creator}</p>
                       <p className="text-sm text-gray-500 mb-6 line-clamp-3">{item.abstract || item.description}</p>
                       <div className="mt-auto flex gap-2">
-                        <Link to={`/research/${item.id}`} className="flex-1 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-blue-100 transition-colors text-center">
+                        <Link to={`/research/${item.id}`} state={{ item }} className="flex-1 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-blue-100 transition-colors text-center">
                           View
                         </Link>
-                        <button className="flex-1 py-2 bg-purple-50 text-purple-700 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-purple-100 transition-colors flex items-center justify-center gap-1">
+                        <Link to={`/book-action/${item.id}?action=edu5`} state={{ book: item }} className="flex-1 py-2 bg-purple-50 text-purple-700 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-purple-100 transition-colors flex items-center justify-center gap-1">
                           <Sparkles size={12} /> Ask AI
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   ))}
@@ -139,12 +139,12 @@ export default function SearchResults() {
                       <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{res.title}</h3>
                       <p className="text-sm text-gray-500 mb-6 line-clamp-3">{res.description}</p>
                       <div className="mt-auto flex gap-2">
-                        <button className="flex-1 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-blue-100 transition-colors">
+                        <Link to={`/book-action/${res.id}`} state={{ book: res }} className="flex-1 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-blue-100 transition-colors text-center">
                           View
-                        </button>
-                        <button className="flex-1 py-2 bg-purple-50 text-purple-700 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-purple-100 transition-colors flex items-center justify-center gap-1">
+                        </Link>
+                        <Link to={`/book-action/${res.id}?action=edu5`} state={{ book: res }} className="flex-1 py-2 bg-purple-50 text-purple-700 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-purple-100 transition-colors flex items-center justify-center gap-1">
                           <Sparkles size={12} /> Ask AI
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   ))}

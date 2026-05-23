@@ -818,7 +818,7 @@ export default function BookDetail() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   {relatedBooks.map(related => (
                     <div key={related.id} className="h-full">
-                       <BookCard publication={related} variant="grid" />
+                       <BookCard publication={related} variant="tile" />
                     </div>
                   ))}
                 </div>
@@ -869,8 +869,11 @@ export default function BookDetail() {
               <div className="space-y-3">
                 {accessStatus === 'granted' ? (
                   <>
-                    <Link to={`/book-action/${book.id}`} state={{ book }} className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 active:scale-95">
+                    <Link to={`/reader/${book.id}`} className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 active:scale-95">
                       <BookOpen size={18} /> Read Now
+                    </Link>
+                    <Link to={`/book-action/${book.id}?action=edu5`} state={{ book }} className="w-full py-4 bg-teal-50 border border-teal-200 hover:bg-teal-100 text-teal-850 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95 animate-pulse">
+                      <Sparkles size={18} /> AI Study & Edu 5.0 Hub
                     </Link>
                     <button 
                       onClick={handleRemix} 
