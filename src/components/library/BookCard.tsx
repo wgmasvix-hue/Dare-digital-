@@ -1,10 +1,12 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { useState } from 'react';
 import { 
   BookOpen, Star, ShieldCheck, Globe, Lock, 
   Eye, ArrowRight, Sparkles, LucideIcon
 } from 'lucide-react';
 import { Book } from '../../types';
+import AIInsightModal from './AIInsightModal';
 
 const FACULTY_COLORS: Record<string, string> = {
   stem: '#2563EB', // Blue 600
@@ -79,6 +81,7 @@ interface BookCardProps {
 
 export default function BookCard({ publication, variant = 'tile', onOpen, loading = false, progress = 0 }: BookCardProps) {
   const navigate = useNavigate();
+  const [showInsight, setShowInsight] = useState(false);
 
   if (loading) {
     return (
@@ -127,9 +130,12 @@ export default function BookCard({ publication, variant = 'tile', onOpen, loadin
   const isNew = year_published && year_published >= new Date().getFullYear() - 1;
 
   const handleCardClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (onOpen) {
-      e.preventDefault();
       onOpen(publication);
+    } else {
+      setShowInsight(true);
     }
   };
 
@@ -180,7 +186,7 @@ export default function BookCard({ publication, variant = 'tile', onOpen, loadin
               navigate(`/book-action/${id}?action=edu5`, { state: { book: publication } });
             }}
            >
-             <Sparkles size={16} /> Edu 5.0 Dissector
+             <Sparkles size={16} /> AI Assist Dissector
            </button>
            <button 
             onClick={(e) => {
@@ -221,6 +227,22 @@ export default function BookCard({ publication, variant = 'tile', onOpen, loadin
             <AccessIcon size={10} />
             {variant === 'tile' ? '' : accessBadge.label}
           </span>
+        </div>
+
+        {/* Persistent Floating AI Assist Pill */}
+        <div className="absolute bottom-3 right-3 z-30">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              navigate(`/book-action/${id}?action=edu5`, { state: { book: publication } });
+            }}
+            className="flex items-center gap-1.5 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all border border-teal-400/20"
+            title="DARA AI Assist"
+          >
+            <Sparkles size={11} className="animate-pulse text-amber-300" />
+            <span>AI Assist</span>
+          </button>
         </div>
 
         {/* Progress Bar Overlay */}
@@ -288,21 +310,22 @@ export default function BookCard({ publication, variant = 'tile', onOpen, loadin
   );
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`group cursor-pointer ${variant === 'featured' || variant === 'list' ? 'col-span-full' : ''} h-full block focus:outline-none`}
-    >
-      {onOpen ? (
+    <>
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`group cursor-pointer ${variant === 'featured' || variant === 'list' ? 'col-span-full' : ''} h-full block focus:outline-none`}
+      >
         <div onClick={handleCardClick} role="button" tabIndex={0} className="h-full block focus:outline-none">
           {cardContent}
         </div>
-      ) : (
-        <Link to={`/book-action/${id}?action=edu5`} state={{ book: publication }} className="block no-underline h-full focus:outline-none">
-          {cardContent}
-        </Link>
-      )}
-    </motion.div>
+      </motion.div>
+      <AIInsightModal 
+        isOpen={showInsight} 
+        onClose={() => setShowInsight(false)} 
+        book={publication} 
+      />
+    </>
   );
 }

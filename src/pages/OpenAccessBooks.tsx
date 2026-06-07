@@ -16,6 +16,7 @@ import { gutenbergService } from '../services/gutenbergService';
 import { openLibraryService } from '../services/openLibraryService';
 import { arxivService } from '../services/arxivService';
 import { useGamification } from '../context/GamificationContext';
+import AIInsightModal from '../components/library/AIInsightModal';
 
 // Visual stats for open-source scale
 const SCALE_STATS = [
@@ -38,6 +39,9 @@ export default function OpenAccessBooks() {
   const location = useLocation();
   const { gainXp } = useGamification();
   
+  const [showInsightModal, setShowInsightModal] = useState(false);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -327,7 +331,11 @@ export default function OpenAccessBooks() {
                 books.map((book) => (
                   <div 
                     key={book.id} 
-                    className="bg-white rounded-3xl border border-slate-200/60 p-6 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 flex flex-col md:flex-row gap-5 relative group scale-98 hover:scale-100"
+                    onClick={() => {
+                      setSelectedBook(book);
+                      setShowInsightModal(true);
+                    }}
+                    className="cursor-pointer bg-white rounded-3xl border border-slate-200/60 p-6 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 flex flex-col md:flex-row gap-5 relative group scale-98 hover:scale-100"
                   >
                     {/* Cover Frame */}
                     <div className="md:w-1/3 aspect-[3/4] bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden relative shadow-inner shrink-0">
@@ -358,7 +366,10 @@ export default function OpenAccessBooks() {
                       {/* CTA Panel */}
                       <div className="mt-auto pt-3 border-t border-slate-100 flex items-center gap-2">
                         <button
-                          onClick={() => handleReadOnline(book)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReadOnline(book);
+                          }}
                           className="flex-1 py-2 rounded-xl bg-slate-950 text-white hover:bg-slate-800 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow"
                         >
                           <Download size={13} />
@@ -409,6 +420,11 @@ export default function OpenAccessBooks() {
           </div>
         </div>
       </div>
+      <AIInsightModal 
+        isOpen={showInsightModal} 
+        onClose={() => setShowInsightModal(false)} 
+        book={selectedBook} 
+      />
     </div>
   );
 }

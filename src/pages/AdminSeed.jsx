@@ -257,6 +257,15 @@ export default function AdminSeed() {
           >
             {libretextsStatus === 'processing' ? 'Importing LibreTexts...' : 'Import LibreTexts (Edge Function)'}
           </button>
+
+          {/* Seed 1M Books Instruct */}
+          <div style={{ padding: '12px 16px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '12px', width: '100%', marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h4 style={{ margin: 0, color: '#0f172a', fontWeight: 'bold' }}>Scale to 1,000,000 Books</h4>
+              <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#64748b' }}>To insert 1 million mock books instantly, please open your Supabase SQL Editor and run the <code>seed_1m_books.sql</code> file found in the project root.</p>
+            </div>
+            <a href="https://supabase.com/dashboard/project/_/sql/new" target="_blank" rel="noreferrer" style={{ padding: '8px 16px', background: '#0f172a', color: 'white', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px' }}>Open Supabase SQL</a>
+          </div>
           
           {status === 'processing' && (
             <div className={styles.progressBar}>
