@@ -41,12 +41,13 @@
     "react-pdf": "^10.4.1",
     "react-router-dom": "^7.13.1",
     "recharts": "^3.8.0",
+    "openai": "^4.100.0",
     "tailwind-merge": "latest",
-    "typescript": "^6.0.2",
-    "typescript-eslint": "^8.57.1",
     "validator": "^13.15.26"
   },
   "devDependencies": {
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.57.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/react": "latest",

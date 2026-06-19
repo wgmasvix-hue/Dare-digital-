@@ -115,7 +115,7 @@ async function startServer() {
       if (functionName === 'external-proxy') {
         const { url, method = 'GET', headers = {}, body: reqBody, base64Body, isRawBody } = body;
         
-        const fetchOptions: { method: string; headers: Record<string, string>; body?: string | Buffer } = {
+        const fetchOptions: { method: string; headers: Record<string, string>; body?: BodyInit } = {
           method,
           headers: { ...headers }
         };
@@ -276,7 +276,7 @@ async function startServer() {
           Faculties: STEM, Agriculture, Health, Business, Education, Engineering, Law, Humanities, AI & Future Tech.
           Levels: Certificate, Diploma, HND, Degree, Masters, PhD.`;
           
-         const messages = [
+         const messages: DeepSeekMessage[] = [
            { role: 'system', content: systemInstruction },
            { role: 'user', content: message }
          ];

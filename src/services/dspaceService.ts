@@ -38,40 +38,46 @@ export const dspaceService = {
     }
   },
   
-  mapDSpaceResponse(data: any): DSpaceResponse {
-     if (!data?._embedded?.searchResult?._embedded?.objects) {
+  mapDSpaceResponse(data: Record<string, unknown>): DSpaceResponse {
+     const embedded = data?._embedded as Record<string, unknown> | undefined;
+     const searchResult = embedded?.searchResult as Record<string, unknown> | undefined;
+     const innerEmbedded = searchResult?._embedded as Record<string, unknown> | undefined;
+     if (!innerEmbedded?.objects) {
          return { books: [], totalResults: 0 };
      }
-     
-     const objects = data._embedded.searchResult._embedded.objects;
-     
-     const books: Book[] = objects.map((obj: any, idx: number) => {
-        const item = obj._embedded?.indexableObject;
+
+     const objects = innerEmbedded.objects as Record<string, unknown>[];
+
+     const books = objects.map((obj, idx: number) => {
+        const objEmbedded = obj._embedded as Record<string, unknown> | undefined;
+        const item = objEmbedded?.indexableObject as Record<string, unknown> | undefined;
         if (!item) return null;
-        
-        const metadata = item.metadata || {};
+
+        const metadata = (item.metadata || {}) as Record<string, { value: string }[]>;
         const title = metadata['dc.title']?.[0]?.value || 'Untitled';
-        const authors = metadata['dc.contributor.author']?.map((a: any) => a.value).join(', ') || 'Unknown';
+        const authors = metadata['dc.contributor.author']?.map((a) => a.value).join(', ') || 'Unknown';
         const description = metadata['dc.description.abstract']?.[0]?.value || 'No abstract available';
-        const uuid = item.id || `dspace-${idx}`;
-        
+        const uuid = (item.id as string) || `dspace-${idx}`;
+        const links = item._links as Record<string, { href: string }> | undefined;
+
         return {
           id: `dspace-${uuid}`,
           title,
           author_names: authors,
           description: description.substring(0, 300) + (description.length > 300 ? '...' : ''),
           cover_image_url: `https://picsum.photos/seed/${uuid}/400/600`,
-          file_url: item._links?.self?.href || '',
-          url: item._links?.self?.href || '',
+          file_url: links?.self?.href || '',
+          url: links?.self?.href || '',
           language: 'English',
           source: 'DSpace Repository',
           access_model: 'open_access'
         };
-     }).filter(Boolean);
-     
+     }).filter(b => b !== null) as Book[];
+
+     const page = searchResult?.page as Record<string, number> | undefined;
      return {
         books,
-        totalResults: data._embedded?.searchResult?.page?.totalElements || books.length
+        totalResults: page?.totalElements || books.length
      };
   }
 };

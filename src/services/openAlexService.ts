@@ -17,11 +17,20 @@ export const openAlexService = {
       }
       const data = await response.json();
       
-      const books: Book[] = data.results.map((work: any, idx: number) => {
+      interface OpenAlexWork {
+        id: string;
+        title?: string;
+        abstract_inverted_index?: Record<string, number[]>;
+        authorships?: { author?: { display_name?: string } }[];
+        open_access?: { oa_url?: string; is_oa?: boolean };
+        language?: string;
+      }
+
+      const books: Book[] = data.results.map((work: OpenAlexWork, idx: number) => {
         const id = work.id.split('/').pop() || `openalex-${idx}`;
         const title = work.title || 'Unknown Title';
         const abstract = work.abstract_inverted_index ? 'Abstract available.' : 'No abstract available.';
-        const authors = work.authorships?.map((a: any) => a.author?.display_name).join(', ') || 'Unknown Author';
+        const authors = work.authorships?.map((a) => a.author?.display_name).join(', ') || 'Unknown Author';
         const pdfUrl = work.open_access?.oa_url || work.id;
         
         return {
