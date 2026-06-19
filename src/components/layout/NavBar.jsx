@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Menu, X, User, ChevronDown, LogOut, History, Settings, 
-  LayoutDashboard, Trophy, Search, Sparkles, Library, FlaskConical, Zap, Database, Globe, ClipboardCheck
+  Menu, X, User, ChevronDown, LogOut, History, Settings,
+  LayoutDashboard, Trophy, Search, Sparkles, Library, FlaskConical, Zap, Database, Globe, ClipboardCheck, BookOpen
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useGamification } from '../../context/GamificationContext';
@@ -91,6 +91,9 @@ export default function NavBar() {
           </Link>
           <Link to="/research" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
             <FlaskConical size={16} /> Research
+          </Link>
+          <Link to="/academic" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2">
+            <BookOpen size={16} className="text-indigo-500" /> Academic DB
           </Link>
           <Link to="/teacher-tools" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
             <ClipboardCheck size={16} className="text-emerald-600" /> Lesson Planner
@@ -201,6 +204,7 @@ export default function NavBar() {
               <Link to="/dspace-explorer" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Database size={20} /> Institutional Repository</Link>
               <Link to="/tutor" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Sparkles size={20} className="text-amber-500" /> DARA AI Tutor</Link>
               <Link to="/research" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><FlaskConical size={20} /> Research Portal</Link>
+              <Link to="/academic" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><BookOpen size={20} className="text-indigo-500" /> Academic Database</Link>
               <Link to="/teacher-tools" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><ClipboardCheck size={20} className="text-emerald-500" /> Lesson Planner</Link>
               <hr className="border-slate-100 my-2" />
               {!user ? (
