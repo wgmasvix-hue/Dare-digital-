@@ -19,7 +19,7 @@ const PILLARS = ['All', 'Teaching', 'Research', 'Community Engagement', 'Innovat
 const ACCESS_TYPES = ['All', 'Dare Access', 'Licensed', 'Purchased'];
 const FACULTIES = ['All', 'STEM', 'Agriculture & Environmental', 'Health Sciences', 'Business & Law', 'Education (Heritage-based)', 'Vocational', 'Polytechnic', 'Engineering', 'Humanities & Social Sciences', 'AI & Future Tech'];
 const UNIVERSITIES = ['All', 'UZ', 'MSU', 'NUST', 'CUT', 'BUSE', 'LSU', 'GZU', 'HIT', 'AU', 'ZEGU', 'ZOU'];
-const SOURCES = ['All', 'Featured Items', 'Dare Library', 'Partner Resources', 'Project Gutenberg', 'Open Library', 'arXiv Research'];
+const SOURCES = ['All', 'Featured Items', 'Dare Library', 'Partner Resources', 'Project Gutenberg', 'Open Library', 'arXiv Research', 'OpenAlex', 'DSpace'];
 const FORMATS = [
   { id: 'All', label: 'All Formats', icon: LayoutGrid },
   { id: 'PDF', label: 'PDFs', icon: FileText },

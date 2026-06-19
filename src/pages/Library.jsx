@@ -37,6 +37,8 @@ import { geminiService } from '../services/geminiService';
 import { gutenbergService } from '../services/gutenbergService';
 import { openLibraryService } from '../services/openLibraryService';
 import { arxivService } from '../services/arxivService';
+import { openAlexService } from '../services/openAlexService';
+import { dspaceService } from '../services/dspaceService';
 
 export default function Library() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -110,12 +112,16 @@ export default function Library() {
       let openStaxApiData = [];
       let openLibraryData = [];
       let arxivData = [];
+      let openAlexData = [];
+      let dspaceExtData = [];
       let dbCount = 0;
       let openStaxCount = 0;
       let gutenbergCount = 0;
       let openStaxApiCount = 0;
       let openLibraryCount = 0;
       let arxivCount = 0;
+      let openAlexCount = 0;
+      let dspaceExtCount = 0;
 
       // 1. Fetch from Supabase
       if (filters.source === 'All' || filters.source === 'Dare Library' || filters.source === 'Project Gutenberg' || filters.source === 'Partner Resources') {
@@ -326,14 +332,40 @@ export default function Library() {
         }
       }
 
+      // 6.5 Fetch from OpenAlex API
+      if ((filters.source === 'All' || filters.source === 'Partner Resources' || filters.source === 'OpenAlex') && 
+          (filters.access === 'All' || filters.access === 'Dare Access')) {
+        try {
+          const page = Math.floor(currentOffset / LIMIT) + 1;
+          const oaData = await openAlexService.searchResearch(filters.q || 'Zimbabwe', page);
+          openAlexData = oaData.books;
+          openAlexCount = oaData.totalResults;
+        } catch (oaErr) {
+          console.error('OpenAlex fetch error:', oaErr);
+        }
+      }
+
+      // 6.6 Fetch from DSpace Bridge
+      if ((filters.source === 'All' || filters.source === 'Partner Resources' || filters.source === 'DSpace') && 
+          (filters.access === 'All' || filters.access === 'Dare Access')) {
+        try {
+          const page = Math.floor(currentOffset / LIMIT) + 1;
+          const dsData = await dspaceService.searchRepository('https://sandbox.dspace.org', filters.q || 'Zimbabwe', page);
+          dspaceExtData = dsData.books;
+          dspaceExtCount = dsData.totalResults;
+        } catch (dsErr) {
+          console.error('DSpace fetch error:', dsErr);
+        }
+      }
+
       // 7. Merge Results
       let combinedData = [];
       if (filters.source === 'Partner Resources') {
-        combinedData = [...dbData, ...openStaxData, ...gutenbergData, ...openStaxApiData, ...openLibraryData, ...arxivData];
-        setTotalCount(dbCount + openStaxCount + gutenbergCount + openStaxApiCount + openLibraryCount + arxivCount);
+        combinedData = [...dbData, ...openStaxData, ...gutenbergData, ...openStaxApiData, ...openLibraryData, ...arxivData, ...openAlexData, ...dspaceExtData];
+        setTotalCount(dbCount + openStaxCount + gutenbergCount + openStaxApiCount + openLibraryCount + arxivCount + openAlexCount + dspaceExtCount);
       } else if (filters.source === 'Research') {
-        combinedData = dspaceData;
-        setTotalCount(dspaceCount);
+        combinedData = [...dspaceData, ...dspaceExtData];
+        setTotalCount(dspaceCount + dspaceExtCount);
       } else if (filters.source === 'Gutenberg' || filters.source === 'Project Gutenberg') {
         combinedData = gutenbergData;
         setTotalCount(gutenbergCount);
@@ -343,6 +375,12 @@ export default function Library() {
       } else if (filters.source === 'arXiv Research') {
         combinedData = arxivData;
         setTotalCount(arxivCount);
+      } else if (filters.source === 'OpenAlex') {
+        combinedData = openAlexData;
+        setTotalCount(openAlexCount);
+      } else if (filters.source === 'DSpace') {
+        combinedData = dspaceExtData;
+        setTotalCount(dspaceExtCount);
       } else if (filters.source === 'Dare Library') {
         combinedData = [...dbData, ...dspaceData];
         setTotalCount(dbCount + dspaceCount);
@@ -357,11 +395,13 @@ export default function Library() {
         const uniqueOpenStaxApi = openStaxApiData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
         const uniqueOpenLibrary = openLibraryData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
         const uniqueArxiv = arxivData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
+        const uniqueOpenAlex = openAlexData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
+        const uniqueDspaceExt = dspaceExtData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
         
-        combinedData = [...dbData, ...uniqueDSpace, ...uniqueOpenStax, ...uniqueGutenberg, ...uniqueOpenStaxApi, ...uniqueOpenLibrary, ...uniqueArxiv];
+        combinedData = [...dbData, ...uniqueDSpace, ...uniqueOpenStax, ...uniqueGutenberg, ...uniqueOpenStaxApi, ...uniqueOpenLibrary, ...uniqueArxiv, ...uniqueOpenAlex, ...uniqueDspaceExt];
         
         if (!isLoadMore) {
-          setTotalCount(dbCount + dspaceCount + openStaxCount + gutenbergCount + openStaxApiCount + openLibraryCount + arxivCount);
+          setTotalCount(dbCount + dspaceCount + openStaxCount + gutenbergCount + openStaxApiCount + openLibraryCount + arxivCount + openAlexCount + dspaceExtCount);
         }
       }
 

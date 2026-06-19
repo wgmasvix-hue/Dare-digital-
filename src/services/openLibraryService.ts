@@ -31,13 +31,12 @@ export const openLibraryService = {
       const limit = 20;
       const targetUrl = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`;
       
-      const { data: proxyResponse, error } = await supabase.functions.invoke('external-proxy', {
-        body: { url: targetUrl }
-      });
-
-      if (error) throw error;
+      const response = await fetch(targetUrl);
+      if (!response.ok) {
+        throw new Error(`OpenLibrary API error: ${response.status}`);
+      }
       
-      const responseData: OpenLibraryRawResponse = proxyResponse.data;
+      const responseData: OpenLibraryRawResponse = await response.json();
       
       return {
         books: (responseData.docs || []).map((doc: OpenLibraryDoc): Book => {

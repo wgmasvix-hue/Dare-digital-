@@ -166,6 +166,26 @@ export default function AdminSeed() {
     }
   };
 
+  const handleSeed1MBooks = async () => {
+    if (status === 'processing' || gutenbergStatus === 'processing' || libretextsStatus === 'processing') return;
+    
+    setLogs([]);
+    addLog('🚀 Starting background 1 Million Books insertion task on the server...', 'info');
+
+    try {
+      const res = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ function: 'seed-1m' })
+      });
+      const data = await res.json();
+      addLog(`✅ Server replied: ${data.message}`, 'success');
+      addLog('ℹ️ This operation runs in the background. You may safely navigate away.', 'info');
+    } catch (err) {
+      addLog(`❌ 1M Seed request failed: ${err.message}`, 'error');
+    }
+  };
+
   const handleLibreTextsImport = async () => {
     if (libretextsStatus === 'processing') return;
     
@@ -262,9 +282,15 @@ export default function AdminSeed() {
           <div style={{ padding: '12px 16px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '12px', width: '100%', marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h4 style={{ margin: 0, color: '#0f172a', fontWeight: 'bold' }}>Scale to 1,000,000 Books</h4>
-              <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#64748b' }}>To insert 1 million mock books instantly, please open your Supabase SQL Editor and run the <code>seed_1m_books.sql</code> file found in the project root.</p>
+              <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#64748b' }}>Insert 1 million mock books via background server process. This simulates a high-scale environment without blocking the main thread.</p>
             </div>
-            <a href="https://supabase.com/dashboard/project/_/sql/new" target="_blank" rel="noreferrer" style={{ padding: '8px 16px', background: '#0f172a', color: 'white', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px' }}>Open Supabase SQL</a>
+            <button 
+              onClick={handleSeed1MBooks}
+              disabled={status === 'processing' || gutenbergStatus === 'processing' || libretextsStatus === 'processing'}
+              style={{ padding: '8px 16px', background: '#0f172a', color: 'white', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', border: 'none' }}
+            >
+              Seed 1 Million Books
+            </button>
           </div>
           
           {status === 'processing' && (

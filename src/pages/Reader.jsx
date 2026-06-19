@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate, Navigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import InteractiveMarkdown from '../components/library/InteractiveMarkdown';
+import AiInsightsDrawer from '../components/library/AiInsightsDrawer';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -85,6 +86,7 @@ export default function Reader() {
   
   // AI Tutor State
   const [showAiSidebar, setShowAiSidebar] = useState(false);
+  const [showAiInsights, setShowAiInsights] = useState(false);
   const [aiMessages, setAiMessages] = useState([
     { role: 'assistant', text: "Mhoro! I'm DARA, your personal AI Tutor. I'm here to help you master the material in this book. \n\nI can summarize chapters, explain complex concepts, or test your knowledge with a quick quiz. What shall we tackle first?" }
   ]);
@@ -265,12 +267,10 @@ export default function Reader() {
             const identifier = id.startsWith('ol-') ? id.replace('ol-', '/works/') : id.replace('olb-', '/books/');
             try {
               const targetUrl = `https://openlibrary.org${identifier}.json`;
-              const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
-                body: { url: targetUrl }
-              });
-              if (proxyError) throw proxyError;
+              const response = await fetch(targetUrl);
+              if (!response.ok) throw new Error("Failed to fetch from Open Library");
+              const data = await response.json();
 
-              const data = proxyResponse.data;
               if (data) {
                 bookData = {
                   id: id,
@@ -893,7 +893,14 @@ export default function Reader() {
           <button 
             onClick={() => setShowAiSidebar(!showAiSidebar)} 
             className={`${styles.toolBtn} ${showAiSidebar ? styles.activeTool : ''}`} 
-            title="AI Tutor"
+            title="AI Chat Tutor"
+          >
+            <MessageSquare size={20} />
+          </button>
+          <button 
+            onClick={() => setShowAiInsights(true)} 
+            className={`${styles.toolBtn} text-purple-500`} 
+            title="AI Insights Drawer"
           >
             <Sparkles size={20} />
           </button>
@@ -1301,6 +1308,14 @@ export default function Reader() {
           </aside>
         )}
       </div>
+      
+      <AiInsightsDrawer 
+        isOpen={showAiInsights} 
+        onClose={() => setShowAiInsights(false)} 
+        bookTitle={book.title} 
+        chapterTitle={`Page ${pageNumber}`}
+        pageContent={`Currently viewing page ${pageNumber} of ${numPages}`} 
+      />
     </div>
   );
 }

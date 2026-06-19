@@ -122,12 +122,10 @@ export default function BookActionPage() {
           } else if (id.startsWith('ol-') || id.startsWith('olb-')) {
             const identifier = id.startsWith('ol-') ? id.replace('ol-', '/works/') : id.replace('olb-', '/books/');
             const targetUrl = `https://openlibrary.org${identifier}.json`;
-            const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
-              body: { url: targetUrl }
-            });
-            if (proxyError) throw proxyError;
+            const response = await fetch(targetUrl);
+            if (!response.ok) throw new Error("Failed to fetch from Open Library");
+            const data = await response.json();
 
-            const data = proxyResponse.data;
             if (data) {
               const transformed = {
                 id: id,

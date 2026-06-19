@@ -2,13 +2,15 @@ import { supabase } from "./supabase";
 import { openLibraryService } from "../services/openLibraryService";
 import { arxivService } from "../services/arxivService";
 import { gutenbergService } from "../services/gutenbergService";
+import { openAlexService } from "../services/openAlexService";
+import { dspaceService } from "../services/dspaceService";
 import { Book } from "../types";
 
 export async function unifiedSearch(query: string) {
   const like = `%${query}%`;
 
   // Query multiple sources and rank by quality_score where available
-  const [books, federated, oer, institutional, localResearch, dspaceDocs, olResults, axResults, gResults] = await Promise.all([
+  const [books, federated, oer, institutional, localResearch, dspaceDocs, olResults, axResults, gResults, openAlexResults, dspaceExtResults] = await Promise.all([
     supabase
       .from("books")
       .select("*")
@@ -44,7 +46,9 @@ export async function unifiedSearch(query: string) {
       .limit(20),
     openLibraryService.searchBooks(query).catch((e) => { console.error('OL Error:', e); return { books: [] }; }),
     arxivService.searchResearch(query).catch((e) => { console.error('Arxiv Error:', e); return { books: [] }; }),
-    gutenbergService.searchBooks(query).catch((e) => { console.error('Gutenberg Error:', e); return { books: [] }; })
+    gutenbergService.searchBooks(query).catch((e) => { console.error('Gutenberg Error:', e); return { books: [] }; }),
+    openAlexService.searchResearch(query).catch((e) => { console.error('OpenAlex Error:', e); return { books: [] }; }),
+    dspaceService.searchRepository('https://sandbox.dspace.org', query).catch((e) => { console.error('DSpace Error:', e); return { books: [] }; })
   ]);
 
   console.log(`Unified search for "${query}":`, {
@@ -56,7 +60,9 @@ export async function unifiedSearch(query: string) {
     dspaceDocs: dspaceDocs.data?.length || 0,
     ol: (olResults as { books: Book[] }).books?.length || 0,
     ax: (axResults as { books: Book[] }).books?.length || 0,
-    g: (gResults as { books: Book[] }).books?.length || 0
+    g: (gResults as { books: Book[] }).books?.length || 0,
+    oa: (openAlexResults as { books: Book[] }).books?.length || 0,
+    ds: (dspaceExtResults as { books: Book[] }).books?.length || 0
   });
 
   return {
@@ -74,12 +80,14 @@ export async function unifiedSearch(query: string) {
         institution: doc.institution,
         is_dspace: true,
         url: doc.url
-      }))
+      })),
+      ...(dspaceExtResults as { books: Book[] }).books
     ],
     external: [
       ...(olResults as { books: Book[] }).books,
       ...(axResults as { books: Book[] }).books,
-      ...(gResults as { books: Book[] }).books
+      ...(gResults as { books: Book[] }).books,
+      ...(openAlexResults as { books: Book[] }).books
     ]
   };
 }

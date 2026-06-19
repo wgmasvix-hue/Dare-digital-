@@ -85,17 +85,15 @@ export default function PDFViewer({ url, onClose, title, contentId }: PDFViewerP
     window.open(url, '_blank');
   };
 
-  const explainPage = async () => {
+  const handleAiInsight = async (type: 'explain' | 'summarize' | 'key-points') => {
     setAiLoading(true);
     setShowAiPanel(true);
     setAiResponse(null);
     
     try {
-      // For now, we use the title and page number as context
-      // In a real app, we'd extract text from the current page
       const response = await geminiService.processInstitutionalContent(
         title || "This document",
-        "explain"
+        type
       );
       setAiResponse(response || "No explanation available.");
     } catch {
@@ -130,11 +128,11 @@ export default function PDFViewer({ url, onClose, title, contentId }: PDFViewerP
 
         <div className="flex items-center gap-3">
           <button 
-            onClick={explainPage}
+            onClick={() => setShowAiPanel(true)}
             className="hidden sm:flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl text-xs font-bold hover:bg-purple-600 hover:text-white transition-all shadow-sm"
           >
             <Sparkles size={16} />
-            Explain Page
+            AI Insights
           </button>
 
           <div className="hidden md:flex items-center bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 p-1">
@@ -245,13 +243,36 @@ export default function PDFViewer({ url, onClose, title, contentId }: PDFViewerP
                     <ReactMarkdown>{aiResponse}</ReactMarkdown>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-300">
-                      <MessageSquare size={24} />
+                  <div className="flex flex-col items-center justify-center h-full text-center gap-6">
+                    <div className="w-16 h-16 rounded-3xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-500 shadow-inner">
+                      <Sparkles size={32} />
                     </div>
-                    <p className="text-sm text-slate-500">
-                      Click "Explain Page" to get AI-powered insights for this section.
-                    </p>
+                    <div>
+                      <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-2">How can DARA help?</h4>
+                      <p className="text-sm text-slate-500 max-w-[200px] mx-auto">
+                        Get AI-powered insights for the current page you're reading.
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-3 w-full mt-4">
+                      <button 
+                        onClick={() => handleAiInsight('explain')}
+                        className="w-full py-3 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 hover:border-purple-400 hover:text-purple-600 transition-all shadow-sm"
+                      >
+                        Explain Page
+                      </button>
+                      <button 
+                        onClick={() => handleAiInsight('summarize')}
+                        className="w-full py-3 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 hover:border-purple-400 hover:text-purple-600 transition-all shadow-sm"
+                      >
+                        Summarize Chapter
+                      </button>
+                      <button 
+                        onClick={() => handleAiInsight('key-points')}
+                        className="w-full py-3 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 hover:border-purple-400 hover:text-purple-600 transition-all shadow-sm"
+                      >
+                        Extract Key Points
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

@@ -554,10 +554,12 @@ The response should be in Markdown and include:
   async processInstitutionalContent(text: string, type: string) {
     let prompt = "";
 
-    if (type === "summary") {
+    if (type === "summary" || type === "summarize") {
       prompt = `Summarize this for a Zimbabwean student:\n${text}`;
     } else if (type === "explain") {
       prompt = `Explain this simply for a Form 4 student:\n${text}`;
+    } else if (type === "key-points") {
+      prompt = `Extract the most important key points from this content. Please format as a bulleted list:\n${text}`;
     } else if (type === "quiz") {
       prompt = `Generate 5 quiz questions from this:\n${text}`;
     } else {

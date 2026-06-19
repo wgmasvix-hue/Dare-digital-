@@ -44,7 +44,10 @@ import {
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
-  PolarRadiusAxis
+  PolarRadiusAxis,
+  ComposedChart,
+  Line,
+  Legend
 } from 'recharts';
 import { motion } from 'motion/react';
 import DaraChatModal from '../components/library/DaraChatModal';
@@ -56,6 +59,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useGamification } from '../context/GamificationContext';
 import { getLeaderboardData, getMotivationalMessage } from '../services/leaderboardService';
 import BookCard from '../components/library/BookCard';
+import ReadingGoals from '../components/dashboard/ReadingGoals';
 
 export default function StudentDashboard() {
   const { user, profile, institution } = useAuth();
@@ -221,7 +225,8 @@ export default function StudentDashboard() {
       const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       const mockStudyData = days.map(day => ({
         name: day,
-        pages: Math.floor(Math.random() * 20) + 5
+        pages: Math.floor(Math.random() * 20) + 5,
+        time: Math.floor(Math.random() * 45) + 15
       }));
       setStudyData(mockStudyData);
 
@@ -556,17 +561,13 @@ export default function StudentDashboard() {
               <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
                 <TrendingUp className="w-5 h-5" />
               </div>
-              <h2 className="text-2xl font-serif text-[#3D3028]">Study Progress</h2>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-bold text-[#8E8271] uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-[#C8861A]"></span>
-              Pages Read
+              <h2 className="text-2xl font-serif text-[#3D3028]">Learning Activity Analytics</h2>
             </div>
           </div>
 
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={studyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <ComposedChart data={studyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F0F0" />
                 <XAxis 
                   dataKey="name" 
@@ -576,6 +577,14 @@ export default function StudentDashboard() {
                   dy={10}
                 />
                 <YAxis 
+                  yAxisId="left"
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#8E8271', fontSize: 10, fontFamily: 'monospace' }}
+                />
+                <YAxis 
+                  yAxisId="right"
+                  orientation="right"
                   axisLine={false} 
                   tickLine={false} 
                   tick={{ fill: '#8E8271', fontSize: 10, fontFamily: 'monospace' }}
@@ -589,12 +598,10 @@ export default function StudentDashboard() {
                     fontFamily: 'Inter, sans-serif'
                   }}
                 />
-                <Bar dataKey="pages" radius={[6, 6, 0, 0]} barSize={32}>
-                  {studyData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index === 5 ? '#3D3028' : '#C8861A'} />
-                  ))}
-                </Bar>
-              </BarChart>
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', fontFamily: 'monospace', fontWeight: 600, color: '#8E8271' }} />
+                <Bar yAxisId="left" dataKey="pages" name="Pages Read" fill="#3D3028" radius={[6, 6, 0, 0]} barSize={24} />
+                <Line yAxisId="right" type="monotone" dataKey="time" name="Reading Time (min)" stroke="#C8861A" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
 
@@ -614,14 +621,20 @@ export default function StudentDashboard() {
           </div>
         </motion.div>
 
-        {/* Recent Activity */}
-        <motion.div variants={itemVariants} className="lg:col-span-4 bg-white border border-[#E8DFD0] rounded-3xl p-8 shadow-sm">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-full bg-stone-50 flex items-center justify-center text-stone-600">
-              <History className="w-5 h-5" />
+        {/* Right Column Stack */}
+        <div className="lg:col-span-4 flex flex-col gap-6">
+          <motion.div variants={itemVariants}>
+            <ReadingGoals currentPagesRead={stats.pagesRead} />
+          </motion.div>
+
+          {/* Recent Activity */}
+          <motion.div variants={itemVariants} className="bg-white border border-[#E8DFD0] rounded-3xl p-8 shadow-sm flex-1">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-full bg-stone-50 flex items-center justify-center text-stone-600">
+                <History className="w-5 h-5" />
+              </div>
+              <h2 className="text-2xl font-serif text-[#3D3028]">Activity</h2>
             </div>
-            <h2 className="text-2xl font-serif text-[#3D3028]">Activity</h2>
-          </div>
 
           <div className="space-y-6">
             {recentActivity.length > 0 ? (
@@ -649,6 +662,7 @@ export default function StudentDashboard() {
             View Full History
           </Link>
         </motion.div>
+        </div>
       </div>
 
       {/* Recommended For You */}

@@ -222,6 +222,52 @@ async function startServer() {
         });
       }
 
+      if (functionName === 'seed-1m') {
+        const supabaseUrl = process.env.VITE_SUPABASE_URL || "https://example.supabase.co";
+        const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || "dummy";
+        
+        // Kick off background job so we don't block
+        setTimeout(async () => {
+          const TOTAL_BOOKS = 1000000;
+          const BATCH_SIZE = 1000;
+          const subjects = ['Science', 'Mathematics', 'History', 'Literature', 'Technology'];
+          const levels = ['University', 'Diploma', 'High School', 'Primary'];
+          
+          for (let i = 0; i < TOTAL_BOOKS; i += BATCH_SIZE) {
+            const batch = [];
+            const limit = Math.min(i + BATCH_SIZE, TOTAL_BOOKS);
+            for (let j = i + 1; j <= limit; j++) {
+              batch.push({
+                title: `Mock Book: ${j}`,
+                author: `Author ${j % 1000}`,
+                description: `Comprehensive mock description for book ${j}. Covers topics in ${subjects[j % subjects.length]}.`,
+                subject: subjects[j % subjects.length],
+                level: levels[j % levels.length],
+                source: 'DARE'
+              });
+            }
+            try {
+              await fetch(`${supabaseUrl}/rest/v1/books`, {
+                method: 'POST',
+                headers: {
+                  'apikey': supabaseKey,
+                  'Authorization': `Bearer ${supabaseKey}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(batch)
+              });
+              // Wait 100ms to avoid overwhelming the database
+              await new Promise(r => setTimeout(r, 100));
+            } catch (err) {
+              console.error("1M Seed Error in batch:", err);
+            }
+          }
+        }, 1000);
+
+        return res.json({ status: "processing", message: "Started background task to seed 1,000,000 books." });
+      }
+
       if (functionName === 'search-books') {
          const rawMessage = body.message || body.contents;
          const message = typeof rawMessage === 'string' ? rawMessage : JSON.stringify(rawMessage || body);
@@ -293,16 +339,25 @@ async function startServer() {
     }
   });
 
+  const distPath = path.join(process.cwd(), 'dist');
+  
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
+    try {
+      const { createServer: createViteServer } = await import('vite');
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: "spa",
+      });
+      app.use(vite.middlewares);
+    } catch (err) {
+      console.warn("Vite not found or failed to load, falling back to static serving. Error:", err);
+      app.use(express.static(distPath));
+      app.get('*all', (req, res) => {
+        res.sendFile(path.join(distPath, 'index.html'));
+      });
+    }
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*all', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
