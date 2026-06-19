@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { 
-  Sparkles, 
-  LayoutGrid, 
-  List as ListIcon, 
-  Filter, 
+import {
+  Sparkles,
+  LayoutGrid,
+  List as ListIcon,
+  Filter,
   AlertCircle,
   History,
   Globe,
-  ArrowRight
+  ArrowRight,
+  RefreshCw,
+  Database
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { transformBooks, BOOK_SELECT, OPENSTAX_CURATED } from '../lib/transformBook';
