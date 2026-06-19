@@ -48,11 +48,12 @@ export default function NavBar() {
         isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm py-2' : 'bg-transparent py-4'
       }`}
     >
-      {/* Knowledge Progress Bar (Top Edge) */}
+      {/* Knowledge Progress Bar (Top Edge) — Zimbabwe flag colours */}
       {user && (
-        <div className="absolute top-0 left-0 w-full h-1 bg-slate-100">
-          <motion.div 
-            className="h-full bg-gradient-to-r from-teal-400 to-emerald-500"
+        <div className="absolute top-0 left-0 w-full h-1" style={{ background: "rgba(231,213,179,0.4)" }}>
+          <motion.div
+            className="h-full"
+            style={{ background: "linear-gradient(90deg, #166534 0%, #D97706 60%, #C2410C 100%)" }}
             initial={{ width: 0 }}
             animate={{ width: `${getLevelInfo().progress}%` }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -77,26 +78,26 @@ export default function NavBar() {
 
         {/* Desktop Main Links */}
         <div className="hidden md:flex items-center gap-1">
-          <Link to="/library" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
+          <Link to="/library" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors flex items-center gap-2">
             <Library size={16} /> Browse
           </Link>
-          <Link to="/open-books" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-teal-50 hover:text-teal-700 transition-colors flex items-center gap-2">
-            <Globe size={16} className="text-teal-550 shrink-0" /> 1M+ Books
+          <Link to="/open-books" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-green-800 hover:bg-green-50 transition-colors flex items-center gap-2">
+            <Globe size={16} className="text-green-600 shrink-0" /> 1M+ Books
           </Link>
-          <Link to="/dspace-explorer" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
+          <Link to="/dspace-explorer" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors flex items-center gap-2">
             <Database size={16} /> Repository
           </Link>
-          <Link to="/tutor" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
+          <Link to="/tutor" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-amber-800 hover:bg-amber-50 transition-colors flex items-center gap-2">
             <Sparkles size={16} className="text-amber-500" /> DARA Tutor
           </Link>
-          <Link to="/research" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
+          <Link to="/research" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors flex items-center gap-2">
             <FlaskConical size={16} /> Research
           </Link>
-          <Link to="/academic" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-indigo-50 hover:text-indigo-700 transition-colors flex items-center gap-2">
-            <BookOpen size={16} className="text-indigo-500" /> Academic DB
+          <Link to="/academic" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-orange-800 hover:bg-orange-50 transition-colors flex items-center gap-2">
+            <BookOpen size={16} className="text-orange-600" /> Academic DB
           </Link>
-          <Link to="/teacher-tools" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
-            <ClipboardCheck size={16} className="text-emerald-600" /> Lesson Planner
+          <Link to="/teacher-tools" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors flex items-center gap-2">
+            <ClipboardCheck size={16} className="text-green-600" /> Lesson Planner
           </Link>
         </div>
 
@@ -127,7 +128,7 @@ export default function NavBar() {
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center gap-2 focus:outline-none"
                 >
-                  <div className="w-10 h-10 rounded-full bg-teal-100 border border-teal-200 flex items-center justify-center text-teal-700 font-bold transition-transform hover:scale-105 active:scale-95">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-800 font-bold transition-transform hover:scale-105 active:scale-95">
                     {profile?.first_name?.[0]?.toUpperCase() || <User size={20} />}
                   </div>
                 </button>

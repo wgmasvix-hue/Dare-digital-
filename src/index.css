@@ -1,178 +1,176 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@400;600;800&family=Source+Code+Pro:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Code+Pro:wght@400;500&display=swap');
 @import "tailwindcss";
 
-/* LIGHT MODE (Default) */
+/* ─────────────────────────────────────────────────────────────
+   DARE Digital Library — Afrocentric Design System
+   Palette inspired by Zimbabwe: kente green, saffron gold,
+   terracotta earth, savanna warmth, ebony warmth
+   ───────────────────────────────────────────────────────────── */
+
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 80px; /* Offset for fixed navbar */
+  scroll-padding-top: 80px;
 }
 
+/* ── LIGHT MODE ─────────────────────────────────────────────── */
 :root, .light {
-  /* Core Brand Colors - Government Green & Blue Palette */
-  --color-primary:    #1E3A8A; /* Deep Royal Blue */
-  --color-accent:     #065F46; /* Deep Forest Green */
-  --color-secondary:  #B45309; /* Warm Amber for highlights */
-  --color-success:    #10B981; /* Growth Green (Emerald 500) */
-  --color-indigo:     #4338CA; /* Indigo 700 */
-  
-  --color-bg-base:    #FFFFFF;
-  --color-bg-subtle:  #F8FAFC; 
-  --color-bg-muted:   #F1F5F9;
-  
-  --color-border:     #E2E8F0;
-  --color-border-strong: #CBD5E1;
+  /* Core brand — Zimbabwe heritage palette */
+  --color-primary:      #166534; /* Deep Kente Green (Zimbabwe highlands) */
+  --color-primary-dark: #14532D; /* Darker kente green */
+  --color-accent:       #D97706; /* Saffron Gold (kente cloth) */
+  --color-gold:         #B45309; /* Warm Amber Gold */
+  --color-terracotta:   #C2410C; /* Zimbabwe Red Earth (Matopo Hills) */
+  --color-sienna:       #9A3412; /* Deep Sienna */
+  --color-secondary:    #15803D; /* Forest Green (growth, life) */
+  --color-success:      #16A34A; /* Emerald success */
+  --color-indigo:       #4338CA; /* Academic indigo */
 
-  /* Dare Library Specific Colors */
-  --navy:             #1E3A8A;
-  --gold:             #B45309;
-  --blue:             #1E3A8A;
-  --green:            #065F46;
-  
-  /* Aliases for consistency */
-  --color-gold:       var(--gold);
-  --color-navy:       var(--navy);
-  --color-primary-dark: #172554;
-  
-  --text-main:        #1E293B; /* Slate 800 */
-  --text-muted:       #475569; /* Slate 600 */
-  --text-subtle:      #94A3B8; /* Slate 400 */
-  
-  --color-text-main:  var(--text-main);
-  --color-text-muted: var(--text-muted);
-  --color-text-subtle: var(--text-subtle);
+  /* Warm backgrounds — papyrus & parchment */
+  --color-bg-base:      #FFFFFF;
+  --color-bg-subtle:    #FFFBF0; /* Warm papyrus */
+  --color-bg-muted:     #FEF3C7; /* Light saffron/honey */
+  --color-bg-warm:      #FEF9EE; /* Soft parchment */
+
+  /* Warm borders */
+  --color-border:        #E7D5B3; /* Warm sand */
+  --color-border-strong: #D0B07A; /* Rich sand */
+
+  /* Warm text — ebony tones, not cold slate */
+  --text-main:           #1C1917; /* Rich Ebony (stone-900) */
+  --text-muted:          #44403C; /* Warm Stone (stone-700) */
+  --text-subtle:         #78716C; /* Warm Gray (stone-500) */
+
+  /* Legacy aliases kept for compat */
+  --navy:                #1C1917;
+  --gold:                #D97706;
+  --blue:                #166534;
+  --green:               #15803D;
+  --color-gold:          var(--gold);
+  --color-navy:          var(--navy);
+
+  --color-text-main:     var(--text-main);
+  --color-text-muted:    var(--text-muted);
+  --color-text-subtle:   var(--text-subtle);
 
   /* Typography */
-  --font-main: 'Inter', system-ui, sans-serif;
+  --font-main:    'Inter', system-ui, sans-serif;
   --font-display: 'Outfit', sans-serif;
-  --font-accent: 'Bricolage Grotesque', sans-serif;
-  --font-mono: 'Source Code Pro', monospace;
-  
-  /* Shadows - Refined for Modern UI */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 12px -1px rgb(0 0 0 / 0.08), 0 2px 6px -2px rgb(0 0 0 / 0.08);
-  --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.12), 0 8px 16px -4px rgb(0 0 0 / 0.12);
-  --shadow-xl: 0 24px 48px -8px rgb(0 0 0 / 0.15), 0 12px 24px -8px rgb(0 0 0 / 0.15);
-  --shadow-premium: 0 20px 50px rgba(15, 23, 42, 0.08);
-  
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-  --gradient-accent: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-  --gradient-green: linear-gradient(135deg, #10B981 0%, #059669 100%);
-  --gradient-surface: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+  --font-accent:  'Bricolage Grotesque', sans-serif;
+  --font-mono:    'Source Code Pro', monospace;
+
+  /* Shadows — warm-tinted */
+  --shadow-sm:      0 1px 2px 0 rgba(28, 25, 23, 0.06);
+  --shadow-md:      0 4px 12px -1px rgba(28, 25, 23, 0.10), 0 2px 6px -2px rgba(28, 25, 23, 0.08);
+  --shadow-lg:      0 12px 24px -4px rgba(28, 25, 23, 0.13), 0 8px 16px -4px rgba(28, 25, 23, 0.10);
+  --shadow-xl:      0 24px 48px -8px rgba(28, 25, 23, 0.16), 0 12px 24px -8px rgba(28, 25, 23, 0.12);
+  --shadow-premium: 0 20px 50px rgba(28, 25, 23, 0.09);
+  --shadow-gold:    0 4px 20px rgba(217, 119, 6, 0.20);
+  --shadow-green:   0 4px 20px rgba(21, 128, 61, 0.18);
+
+  /* Afrocentric gradients */
+  --gradient-primary:    linear-gradient(135deg, #1C1917 0%, #292524 100%); /* Rich mahogany */
+  --gradient-accent:     linear-gradient(135deg, #15803D 0%, #166534 100%); /* Kente green */
+  --gradient-gold:       linear-gradient(135deg, #D97706 0%, #B45309 100%); /* Saffron gold */
+  --gradient-earth:      linear-gradient(135deg, #C2410C 0%, #9A3412 100%); /* Zimbabwe earth */
+  --gradient-hero:       linear-gradient(135deg, #166534 0%, #D97706 50%, #C2410C 100%); /* Zimbabwe flag */
+  --gradient-surface:    linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+  --gradient-warm-fade:  linear-gradient(180deg, rgba(254,243,199,0) 0%, rgba(254,243,199,1) 100%);
 
   /* Radius */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.875rem;
-  --radius-lg: 1.25rem;
-  --radius-xl: 2rem;
+  --radius-sm:   0.5rem;
+  --radius-md:   0.875rem;
+  --radius-lg:   1.25rem;
+  --radius-xl:   2rem;
   --radius-full: 9999px;
 
-  /* RGB variants for transparency */
-  --color-bg-base-rgb: 255, 255, 255;
-  --color-primary-rgb: 15, 23, 42;
-  --color-accent-rgb: 59, 130, 246;
-  --color-secondary-rgb: 16, 185, 129;
-  --color-indigo-rgb: 99, 102, 241;
-  --color-border-rgb: 226, 232, 240;
-  --text-main-rgb: 15, 23, 42;
-  --text-muted-rgb: 71, 85, 105;
+  /* RGB for transparency */
+  --color-bg-base-rgb:    255, 255, 255;
+  --color-primary-rgb:    22, 101, 52;
+  --color-accent-rgb:     217, 119, 6;
+  --color-secondary-rgb:  21, 128, 61;
+  --color-indigo-rgb:     67, 56, 202;
+  --color-border-rgb:     231, 213, 179;
+  --text-main-rgb:        28, 25, 23;
+  --text-muted-rgb:       68, 64, 60;
 }
 
-/* DARK MODE */
+/* ── DARK MODE — warm mahogany, not cold blue ───────────────── */
 .dark {
-  --color-bg-base:    #020617; /* Slate 950 */
-  --color-bg-subtle:  #0F172A; /* Slate 900 */
-  --color-bg-muted:   #1E293B; /* Slate 800 */
-  --color-border:     #1E293B; /* Slate 800 */
-  --color-border-strong: #334155;
-  
-  --text-main:        #F8FAFC; /* Slate 50 */
-  --text-muted:       #94A3B8; /* Slate 400 */
-  --text-subtle:      #64748B; /* Slate 500 */
+  --color-bg-base:    #120C07; /* Warm near-black (mahogany) */
+  --color-bg-subtle:  #1E130A; /* Dark mahogany */
+  --color-bg-muted:   #2D1E0F; /* Medium mahogany */
+  --color-border:     #3B2710; /* Warm dark border */
+  --color-border-strong: #5C3D1A;
 
-  --gradient-primary: linear-gradient(135deg, #020617 0%, #0F172A 100%);
-  --gradient-surface: linear-gradient(180deg, rgba(2, 6, 23, 0) 0%, rgba(2, 6, 23, 1) 100%);
+  --text-main:        #FEF9EE; /* Warm cream (not cold white) */
+  --text-muted:       #C4A87A; /* Warm sand */
+  --text-subtle:      #8B7355; /* Muted warm */
 
-  --color-bg-base-rgb: 2, 6, 23;
-  --color-primary-rgb: 248, 250, 252;
-  --color-accent-rgb: 59, 130, 246;
-  --color-secondary-rgb: 16, 185, 129;
-  --color-indigo-rgb: 99, 102, 241;
-  --color-border-rgb: 30, 41, 59;
-  --text-main-rgb: 248, 250, 252;
-  --text-muted-rgb: 148, 163, 184;
+  --gradient-primary: linear-gradient(135deg, #120C07 0%, #1E130A 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(18,12,7,0) 0%, rgba(18,12,7,1) 100%);
+
+  --color-bg-base-rgb:  18, 12, 7;
+  --color-primary-rgb:  254, 249, 238;
+  --text-main-rgb:      254, 249, 238;
+  --text-muted-rgb:     196, 168, 122;
 }
 
-/* SEPIA MODE */
+/* ── SEPIA MODE ─────────────────────────────────────────────── */
 .sepia {
-  --color-bg-base:    #F4ECD8;
-  --color-bg-subtle:  #EAE0C9;
-  --color-bg-muted:   #D3C5A3;
-  --color-border:     #D3C5A3;
-  --color-border-strong: #B4A684;
-  
-  --text-main:        #433422;
-  --text-muted:       #5F4B32;
-  --text-subtle:      #8B7355;
-
-  /* Sepia Earthy Palette */
+  --color-bg-base:    #F7EDD8;
+  --color-bg-subtle:  #EDE0C4;
+  --color-bg-muted:   #DBC9A2;
+  --color-border:     #C9B48A;
+  --color-border-strong: #A8915E;
+  --text-main:        #3B2B1A;
+  --text-muted:       #5C4230;
+  --text-subtle:      #8B6B4A;
   --soil: #5D4037;
   --clay: #8D6E63;
-  --clay-light: #D3C5A3;
   --amber: #B45309;
-  --amber-light: rgba(180, 83, 9, 0.1);
-  --parchment: #F4ECD8;
-  --cream: #EAE0C9;
-  --mist: #D3C5A3;
-  --leaf: #3E5B2D;
-  --leaf-light: rgba(62, 91, 45, 0.1);
-  --white: #F4ECD8;
-  --navy: #2A1B0E;
-  --bark: #4E342E;
-
-  --color-bg-base-rgb: 244, 236, 216;
-  --color-primary-rgb: 67, 52, 34;
+  --parchment: #F7EDD8;
+  --color-bg-base-rgb: 247, 237, 216;
+  --color-primary-rgb: 59, 43, 26;
 }
 
 @theme {
-  --color-primary: var(--color-primary);
-  --color-accent: var(--color-accent);
-  --color-secondary: var(--color-secondary);
-  --color-indigo: var(--color-indigo);
-  --color-bg-base: var(--color-bg-base);
-  --color-bg-subtle: var(--color-bg-subtle);
-  --color-bg-muted: var(--color-bg-muted);
-  --color-border: var(--color-border);
+  --color-primary:       var(--color-primary);
+  --color-accent:        var(--color-accent);
+  --color-secondary:     var(--color-secondary);
+  --color-indigo:        var(--color-indigo);
+  --color-bg-base:       var(--color-bg-base);
+  --color-bg-subtle:     var(--color-bg-subtle);
+  --color-bg-muted:      var(--color-bg-muted);
+  --color-border:        var(--color-border);
   --color-border-strong: var(--color-border-strong);
-  
-  --color-text-main: var(--text-main);
-  --color-text-muted: var(--text-muted);
-  --color-text-subtle: var(--text-subtle);
 
-  --color-primary-rgb: var(--color-primary-rgb);
-  --color-accent-rgb: var(--color-accent-rgb);
-  --color-bg-base-rgb: var(--color-bg-base-rgb);
-  
-  --font-sans: var(--font-main);
-  --font-display: var(--font-display);
-  --font-accent: var(--font-accent);
-  --font-mono: var(--font-mono);
-  
-  --shadow-sm: var(--shadow-sm);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-xl: var(--shadow-xl);
+  --color-text-main:     var(--text-main);
+  --color-text-muted:    var(--text-muted);
+  --color-text-subtle:   var(--text-subtle);
+
+  --color-primary-rgb:  var(--color-primary-rgb);
+  --color-accent-rgb:   var(--color-accent-rgb);
+  --color-bg-base-rgb:  var(--color-bg-base-rgb);
+
+  --font-sans:     var(--font-main);
+  --font-display:  var(--font-display);
+  --font-accent:   var(--font-accent);
+  --font-mono:     var(--font-mono);
+
+  --shadow-sm:      var(--shadow-sm);
+  --shadow-md:      var(--shadow-md);
+  --shadow-lg:      var(--shadow-lg);
+  --shadow-xl:      var(--shadow-xl);
   --shadow-premium: var(--shadow-premium);
-  
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
+
+  --radius-sm:   var(--radius-sm);
+  --radius-md:   var(--radius-md);
+  --radius-lg:   var(--radius-lg);
+  --radius-xl:   var(--radius-xl);
   --radius-full: var(--radius-full);
 }
 
-/* --- THE CLEAN CANVAS --- */
-
+/* ── BASE CANVAS ─────────────────────────────────────────────── */
 .app-wrapper {
   background-color: var(--color-bg-base);
   color: var(--text-main);
@@ -180,44 +178,11 @@ html {
   display: flex;
   flex-direction: column;
   transition: background-color 0.3s ease, color 0.3s ease;
-  overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
 }
 
-html {
-  font-size: 16px;
-}
-
-@media (max-width: 768px) {
-  html {
-    font-size: 14px;
-  }
-}
-
-/* CUSTOM SCROLLBARS */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-bg-base);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(var(--text-muted-rgb), 0.3);
-  border-radius: 5px;
-  border: 2px solid var(--color-bg-base);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--text-muted-rgb), 0.5);
-}
-
-/* Base focus styles for accessibility */
-*:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
+html { font-size: 16px; }
+@media (max-width: 768px) { html { font-size: 14px; } }
 
 body {
   background-color: var(--color-bg-base);
@@ -229,126 +194,339 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- SUPABASE COMPONENT REFINEMENT --- */
+/* ── ACCESSIBILITY ───────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
 
-/* Professional Inputs for Supabase Auth */
+/* Skip navigation — accessible keyboard landmark */
+.skip-nav {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-accent);
+  color: white;
+  font-weight: 700;
+  border-radius: 0 0 0.5rem 0.5rem;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+.skip-nav:focus { top: 0; }
+
+/* Reduced motion — respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .animate-blob, .animate-ping, .animate-spin, .animate-pulse { animation: none; }
+}
+
+/* ── SCROLLBARS — warm tones ─────────────────────────────────── */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-bg-base); }
+::-webkit-scrollbar-thumb {
+  background: rgba(180, 83, 9, 0.25);
+  border-radius: 5px;
+  border: 2px solid var(--color-bg-base);
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(180, 83, 9, 0.45); }
+
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-border-strong); }
+
+/* ── TYPOGRAPHY ─────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+.text-balance { text-wrap: balance; }
+
+.micro-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+/* ── AFROCENTRIC PATTERN UTILITIES ───────────────────────────── */
+
+/* Subtle kente weave — geometric grid like traditional cloth */
+.pattern-kente {
+  background-image:
+    repeating-linear-gradient(90deg, rgba(217,119,6,0.06) 0, rgba(217,119,6,0.06) 1px, transparent 0, transparent 24px),
+    repeating-linear-gradient(0deg, rgba(194,65,12,0.05) 0, rgba(194,65,12,0.05) 1px, transparent 0, transparent 24px),
+    repeating-linear-gradient(45deg, rgba(21,128,61,0.04) 0, rgba(21,128,61,0.04) 1px, transparent 0, transparent 48px);
+}
+
+/* Great Zimbabwe concentric ring motif */
+.pattern-zimbabwe {
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 15px, rgba(217,119,6,0.06) 15px, rgba(217,119,6,0.06) 16px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 15px, rgba(21,128,61,0.05) 15px, rgba(21,128,61,0.05) 16px);
+}
+
+/* Three-stripe divider inspired by Zimbabwe flag */
+.divider-africa {
+  height: 4px;
+  background: linear-gradient(90deg, #15803D 0% 33%, #D97706 33% 66%, #C2410C 66% 100%);
+  border-radius: 2px;
+}
+
+/* Kente stripe accent bar */
+.stripe-kente {
+  height: 3px;
+  background: repeating-linear-gradient(90deg,
+    #15803D 0, #15803D 8px,
+    #D97706 8px, #D97706 16px,
+    #C2410C 16px, #C2410C 24px,
+    #1C1917 24px, #1C1917 32px
+  );
+}
+
+/* Warm badge styles */
+.badge-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: rgba(217, 119, 6, 0.12);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  color: #92400E;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badge-green {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: rgba(21, 128, 61, 0.10);
+  border: 1px solid rgba(21, 128, 61, 0.20);
+  color: #14532D;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badge-earth {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: rgba(194, 65, 12, 0.10);
+  border: 1px solid rgba(194, 65, 12, 0.20);
+  color: #7C2D12;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── FORMS ──────────────────────────────────────────────────── */
 input, textarea {
   background: var(--color-bg-base);
   border: 1px solid var(--color-border);
   color: var(--text-main);
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 10px 14px;
-  transition: var(--transition);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-
-input:focus {
+input:focus, textarea:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 4px rgba(var(--color-accent-rgb), 0.2);
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
   outline: none;
 }
 
-/* --- AI RESPONSE (GOOGLE AI STUDIO) --- */
+/* ── CODE BLOCKS ─────────────────────────────────────────────── */
+pre, code {
+  font-family: var(--font-mono);
+  background: #FEF3C7;
+  color: #1C1917;
+  border: 1px solid #E7D5B3;
+  border-radius: 4px;
+  padding: 0.2rem 0.4rem;
+}
 
+/* ── BUTTON SYSTEM ───────────────────────────────────────────── */
+.btn-modern {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 26px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  letter-spacing: 0.03em;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: none;
+  min-height: 44px; /* WCAG minimum touch target */
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-green);
+}
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(21,128,61,0.25);
+}
+
+.btn-gold {
+  background: var(--gradient-gold);
+  color: white;
+  box-shadow: var(--shadow-gold);
+}
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(217,119,6,0.30);
+}
+
+.btn-earth {
+  background: var(--gradient-earth);
+  color: white;
+}
+.btn-earth:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(194,65,12,0.25);
+}
+
+.btn-secondary {
+  background: var(--color-bg-subtle);
+  color: var(--text-main);
+  border: 1px solid var(--color-border);
+}
+.btn-secondary:hover {
+  background: var(--color-bg-muted);
+  border-color: var(--color-border-strong);
+  transform: translateY(-1px);
+}
+
+/* ── CARD SYSTEM ─────────────────────────────────────────────── */
+.card-modern {
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+.card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-accent);
+}
+
+/* ── TABS ────────────────────────────────────────────────────── */
+.tabs-pill {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: fit-content;
+}
+.tab-pill {
+  padding: 8px 20px;
+  border-radius: calc(var(--radius-lg) - 4px);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: transparent;
+  min-height: 40px;
+}
+.tab-pill:hover { color: var(--text-main); background: rgba(217,119,6,0.08); }
+.tab-pill.active {
+  background: var(--color-bg-base);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── AI CONTAINER ────────────────────────────────────────────── */
 .ai-container {
   background: var(--color-bg-subtle);
   border-left: 4px solid var(--color-accent);
   border-radius: 0 8px 8px 0;
   padding: 1.5rem;
   margin: 1.5rem 0;
-  box-shadow: var(--shadow-soft);
 }
 
-/* High-contrast code for light mode */
-pre, code {
-  font-family: var(--font-mono);
-  background: #F1F5F9;
-  color: #0F172A;
-  border: 1px solid #CBD5E1;
-  border-radius: 4px;
-  padding: 0.2rem 0.4rem;
-}
-
+/* ── SKELETON / SHIMMER ──────────────────────────────────────── */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(90deg, 
-    rgba(226, 232, 240, 0.5) 25%, 
-    rgba(241, 245, 249, 0.8) 50%, 
-    rgba(226, 232, 240, 0.5) 75%);
+  background: linear-gradient(90deg,
+    rgba(231,213,179,0.4) 25%,
+    rgba(254,243,199,0.8) 50%,
+    rgba(231,213,179,0.4) 75%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite linear;
 }
-
 .dark .skeleton-shimmer {
-  background: linear-gradient(90deg, 
-    rgba(30, 41, 59, 0.5) 25%, 
-    rgba(51, 65, 85, 0.8) 50%, 
-    rgba(30, 41, 59, 0.5) 75%);
+  background: linear-gradient(90deg,
+    rgba(59,39,16,0.5) 25%,
+    rgba(92,61,26,0.8) 50%,
+    rgba(59,39,16,0.5) 75%);
   background-size: 200% 100%;
 }
 
-/* --- TYPOGRAPHY --- */
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-.serif-italic {
-  font-family: var(--font-serif);
-  font-style: italic;
-}
-
-.text-balance {
-  text-wrap: balance;
-}
-
-.micro-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
 .shimmer {
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0) 0%, 
-    rgba(255, 255, 255, 0.4) 50%, 
-    rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.4) 50%,
+    rgba(255,255,255,0) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
-.dark .shimmer {
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0) 0%, 
-    rgba(255, 255, 255, 0.05) 50%, 
-    rgba(255, 255, 255, 0) 100%);
-  background-size: 200% 100%;
+/* ── ANIMATIONS ──────────────────────────────────────────────── */
+@keyframes blob {
+  0%   { transform: translate(0,0) scale(1); }
+  33%  { transform: translate(30px,-50px) scale(1.1); }
+  66%  { transform: translate(-20px,20px) scale(0.9); }
+  100% { transform: translate(0,0) scale(1); }
 }
+.animate-blob { animation: blob 7s infinite; }
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
 
-/* --- UTILITIES --- */
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-.section-padding {
-  padding-top: 5rem;
-  padding-bottom: 5rem;
-}
+/* ── UTILITIES ───────────────────────────────────────────────── */
+.section-padding { padding-top: 5rem; padding-bottom: 5rem; }
 
 .container-wide {
   max-width: 1400px;
@@ -356,143 +534,6 @@ h1, h2, h3, h4, h5, h6 {
   margin-right: auto;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
-}
-
-.btn-modern {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 24px;
-  border-radius: var(--radius-md);
-  font-weight: 700;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  border: none;
-  font-family: var(--font-sans);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.8rem;
-}
-
-.btn-primary {
-  background: var(--color-accent);
-  color: white;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-}
-
-.btn-primary:hover {
-  background: var(--color-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-
-.btn-secondary {
-  background: var(--color-bg-subtle);
-  color: var(--color-text-main);
-  border: 1px solid var(--color-border);
-}
-
-.btn-secondary:hover {
-  background: var(--color-border);
-  transform: translateY(-2px);
-}
-
-.card-modern {
-  background: var(--color-bg-base);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-}
-
-.card-modern:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-accent);
-}
-
-/* Modern Tabs (Pill Style) */
-.tabs-pill {
-  display: flex;
-  gap: 8px;
-  padding: 6px;
-  background: var(--color-bg-subtle);
-  border-radius: var(--radius-lg);
-  width: fit-content;
-}
-
-.tab-pill {
-  padding: 8px 20px;
-  border-radius: var(--radius-lg);
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-  background: transparent;
-}
-
-.tab-pill:hover {
-  color: var(--color-text-main);
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.tab-pill.active {
-  background: var(--color-bg-base);
-  color: var(--color-accent);
-  box-shadow: var(--shadow-sm);
-}
-
-.dark .tab-pill.active {
-  background: var(--color-bg-base);
-  color: var(--color-accent);
-}
-
-/* Custom Scrollbar Utility */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #E2E8F0;
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #CBD5E1;
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #334155;
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #475569;
-}
-
-@keyframes blob {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(30px, -50px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
-  100% { transform: translate(0px, 0px) scale(1); }
-}
-
-.animate-blob {
-  animation: blob 7s infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
 }
 
 .app-wrapper {
@@ -504,6 +545,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Scroll-to-top button */
 .scroll-top-btn {
   position: fixed;
   bottom: 32px;
@@ -511,12 +553,12 @@ h1, h2, h3, h4, h5, h6 {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--color-accent);
+  background: var(--gradient-gold);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-gold);
   cursor: pointer;
   z-index: 1000;
   opacity: 0;
@@ -525,15 +567,9 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
 }
+.scroll-top-btn.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+.scroll-top-btn:hover { transform: scale(1.1); box-shadow: 0 8px 24px rgba(217,119,6,0.30); }
 
-.scroll-top-btn.visible {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.scroll-top-btn:hover {
-  background: var(--color-primary);
-  transform: scale(1.1);
-  box-shadow: var(--shadow-lg);
-}
+/* Scrollbar hide utility (for tab bars) */
+.scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
