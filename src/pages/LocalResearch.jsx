@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Search, 
-  FileText, 
-  Upload, 
-  User, 
-  Calendar, 
-  Building, 
+import {
+  Search,
+  FileText,
+  Upload,
+  User,
+  Calendar,
+  Building,
   ArrowRight,
   Filter,
   CheckCircle,
@@ -21,11 +21,15 @@ import {
   Plus,
   X,
   Sparkles,
-  Share2
+  Share2,
+  Globe,
+  ExternalLink,
+  TrendingUp,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { researchService } from '../services/researchService';
 import { geminiService } from '../services/geminiService';
+import { openAlexService, OPENALEX_CONCEPTS, OPENALEX_TYPES } from '../services/openAlexService';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import styles from './LocalResearch.module.css';
@@ -67,6 +71,17 @@ export default function LocalResearch() {
   const itemsPerPage = 10;
   const [hasMore, setHasMore] = useState(true);
   const loadMoreRef = useRef(null);
+
+  // OpenAlex state
+  const [oaQuery, setOaQuery] = useState('');
+  const [oaPapers, setOaPapers] = useState([]);
+  const [oaTotal, setOaTotal] = useState(0);
+  const [oaPage, setOaPage] = useState(1);
+  const [oaLoading, setOaLoading] = useState(false);
+  const [oaFeatured, setOaFeatured] = useState([]);
+  const [oaStats, setOaStats] = useState({ total: 250_000_000 });
+  const [oaFilters, setOaFilters] = useState({ type: '', isOA: false, yearFrom: '', yearTo: '', conceptId: '', sort: 'relevance' });
+  const [oaInitialized, setOaInitialized] = useState(false);
 
   // Infinite Scroll Observer
   useEffect(() => {
@@ -196,6 +211,36 @@ export default function LocalResearch() {
       console.error('Error fetching data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Load OpenAlex featured papers once when tab is first opened
+  useEffect(() => {
+    if (activeTab === 'openalex' && !oaInitialized) {
+      setOaInitialized(true);
+      openAlexService.getFeatured().then(setOaFeatured);
+      openAlexService.getStats().then(setOaStats);
+    }
+  }, [activeTab, oaInitialized]);
+
+  const searchOpenAlex = async (page = 1, append = false) => {
+    setOaLoading(true);
+    try {
+      const result = await openAlexService.search(oaQuery, page, {
+        type: oaFilters.type || undefined,
+        isOA: oaFilters.isOA || undefined,
+        yearFrom: oaFilters.yearFrom ? parseInt(oaFilters.yearFrom) : undefined,
+        yearTo: oaFilters.yearTo ? parseInt(oaFilters.yearTo) : undefined,
+        conceptId: oaFilters.conceptId || undefined,
+        sort: oaFilters.sort,
+      });
+      setOaPapers(prev => append ? [...prev, ...result.papers] : result.papers);
+      setOaTotal(result.totalResults);
+      setOaPage(page);
+    } catch (err) {
+      console.error('OpenAlex search error:', err);
+    } finally {
+      setOaLoading(false);
     }
   };
 
@@ -367,11 +412,18 @@ export default function LocalResearch() {
           >
             Digitization Hub
           </button>
-          <button 
+          <button
             className={`${styles.tab} ${activeTab === 'reports' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('reports')}
           >
             Archival Reports
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'openalex' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('openalex')}
+          >
+            <Globe size={13} className="inline mr-1 -mt-0.5" />
+            Global Papers (200M+)
           </button>
         </div>
 
@@ -620,6 +672,279 @@ export default function LocalResearch() {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'openalex' && (
+              <div className="flex flex-col gap-6 py-2">
+                {/* Stats banner */}
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white flex items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold">OpenAlex Global Research Database</h2>
+                    <p className="opacity-75 mt-1 text-sm">
+                      Freely search across {oaStats.total.toLocaleString()}+ scholarly works worldwide — journals, books, preprints, datasets and more.
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-4xl font-black leading-none">{Math.round(oaStats.total / 1_000_000)}M+</div>
+                    <div className="text-xs opacity-60 mt-1">papers indexed</div>
+                  </div>
+                </div>
+
+                {/* Search + filters */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col gap-3">
+                  <form
+                    className="flex gap-2"
+                    onSubmit={(e) => { e.preventDefault(); searchOpenAlex(1, false); }}
+                  >
+                    <div className="flex-1 relative">
+                      <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-400"
+                        placeholder="Search 200M+ papers by title, author, keyword…"
+                        value={oaQuery}
+                        onChange={e => setOaQuery(e.target.value)}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                    >
+                      Search
+                    </button>
+                  </form>
+
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {/* Open access toggle */}
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-slate-700">
+                      <button
+                        type="button"
+                        onClick={() => setOaFilters(f => ({ ...f, isOA: !f.isOA }))}
+                        className={`w-9 h-5 rounded-full relative transition-colors ${oaFilters.isOA ? 'bg-green-500' : 'bg-slate-200'}`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${oaFilters.isOA ? 'translate-x-4' : ''}`} />
+                      </button>
+                      Open Access Only
+                    </label>
+
+                    <select
+                      className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:border-blue-400"
+                      value={oaFilters.type}
+                      onChange={e => setOaFilters(f => ({ ...f, type: e.target.value }))}
+                    >
+                      {OPENALEX_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                    </select>
+
+                    <div className="flex items-center gap-1">
+                      <input
+                        className="w-20 text-sm border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-400"
+                        placeholder="From"
+                        type="number"
+                        min="1800"
+                        max={new Date().getFullYear()}
+                        value={oaFilters.yearFrom}
+                        onChange={e => setOaFilters(f => ({ ...f, yearFrom: e.target.value }))}
+                      />
+                      <span className="text-slate-400 text-xs">–</span>
+                      <input
+                        className="w-20 text-sm border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-400"
+                        placeholder="To"
+                        type="number"
+                        min="1800"
+                        max={new Date().getFullYear()}
+                        value={oaFilters.yearTo}
+                        onChange={e => setOaFilters(f => ({ ...f, yearTo: e.target.value }))}
+                      />
+                    </div>
+
+                    <select
+                      className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:border-blue-400"
+                      value={oaFilters.conceptId}
+                      onChange={e => setOaFilters(f => ({ ...f, conceptId: e.target.value }))}
+                    >
+                      <option value="">All Fields</option>
+                      {OPENALEX_CONCEPTS.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+
+                    <select
+                      className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:border-blue-400"
+                      value={oaFilters.sort}
+                      onChange={e => setOaFilters(f => ({ ...f, sort: e.target.value }))}
+                    >
+                      <option value="relevance">Sort: Relevance</option>
+                      <option value="citations">Sort: Most Cited</option>
+                      <option value="date">Sort: Newest</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Results */}
+                {oaLoading && oaPapers.length === 0 ? (
+                  <div className="flex justify-center py-20">
+                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : oaPapers.length > 0 ? (
+                  <>
+                    <p className="text-sm text-slate-500">
+                      Showing results for <span className="font-semibold text-slate-700">"{oaQuery || 'all papers'}"</span> — {oaTotal.toLocaleString()} total results
+                    </p>
+
+                    <div className="flex flex-col gap-4">
+                      {oaPapers.map(paper => (
+                        <div key={paper.id} className="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md transition-all">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                {paper.isOA && (
+                                  <span className="text-[11px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Open Access</span>
+                                )}
+                                <span className="text-[11px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full capitalize">{paper.type.replace(/-/g, ' ')}</span>
+                                {paper.year && <span className="text-[11px] text-slate-400">{paper.year}</span>}
+                                {paper.venue && <span className="text-[11px] text-slate-400 italic truncate max-w-[200px]">{paper.venue}</span>}
+                              </div>
+
+                              <h3 className="font-semibold text-slate-800 text-base leading-snug">
+                                <a
+                                  href={paper.doi ? `https://doi.org/${paper.doi.replace('https://doi.org/', '')}` : `https://openalex.org/W${paper.id}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:text-blue-600 transition-colors"
+                                >
+                                  {paper.title}
+                                </a>
+                              </h3>
+
+                              <p className="text-sm text-slate-500 mt-1 truncate">{paper.authors}</p>
+
+                              <p className="text-sm text-slate-600 mt-2 line-clamp-3">{paper.abstract}</p>
+
+                              {paper.concepts.length > 0 && (
+                                <div className="flex gap-1.5 mt-2.5 flex-wrap">
+                                  {paper.concepts.slice(0, 5).map(c => (
+                                    <span key={c} className="text-[11px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{c}</span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex flex-col items-end gap-2 shrink-0">
+                              <div className="flex items-center gap-1 text-slate-500 text-sm">
+                                <TrendingUp size={13} />
+                                <span className="font-semibold">{paper.citations.toLocaleString()}</span>
+                              </div>
+                              {paper.oaUrl && (
+                                <a
+                                  href={paper.oaUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1"
+                                >
+                                  <ExternalLink size={11} /> Read PDF
+                                </a>
+                              )}
+                              <a
+                                href={`https://openalex.org/W${paper.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs px-3 py-1.5 border border-slate-200 text-slate-600 rounded-lg hover:border-blue-400 hover:text-blue-600 transition-colors flex items-center gap-1"
+                              >
+                                <ExternalLink size={11} /> Details
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {oaPapers.length < oaTotal && (
+                      <div className="flex justify-center pt-2">
+                        <button
+                          onClick={() => searchOpenAlex(oaPage + 1, true)}
+                          disabled={oaLoading}
+                          className="px-8 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2 text-sm"
+                        >
+                          {oaLoading
+                            ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            : <Plus size={15} />
+                          }
+                          Load More
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {/* Featured papers grid */}
+                    <div>
+                      <h3 className="font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                        <TrendingUp size={16} className="text-blue-500" /> Trending Open Access Papers
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {oaFeatured.length === 0
+                          ? Array(9).fill(0).map((_, i) => (
+                              <div key={i} className="h-44 bg-slate-100 rounded-2xl animate-pulse" />
+                            ))
+                          : oaFeatured.map(paper => (
+                              <div key={paper.id} className="bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-md transition-all flex flex-col gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-[11px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Open Access</span>
+                                  {paper.year && <span className="text-[11px] text-slate-400">{paper.year}</span>}
+                                </div>
+                                <h4 className="font-semibold text-slate-800 text-sm line-clamp-3 flex-1">
+                                  <a
+                                    href={paper.doi ? `https://doi.org/${paper.doi.replace('https://doi.org/', '')}` : `https://openalex.org/W${paper.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-blue-600 transition-colors"
+                                  >
+                                    {paper.title}
+                                  </a>
+                                </h4>
+                                <p className="text-xs text-slate-500 truncate">{paper.authors}</p>
+                                <div className="flex items-center justify-between mt-auto pt-1">
+                                  <span className="flex items-center gap-1 text-xs text-slate-400">
+                                    <TrendingUp size={11} /> {paper.citations.toLocaleString()} citations
+                                  </span>
+                                  {paper.oaUrl && (
+                                    <a
+                                      href={paper.oaUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs text-blue-600 hover:underline flex items-center gap-0.5"
+                                    >
+                                      <ExternalLink size={11} /> Read
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            ))
+                        }
+                      </div>
+                    </div>
+
+                    {/* Field browser */}
+                    <div>
+                      <h3 className="font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                        <Globe size={16} className="text-indigo-500" /> Browse by Field of Study
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {OPENALEX_CONCEPTS.map(concept => (
+                          <button
+                            key={concept.id}
+                            onClick={() => {
+                              setOaFilters(f => ({ ...f, conceptId: concept.id }));
+                              setOaQuery('');
+                              setTimeout(() => searchOpenAlex(1, false), 0);
+                            }}
+                            className="px-4 py-2 text-sm bg-white border border-slate-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-all"
+                          >
+                            {concept.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
