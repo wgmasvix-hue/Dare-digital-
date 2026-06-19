@@ -1,16 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import {
-  Sparkles,
-  LayoutGrid,
-  List as ListIcon,
-  Filter,
+import { useSearchParams, Link } from 'react-router-dom';
+import { 
+  Sparkles, 
+  LayoutGrid, 
+  List as ListIcon, 
+  Filter, 
   AlertCircle,
   History,
   Globe,
-  ArrowRight,
-  RefreshCw,
-  Database
+  ArrowRight
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { transformBooks, BOOK_SELECT, OPENSTAX_CURATED } from '../lib/transformBook';
@@ -43,7 +41,6 @@ import { arxivService } from '../services/arxivService';
 export default function Library() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { bookProgress } = useGamification();
-  const navigate = useNavigate();
   
   // Filter States
   const [filters, setFilters] = useState({
@@ -556,20 +553,14 @@ export default function Library() {
                 key={source}
                 onClick={() => handleFilterChange('source', source)}
                 className={`px-5 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${
-                  filters.source === source
-                    ? 'bg-slate-900 text-white shadow-sm'
+                  filters.source === source 
+                    ? 'bg-slate-900 text-white shadow-sm' 
                     : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 {source}
               </button>
             ))}
-            <button
-              onClick={() => navigate('/global-repos')}
-              className="px-5 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all text-teal-600 hover:text-teal-800 hover:bg-teal-50 flex items-center gap-1.5 border border-teal-200"
-            >
-              <Globe size={14} /> Global Repos
-            </button>
           </div>
         </div>
 

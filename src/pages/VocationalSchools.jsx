@@ -23,72 +23,72 @@ import styles from './VocationalSchools.module.css';
 
 const SCHOOLS = [
   {
-    id: 'hpt',
-    name: 'Harare Polytechnic',
+    id: 'prince-edward',
+    name: 'Prince Edward School',
+    location: 'Harare',
+    type: 'polytechnic', // Using 'polytechnic' to represent O-Level tab due to existing logic
+    description: 'A prestigious public boys high school in Harare offering comprehensive O-Level and A-Level curricula with strong emphasis on sciences, arts, and sports.',
+    programs: ['Sciences', 'Commercials', 'Arts', 'Sports'],
+    icon: Building2,
+    logo: 'https://picsum.photos/seed/princeedward/200'
+  },
+  {
+    id: 'churchill',
+    name: 'Churchill Boys High School',
     location: 'Harare',
     type: 'polytechnic',
-    description: 'The oldest and largest technical college in Zimbabwe, offering a wide range of engineering, business, and applied arts programs.',
-    programs: ['Engineering', 'ICT', 'Business', 'Applied Arts', 'Mass Comm'],
+    description: 'Known for academic excellence and developing a well-rounded O-Level and A-Level curriculum.',
+    programs: ['Sciences', 'Commercials', 'Arts'],
     icon: Building2,
-    logo: 'https://picsum.photos/seed/hararepoly/200'
+    logo: 'https://picsum.photos/seed/churchill/200'
   },
   {
-    id: 'bpt',
-    name: 'Bulawayo Polytechnic',
-    location: 'Bulawayo',
+    id: 'goromonzi',
+    name: 'Goromonzi High School',
+    location: 'Mashonaland East',
     type: 'polytechnic',
-    description: 'A leading technical institution in the southern region, known for its strong engineering and hospitality departments.',
-    programs: ['Mechanical Eng', 'Electrical Eng', 'Hospitality', 'Commerce'],
-    icon: Hammer,
-    logo: 'https://picsum.photos/seed/bulawayopoly/200'
+    description: 'One of the first schools to offer A-Level education to Africans in Zimbabwe, maintaining a strong tradition of academic excellence.',
+    programs: ['Sciences', 'Commercials', 'Arts'],
+    icon: Building2,
+    logo: 'https://picsum.photos/seed/goromonzi/200'
   },
   {
-    id: 'kpt',
-    name: 'Kwekwe Polytechnic',
-    location: 'Kwekwe',
-    type: 'polytechnic',
-    description: 'Strategically located in the industrial hub, specializing in mining and heavy engineering skills.',
-    programs: ['Mining Eng', 'Metallurgy', 'Automotive', 'Science Tech'],
-    icon: Zap,
-    logo: 'https://picsum.photos/seed/kwekwe/200'
+    id: 'mabelreign',
+    name: 'Mabelreign Girls High School',
+    location: 'Harare',
+    type: 'vocational', // 'vocational' mapping to A-Level in UI
+    description: 'A top-tier girls high school providing robust A-Level programs to empower future female leaders in STEM and Humanities.',
+    programs: ['STEM Education', 'Humanities', 'Commercials'],
+    icon: Building2,
+    logo: 'https://picsum.photos/seed/mabelreign/200'
   },
   {
-    id: 'mpt',
-    name: 'Mutare Polytechnic',
-    location: 'Mutare',
-    type: 'polytechnic',
-    description: 'Providing technical and vocational training with a focus on sustainable development and industrial skills.',
-    programs: ['Civil Eng', 'Wood Tech', 'Fashion', 'Tourism'],
-    icon: Sprout,
-    logo: 'https://picsum.photos/seed/mutare/200'
-  },
-  {
-    id: 'msvtc',
-    name: 'Mupfure Self-Help College',
-    location: 'Chegutu',
+    id: 'st-ignatius',
+    name: 'St Ignatius College',
+    location: 'Chishawasha',
     type: 'vocational',
-    description: 'A unique vocational centre focusing on self-reliance and entrepreneurial skills for rural development.',
-    programs: ['Agriculture', 'Building', 'Textiles', 'Metalwork'],
-    icon: Hammer,
-    logo: 'https://picsum.photos/seed/mupfure/200'
+    description: 'Highly acclaimed for remarkable A-Level academic results, particularly in Sciences and Mathematics.',
+    programs: ['Advanced Sciences', 'Mathematics', 'Arts'],
+    icon: Building2,
+    logo: 'https://picsum.photos/seed/stignatius/200'
   },
   {
-    id: 'kvtc',
-    name: 'Kaguvi VTC',
-    location: 'Gweru',
+    id: 'sandringham',
+    name: 'Sandringham High School',
+    location: 'Norton',
     type: 'vocational',
-    description: 'Specializing in youth empowerment through practical skills training in various trades.',
-    programs: ['Bricklaying', 'Carpentry', 'Plumbing', 'Motor Mechanics'],
-    icon: Wrench,
-    logo: 'https://picsum.photos/seed/kaguvi/200'
+    description: 'A renowned high school known for producing stellar A-Level students with a strong ethical and academic foundation.',
+    programs: ['Sciences', 'Commercials', 'Arts'],
+    icon: Building2,
+    logo: 'https://picsum.photos/seed/sandringham/200'
   }
 ];
 
 const STATS = [
-  { number: '15+', label: 'Polytechnics', icon: Building2 },
-  { number: '40+', label: 'Vocational Centres', icon: Wrench },
-  { number: '50k+', label: 'Annual Graduates', icon: GraduationCap },
-  { number: '100+', label: 'Skill Tracks', icon: Cpu }
+  { number: '3000+', label: 'Registered High Schools', icon: Building2 },
+  { number: '2M+', label: 'O-Level Students', icon: Users },
+  { number: '150k+', label: 'A-Level Students', icon: GraduationCap },
+  { number: '20+', label: 'Subject Areas', icon: Cpu }
 ];
 
 export default function VocationalSchools() {
@@ -160,15 +160,15 @@ export default function VocationalSchools() {
             animate={{ opacity: 1, scale: 1 }}
             className="flex items-center justify-center gap-2 text-accent font-bold text-xs uppercase tracking-[0.2em] mb-4"
           >
-            <Wrench className="w-5 h-5" />
-            <span>Skills & Trades</span>
+            <GraduationCap className="w-5 h-5" />
+            <span>O-Level & A-Level</span>
           </motion.div>
           <motion.h1 
             className="text-4xl md:text-6xl font-display font-black text-white mb-6 leading-tight"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            Polytechnic & <span className="text-accent italic">Vocational Portal</span>
+            Zimbabwe <span className="text-accent italic">Secondary Schools</span>
           </motion.h1>
           <motion.p 
             className="text-white/70 max-w-2xl mx-auto text-lg font-medium"
@@ -176,7 +176,7 @@ export default function VocationalSchools() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            Empowering Zimbabwe's workforce through practical skills, technical excellence, and industrial innovation.
+            Empowering O-Level and A-Level students through comprehensive open educational resources, past papers, and structured study guides.
           </motion.p>
         </div>
       </header>
@@ -186,13 +186,13 @@ export default function VocationalSchools() {
           className={`${styles.tab} ${activeTab === 'polytechnic' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('polytechnic')}
         >
-          Polytechnics
+          O-Level (Forms 1-4)
         </button>
         <button 
           className={`${styles.tab} ${activeTab === 'vocational' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('vocational')}
         >
-          Vocational Schools
+          A-Level (Forms 5-6)
         </button>
       </div>
 
@@ -264,13 +264,13 @@ export default function VocationalSchools() {
 
       <section style={{ marginTop: '80px', textAlign: 'center' }}>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--soil)', marginBottom: '24px' }}>
-          Need Technical Resources?
+          Need Subject Specific Resources?
         </h2>
         <p style={{ color: 'var(--clay)', maxWidth: '600px', margin: '0 auto 32px', lineHeight: '1.6' }}>
-          Access our specialized collection of engineering manuals, workshop guides, and technical textbooks curated for vocational training.
+          Access our specialized collection of study guides, past papers, marking schemes, and STEM textbooks curated for secondary schools.
         </p>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-          <Link to="/vocational-tools" style={{ 
+          <Link to="/library" style={{ 
             padding: '14px 32px', 
             background: 'var(--amber)', 
             color: 'var(--soil)', 
@@ -283,7 +283,7 @@ export default function VocationalSchools() {
             alignItems: 'center',
             gap: '8px'
           }}>
-            <Wrench size={18} /> Open AI Skills Lab
+            <GraduationCap size={18} /> Browse O-Level Library
           </Link>
           <button style={{ 
             padding: '14px 32px', 
@@ -294,7 +294,7 @@ export default function VocationalSchools() {
             fontWeight: '700',
             cursor: 'pointer'
           }}>
-            Contact Skills Dept
+            Filter by Subject
           </button>
         </div>
       </section>

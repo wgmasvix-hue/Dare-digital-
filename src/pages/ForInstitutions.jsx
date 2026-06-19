@@ -148,7 +148,7 @@ const HeroSection = ({ formRef, plansRef }) => {
           margin: '0 auto 40px', 
           lineHeight: '1.6' 
         }}>
-          Dare Digital Library gives Zimbabwe's tertiary institutions a single subscription covering 6,000+ academic titles — with offline access built for our connectivity realities.
+          Dare Digital Library gives Zimbabwe's secondary schools a single subscription covering 6,000+ academic titles — with offline access built for our connectivity realities.
         </p>
         <div className="hero-animate hero-delay-3" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button 

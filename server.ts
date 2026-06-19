@@ -201,7 +201,7 @@ async function startServer() {
           try {
             const singlePromptString = typeof rawMessage === 'string' ? rawMessage : JSON.stringify(rawMessage || body);
             const response = await ai.models.generateContent({
-              model: body.model || 'gemini-1.5-flash',
+              model: body.model || 'gemini-2.5-flash',
               contents: singlePromptString,
               config: {
                 systemInstruction: systemInstruction,
@@ -251,7 +251,7 @@ async function startServer() {
          if (!usedDeepSeek) {
            try {
              const response = await ai.models.generateContent({
-                model: 'gemini-1.5-flash',
+                model: 'gemini-2.5-flash',
                 contents: message,
                 config: {
                     systemInstruction,

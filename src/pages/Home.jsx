@@ -54,7 +54,7 @@ export default function Home() {
           </h1>
           
           <p className="text-xl lg:text-2xl text-slate-600 font-medium max-w-2xl mx-auto mb-12 leading-relaxed">
-            Zimbabwe's premier Digital Academic Resource Engine. Empowering Education 5.0 through open access, AI-driven learning, and collaborative research.
+            Zimbabwe's premier Digital Academic Resource Engine for Secondary Schools. Empowering O-Level and A-Level students through open access resources and AI-driven learning.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

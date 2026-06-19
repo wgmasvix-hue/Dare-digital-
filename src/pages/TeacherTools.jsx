@@ -10,6 +10,7 @@ import {
   GraduationCap,
   History,
   Lightbulb,
+  Database,
   ArrowLeft,
   MessageSquare,
   Hammer,
@@ -26,6 +27,7 @@ import HBCTeachingAidAssistant from '../components/tools/HBCTeachingAidAssistant
 import HBCAssessmentAssistant from '../components/tools/HBCAssessmentAssistant';
 import UnhuRubricAssistant from '../components/tools/UnhuRubricAssistant';
 import HBCRemedialAssistant from '../components/tools/HBCRemedialAssistant';
+import GoogleWorkspaceIntegration from '../components/tools/GoogleWorkspaceIntegration';
 import styles from './TeacherTools.module.css';
 
 export default function TeacherTools() {
@@ -247,6 +249,17 @@ export default function TeacherTools() {
               <span className={styles.tabBadge}>Live</span>
               <div className={styles.xpBar} style={{ width: '45%' }} />
             </button>
+            <button 
+              className={`${styles.navItem} ${activeTab === 'workspace' ? styles.active : ''}`}
+              onClick={() => { setActiveTab('workspace'); setResult(''); }}
+            >
+              <div className={styles.navItemContent}>
+                <Database size={20} className="text-purple-500" />
+                <span>Google Workspace</span>
+              </div>
+              <span className={styles.tabBadge}>Sync</span>
+              <div className={styles.xpBar} />
+            </button>
           </nav>
 
           <div className={styles.sidebarFooter}>
@@ -408,6 +421,16 @@ export default function TeacherTools() {
                   title="Green Book HBC Assistant"
                   allow="camera; microphone; geolocation"
                 />
+              </motion.div>
+            ) : activeTab === 'workspace' ? (
+              <motion.div
+                key="workspace-integration"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="h-full flex-1 w-full"
+              >
+                 <GoogleWorkspaceIntegration />
               </motion.div>
             ) : result ? (
               <motion.div 

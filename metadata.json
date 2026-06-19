@@ -1,6 +1,6 @@
 {
-  "name": "Dare Digital Library",
-  "description": "Zimbabwe's premier tertiary digital library platform, aligned with NDS2 (2026-2030) and the five pillars of Education 5.0: Teaching, Research, Community Engagement, Innovation, and Industrialisation.",
+  "name": "Dare Digital Library (Secondary)",
+  "description": "Zimbabwe's premier secondary school digital library platform, empowering O-Level and A-Level students with open access resources, AI-driven learning, and Education 5.0 alignment.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

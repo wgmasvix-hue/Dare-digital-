@@ -41,8 +41,8 @@ export default function Footer() {
             <div className={styles.linkCol}>
               <h4 className={styles.colTitle}>Portals</h4>
               <Link to="/research">Research Portal</Link>
-              <Link to="/vocational">Vocational Hub</Link>
-              <Link to="/teachers-colleges">Teachers Colleges</Link>
+              <Link to="/vocational">Secondary Schools</Link>
+              <Link to="/teachers-colleges">Teachers Hub</Link>
               <Link to="/institutional">Institutional</Link>
             </div>
             <div className={styles.linkCol}>
