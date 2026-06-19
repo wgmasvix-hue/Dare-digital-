@@ -1,0 +1,37 @@
+[build]
+  command   = "vite build"
+  publish   = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# ── Serverless functions ────────────────────────────────────────
+# All /api/edge-function/* calls are routed to a single Netlify function.
+# The function name is extracted from the path at runtime.
+[[redirects]]
+  from   = "/api/edge-function/*"
+  to     = "/.netlify/functions/edge-function"
+  status = 200
+  force  = true
+
+# ── SPA fallback — must be last ─────────────────────────────────
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# ── Cache static assets ─────────────────────────────────────────
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ── Security headers ────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options  = "nosniff"
+    Referrer-Policy         = "strict-origin-when-cross-origin"
+    X-Frame-Options         = "SAMEORIGIN"
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data: https: http: https://picsum.photos; connect-src 'self' https://*.supabase.co https://*.run.app https://*.google.com https://*.googleapis.com https://api.semanticscholar.org https://api.openalex.org https://doaj.org https://www.ebi.ac.uk https://api.base-search.net https://chroniclingamerica.loc.gov https://archive.org https://standardebooks.org https://library.oapen.org; script-src 'self' 'unsafe-inline' 'unsafe-eval'; frame-src 'self'"
