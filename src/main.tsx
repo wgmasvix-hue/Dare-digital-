@@ -50,6 +50,7 @@ import AIModelsTools from './pages/AIModelsTools';
 import TutorPage from './pages/TutorPage';
 import ForInstitutions from './pages/ForInstitutions';
 
+import GlobalRepositories from './pages/GlobalRepositories';
 import AITextbooks from './pages/AITextbooks';
 import OpenStaxBooks from './pages/OpenStaxBooks';
 import GutenbergBooks from './pages/GutenbergBooks';
@@ -153,6 +154,7 @@ createRoot(rootElement).render(
               </ProtectedRoute>
             } />
 
+            <Route path="/global-repos" element={<GlobalRepositories />} />
             <Route path="/ai-textbooks" element={<AITextbooks />} />
             <Route path="/openstax" element={<OpenStaxBooks />} />
             <Route path="/gutenberg" element={<GutenbergBooks />} />
