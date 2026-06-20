@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { motion } from "motion/react"
+import { motion, useInView } from "motion/react"
 import {
   ArrowRight,
   Sparkles,
@@ -17,6 +17,11 @@ import {
   Users,
   Award,
   BookMarked,
+  Search,
+  Brain,
+  TrendingUp,
+  Star,
+  Quote,
 } from "lucide-react"
 import { OPENSTAX_EXPANDED, AI_PRIORITY_OER } from "../lib/oerCatalog"
 import SearchBar from "../components/library/SearchBar"
@@ -89,12 +94,66 @@ const FEATURES = [
 ]
 
 const CATEGORIES = [
-  { title: "Mathematics",    icon: "📐", color: "hover:bg-blue-50   hover:border-blue-300  hover:text-blue-700" },
-  { title: "Sciences",       icon: "🔬", color: "hover:bg-green-50  hover:border-green-300 hover:text-green-700" },
-  { title: "Computer Sci",   icon: "💻", color: "hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700" },
-  { title: "Literature",     icon: "📖", color: "hover:bg-amber-50  hover:border-amber-300 hover:text-amber-700" },
-  { title: "History",        icon: "🏛️", color: "hover:bg-orange-50 hover:border-orange-300 hover:text-orange-700" },
-  { title: "Research",       icon: "🔭", color: "hover:bg-rose-50   hover:border-rose-300  hover:text-rose-700" },
+  { title: "Mathematics",    icon: "📐", bg: "from-blue-50 to-blue-100/60",   border: "border-blue-200",   text: "text-blue-700",   hover: "hover:shadow-blue-100" },
+  { title: "Sciences",       icon: "🔬", bg: "from-green-50 to-green-100/60", border: "border-green-200",  text: "text-green-700",  hover: "hover:shadow-green-100" },
+  { title: "Computer Sci",   icon: "💻", bg: "from-purple-50 to-purple-100/60",border:"border-purple-200", text: "text-purple-700", hover: "hover:shadow-purple-100" },
+  { title: "Literature",     icon: "📖", bg: "from-amber-50 to-amber-100/60", border: "border-amber-200",  text: "text-amber-700",  hover: "hover:shadow-amber-100" },
+  { title: "History",        icon: "🏛️", bg: "from-orange-50 to-orange-100/60",border:"border-orange-200", text: "text-orange-700", hover: "hover:shadow-orange-100" },
+  { title: "Research",       icon: "🔭", bg: "from-rose-50 to-rose-100/60",   border: "border-rose-200",   text: "text-rose-700",   hover: "hover:shadow-rose-100" },
+]
+
+const HOW_IT_WORKS = [
+  {
+    step: "01",
+    icon: <Search size={28} />,
+    color: "text-green-700",
+    bg: "bg-green-50",
+    border: "border-green-200",
+    title: "Search Everything",
+    desc: "One search across 560M+ papers, 10M+ books, OpenStax textbooks, and Zimbabwe institutional repositories — results in under a second.",
+  },
+  {
+    step: "02",
+    icon: <Brain size={28} />,
+    color: "text-amber-600",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+    title: "Learn with DARA AI",
+    desc: "Open any resource and DARA becomes your personal tutor — summarising chapters, answering questions in Shona or English, generating quizzes.",
+  },
+  {
+    step: "03",
+    icon: <TrendingUp size={28} />,
+    color: "text-orange-700",
+    bg: "bg-orange-50",
+    border: "border-orange-200",
+    title: "Track & Excel",
+    desc: "Earn XP for reading, rise through levels, and unlock achievement badges. See your progress on the national leaderboard.",
+  },
+]
+
+const TESTIMONIALS = [
+  {
+    quote: "DARE helped me research my thesis in weeks instead of months. The Academic Database alone saved me from paying for journal access.",
+    name: "Tinashe M.",
+    role: "MSc Student, University of Zimbabwe",
+    initials: "TM",
+    color: "bg-green-100 text-green-700",
+  },
+  {
+    quote: "DARA explained organic chemistry in Shona better than my textbook did in English. This platform is genuinely revolutionary.",
+    name: "Rudo C.",
+    role: "A-Level Student, Harare",
+    initials: "RC",
+    color: "bg-amber-100 text-amber-700",
+  },
+  {
+    quote: "I use the Lesson Planner every week. What used to take me 3 hours now takes 15 minutes — fully aligned with the ZIMSEC syllabus.",
+    name: "Mr. Moyo",
+    role: "Secondary School Teacher, Bulawayo",
+    initials: "MM",
+    color: "bg-orange-100 text-orange-700",
+  },
 ]
 
 export default function Home() {
@@ -245,8 +304,50 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── HOW IT WORKS ──────────────────────────────────────── */}
+      <section className="py-24 px-6 lg:px-12 max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-50 border border-green-200 text-green-800 text-xs font-black uppercase tracking-widest mb-5">
+            Simple &amp; Powerful
+          </div>
+          <h2 className="text-4xl lg:text-5xl font-black tracking-tight text-stone-900 mb-4"
+            style={{ fontFamily: 'var(--font-accent)' }}>
+            How DARE Works
+          </h2>
+          <p className="text-xl text-stone-500 font-medium">From search to mastery in minutes, not months.</p>
+        </div>
+
+        <div className="relative">
+          {/* Connecting line — desktop only */}
+          <div className="hidden lg:block absolute top-16 left-[calc(16.67%+2rem)] right-[calc(16.67%+2rem)] h-0.5 bg-gradient-to-r from-green-300 via-amber-300 to-orange-300 z-0" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
+            {HOW_IT_WORKS.map((step, i) => (
+              <motion.div
+                key={step.step}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: i * 0.15 }}
+                className="bg-white rounded-3xl border border-stone-100 p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+              >
+                {/* Step number */}
+                <div className="flex items-start justify-between mb-6">
+                  <div className={`w-14 h-14 ${step.bg} ${step.border} border rounded-2xl flex items-center justify-center ${step.color} group-hover:scale-110 transition-transform duration-300`}>
+                    {step.icon}
+                  </div>
+                  <span className="text-5xl font-black text-stone-100 leading-none select-none">{step.step}</span>
+                </div>
+                <h3 className="text-xl font-black text-stone-900 mb-3 tracking-tight">{step.title}</h3>
+                <p className="text-stone-500 font-medium leading-relaxed text-[15px]">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── BROWSE CATEGORIES ─────────────────────────────────── */}
-      <section className="py-20 px-6 lg:px-12 max-w-7xl mx-auto">
+      <section className="py-20 px-6 lg:px-12 max-w-7xl mx-auto border-t border-stone-100">
         <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
           <div className="max-w-2xl">
             <h2 className="text-3xl lg:text-4xl font-black tracking-tight text-stone-900 mb-2"
@@ -255,16 +356,26 @@ export default function Home() {
             </h2>
             <p className="text-lg text-stone-500 font-medium">Dive straight into what you need.</p>
           </div>
+          <Link to="/library" className="shrink-0 text-sm font-bold text-green-700 hover:text-green-600 flex items-center gap-1.5">
+            All subjects <ArrowRight size={15} />
+          </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {CATEGORIES.map(cat => (
-            <Link
+          {CATEGORIES.map((cat, i) => (
+            <motion.div
               key={cat.title}
-              to={`/library?q=${encodeURIComponent(cat.title)}`}
-              className={`bg-white border border-stone-200 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 transition-all duration-200 group ${cat.color}`}>
-              <div className="text-3xl group-hover:scale-110 transition-transform duration-200">{cat.icon}</div>
-              <span className="font-bold text-stone-800 text-sm group-hover:inherit">{cat.title}</span>
-            </Link>
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: i * 0.05 }}
+            >
+              <Link
+                to={`/library?q=${encodeURIComponent(cat.title)}`}
+                className={`bg-gradient-to-br ${cat.bg} border ${cat.border} rounded-2xl p-6 flex flex-col items-center justify-center gap-3 transition-all duration-300 group hover:shadow-lg hover:-translate-y-1 block`}>
+                <div className="text-3xl group-hover:scale-125 transition-transform duration-300">{cat.icon}</div>
+                <span className={`font-black text-sm ${cat.text}`}>{cat.title}</span>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -321,6 +432,47 @@ export default function Home() {
               </Link>
             ))
           )}
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ──────────────────────────────────────── */}
+      <section className="py-24 px-6 lg:px-12 border-y border-amber-100/80"
+        style={{ background: "linear-gradient(180deg, #FFFBF0 0%, #FFF8E8 100%)" }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <div className="flex justify-center gap-0.5 mb-4">
+              {[...Array(5)].map((_, i) => <Star key={i} size={18} className="fill-amber-400 text-amber-400" />)}
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-black tracking-tight text-stone-900 mb-3"
+              style={{ fontFamily: 'var(--font-accent)' }}>
+              What Zimbabwean scholars say
+            </h2>
+            <p className="text-lg text-stone-500 font-medium">Real students. Real results.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t, i) => (
+              <motion.div
+                key={t.name}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, delay: i * 0.12 }}
+                className="bg-white rounded-3xl border border-stone-100 shadow-sm p-8 flex flex-col gap-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+              >
+                <Quote size={28} className="text-amber-300 shrink-0" />
+                <p className="text-stone-700 font-medium leading-relaxed text-[15px] flex-1">"{t.quote}"</p>
+                <div className="flex items-center gap-3 pt-2 border-t border-stone-100">
+                  <div className={`w-10 h-10 rounded-full ${t.color} font-black text-sm flex items-center justify-center shrink-0`}>
+                    {t.initials}
+                  </div>
+                  <div>
+                    <p className="font-bold text-stone-900 text-sm">{t.name}</p>
+                    <p className="text-xs text-stone-500 font-medium">{t.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 

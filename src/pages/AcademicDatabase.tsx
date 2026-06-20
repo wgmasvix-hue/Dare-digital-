@@ -539,26 +539,40 @@ export default function AcademicDatabase() {
   return (
     <div className="min-h-screen bg-[#F5F5F0]">
       {/* ── Header ── */}
-      <div className="bg-white border-b border-slate-200 pt-20 pb-0 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-0">
+      <div className="bg-[#0D1F17] border-b border-green-900/40 pt-20 pb-0 relative overflow-hidden">
+        {/* Decorative blobs */}
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-green-800/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-10 left-1/3 w-60 h-60 rounded-full bg-amber-700/10 blur-3xl pointer-events-none" />
+        {/* Flag stripe */}
+        <div className="absolute top-0 left-0 w-full h-1 pointer-events-none"
+          style={{ background: 'linear-gradient(90deg, #166534 0% 25%, #D97706 25% 50%, #C2410C 50% 75%, #1C1917 75% 100%)' }}
+        />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-6 relative z-10">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-xs text-slate-400 mb-4">
+          <div className="flex items-center gap-2 text-xs text-green-700 mb-4">
             <span>DARE Digital Library</span>
             <ChevronRight size={12} />
-            <span className="text-slate-700 font-semibold">Academic Database</span>
+            <span className="text-green-400 font-semibold">Academic Database</span>
           </div>
 
-          <div className="flex items-start justify-between gap-4 mb-5">
+          <div className="flex items-start justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Academic Database</h1>
-              <p className="text-sm text-slate-500 mt-0.5">
-                {SOURCE_STATS.map(s => s.count).join(' + ')} documents across all disciplines
+              <div className="inline-flex items-center gap-2 bg-green-900/60 border border-green-700/40 text-green-300 text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3">
+                <GraduationCap size={11} />
+                769M+ Peer-Reviewed Documents
+              </div>
+              <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-none">
+                Academic <span className="text-green-400">Database</span>
+              </h1>
+              <p className="text-stone-400 text-sm mt-1.5 font-medium">
+                Semantic Scholar · DOAJ · Europe PMC · BASE · Chronicling America
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setShowReadingList(!showReadingList)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold border transition-all ${showReadingList ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-slate-700 border-slate-200 hover:border-amber-400'}`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-all ${showReadingList ? 'bg-amber-500 text-white border-amber-500' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`}
               >
                 <BookMarked size={15} />
                 Reading List
@@ -572,11 +586,11 @@ export default function AcademicDatabase() {
           </div>
 
           {/* Source stats strip */}
-          <div className="flex gap-4 mb-5 overflow-x-auto scrollbar-hide pb-1">
-            {SOURCE_STATS.map(s => (
-              <div key={s.label} className="shrink-0 text-center">
-                <div className="text-lg font-black text-green-800 leading-none">{s.count}</div>
-                <div className="text-[10px] text-slate-500 mt-0.5 whitespace-nowrap">{s.label}</div>
+          <div className="flex gap-6 mb-6 overflow-x-auto scrollbar-hide pb-1">
+            {SOURCE_STATS.map((s, i) => (
+              <div key={s.label} className="shrink-0">
+                <div className="text-xl font-black text-amber-400 leading-none">{s.count}</div>
+                <div className="text-[10px] text-stone-500 mt-0.5 whitespace-nowrap font-medium">{s.label}</div>
               </div>
             ))}
           </div>
@@ -585,21 +599,21 @@ export default function AcademicDatabase() {
           <form onSubmit={handleBasicSearch}>
             <div className="flex gap-2 mb-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-500" size={18} />
                 <input
                   type="text"
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
                   placeholder="Search papers, theses, journals, historical documents…"
-                  className="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent text-sm shadow-sm"
+                  className="w-full pl-10 pr-4 py-3.5 bg-white/10 border border-white/15 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm backdrop-blur-sm"
                 />
               </div>
               <button type="submit"
-                className="px-6 py-3 bg-green-700 hover:bg-green-600 text-white font-bold rounded-xl transition-colors shadow-sm text-sm">
+                className="px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl transition-colors shadow-sm text-sm">
                 Search
               </button>
               <button type="button" onClick={() => setShowAdvanced(!showAdvanced)}
-                className={`px-3 py-3 rounded-xl font-bold border text-sm flex items-center gap-1.5 transition-all ${showAdvanced ? 'bg-green-700 text-white border-green-700' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400 hover:text-green-700'}`}>
+                className={`px-3 py-3 rounded-xl font-bold border text-sm flex items-center gap-1.5 transition-all ${showAdvanced ? 'bg-amber-500 text-white border-amber-500' : 'bg-white/10 text-white border-white/15 hover:bg-white/20'}`}>
                 <SlidersHorizontal size={16} />
                 <span className="hidden sm:inline">Advanced</span>
               </button>
@@ -695,10 +709,10 @@ export default function AcademicDatabase() {
           )}
 
           {/* Source tabs */}
-          <div className="flex gap-0 overflow-x-auto scrollbar-hide border-t border-slate-200 -mx-4 sm:-mx-6 px-4 sm:px-6">
+          <div className="flex gap-0 overflow-x-auto scrollbar-hide border-t border-white/10 -mx-4 sm:-mx-6 px-4 sm:px-6">
             {TABS.map(tab => (
               <button key={tab.id} onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center gap-1.5 px-4 py-3 font-bold text-sm whitespace-nowrap border-b-2 transition-all ${activeTab === tab.id ? 'border-green-700 text-green-700' : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300'}`}>
+                className={`flex items-center gap-1.5 px-4 py-3.5 font-bold text-sm whitespace-nowrap border-b-2 transition-all ${activeTab === tab.id ? 'border-green-400 text-green-400' : 'border-transparent text-stone-500 hover:text-stone-200 hover:border-stone-600'}`}>
                 {tab.icon}
                 {tab.label}
               </button>

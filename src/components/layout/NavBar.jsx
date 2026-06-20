@@ -1,166 +1,333 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Menu, X, User, ChevronDown, LogOut, History, Settings,
-  LayoutDashboard, Trophy, Search, Sparkles, Library, FlaskConical, Zap, Database, Globe, ClipboardCheck, BookOpen
+import {
+  Menu, X, User, LogOut, History, Settings,
+  LayoutDashboard, Trophy, Search, Sparkles, ChevronDown, Zap
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useGamification } from '../../context/GamificationContext';
 import GlobalSearch from './GlobalSearch';
 import LogoIcon from '../common/LogoIcon';
 
+const CORE_NAV = [
+  { label: 'Browse',   href: '/library'  },
+  { label: 'Academic', href: '/academic' },
+  { label: 'Research', href: '/research' },
+];
+
+const EXPLORE_ITEMS = [
+  {
+    emoji: '📚',
+    label: 'Open Books',
+    sub: '1M+ free titles',
+    href: '/open-books',
+  },
+  {
+    emoji: '🏛',
+    label: 'Repository',
+    sub: 'Institutional archives',
+    href: '/dspace-explorer',
+  },
+  {
+    emoji: '📝',
+    label: 'Lesson Planner',
+    sub: 'AI lesson plans',
+    href: '/teacher-tools',
+  },
+  {
+    emoji: '🏆',
+    label: 'Leaderboard',
+    sub: 'Top scholars',
+    href: '/leaderboard',
+  },
+];
+
 export default function NavBar() {
   const { user, profile, signOut } = useAuth();
   const { xp, streak, level, getLevelInfo } = useGamification();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled]       = useState(false);
+  const [isMobileOpen, setIsMobileOpen]   = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const dropdownRef = useRef(null);
-  const location = useLocation();
+  const [isExploreOpen, setIsExploreOpen] = useState(false);
 
+  const dropdownRef = useRef(null);
+  const exploreRef  = useRef(null);
+  const location    = useLocation();
+
+  /* ── scroll shadow ──────────────────────────────────────────── */
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  /* ── close profile dropdown on outside click ─────────────────── */
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsProfileOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  /* ── close explore dropdown on outside click ─────────────────── */
   useEffect(() => {
-    setIsMobileMenuOpen(false);
+    const handler = (e) => {
+      if (exploreRef.current && !exploreRef.current.contains(e.target)) {
+        setIsExploreOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  /* ── close everything on route change ───────────────────────── */
+  useEffect(() => {
+    setIsMobileOpen(false);
     setIsProfileOpen(false);
+    setIsExploreOpen(false);
   }, [location]);
 
+  const isActive = (href) => location.pathname === href;
+
+  /* ── active link class ───────────────────────────────────────── */
+  const navLinkClass = (href) =>
+    `relative px-4 py-2 rounded-full text-sm font-semibold transition-all duration-150 focus:outline-none group ${
+      isActive(href)
+        ? 'text-green-700 font-black'
+        : 'text-stone-500 hover:text-stone-900 hover:bg-stone-100/70'
+    }`;
+
+  /* ─────────────────────────────────────────────────────────────── */
   return (
-    <nav 
+    <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm py-2' : 'bg-transparent py-4'
+        isScrolled
+          ? 'bg-white/95 backdrop-blur-lg border-b border-stone-200/80 shadow-sm py-2'
+          : 'bg-transparent py-4'
       }`}
     >
-      {/* Knowledge Progress Bar (Top Edge) — Zimbabwe flag colours */}
+      {/* XP progress bar */}
       {user && (
-        <div className="absolute top-0 left-0 w-full h-1" style={{ background: "rgba(231,213,179,0.4)" }}>
+        <div
+          className="absolute top-0 left-0 w-full h-[3px]"
+          style={{ background: 'rgba(231,213,179,0.35)' }}
+        >
           <motion.div
             className="h-full"
-            style={{ background: "linear-gradient(90deg, #166534 0%, #D97706 60%, #C2410C 100%)" }}
+            style={{ background: 'linear-gradient(90deg,#166534 0%,#D97706 60%,#C2410C 100%)' }}
             initial={{ width: 0 }}
             animate={{ width: `${getLevelInfo().progress}%` }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 1.1, ease: 'easeOut' }}
           />
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-8 mt-1">
-        <Link to="/" className="flex items-center gap-3 shrink-0 focus:outline-none group">
-          <div className="p-1.5 rounded-2xl transition-all duration-300 bg-slate-50 border border-slate-200/60 shadow-inner group-hover:scale-105 group-hover:bg-white group-hover:border-slate-300">
-             <LogoIcon size={32} />
+      <div className="max-w-7xl mx-auto px-5 flex items-center justify-between gap-6 mt-0.5">
+
+        {/* ── Logo ────────────────────────────────────────────────── */}
+        <Link
+          to="/"
+          className="flex items-center gap-3 shrink-0 focus:outline-none group"
+        >
+          <div className="p-1.5 rounded-2xl transition-all duration-200 bg-white/80 border border-stone-200/70 shadow-sm group-hover:scale-105 group-hover:border-stone-300">
+            <LogoIcon size={30} />
           </div>
-          <div className="hidden sm:flex flex-col">
-            <span className="font-display font-black text-xl leading-none tracking-wider text-slate-900 group-hover:text-primary transition-colors">
+          <div className="hidden sm:flex flex-col leading-none">
+            <span className="font-display font-black text-[1.15rem] tracking-widest text-stone-900 group-hover:text-green-800 transition-colors">
               DARE
             </span>
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-0.5 font-mono">
+            <span className="text-[8.5px] font-bold text-stone-400 uppercase tracking-[0.22em] mt-0.5 font-mono">
               Digital Library
             </span>
           </div>
         </Link>
 
-        {/* Desktop Main Links */}
-        <div className="hidden md:flex items-center gap-1">
-          <Link to="/library" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors flex items-center gap-2">
-            <Library size={16} /> Browse
+        {/* ── Desktop nav ─────────────────────────────────────────── */}
+        <div className="hidden md:flex items-center gap-0.5">
+
+          {/* Browse */}
+          <Link to="/library" className={navLinkClass('/library')}>
+            Browse
+            {isActive('/library') && (
+              <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-[2.5px] rounded-full bg-green-600" />
+            )}
           </Link>
-          <Link to="/open-books" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-green-800 hover:bg-green-50 transition-colors flex items-center gap-2">
-            <Globe size={16} className="text-green-600 shrink-0" /> 1M+ Books
+
+          {/* Academic */}
+          <Link to="/academic" className={navLinkClass('/academic')}>
+            Academic
+            {isActive('/academic') && (
+              <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-[2.5px] rounded-full bg-green-600" />
+            )}
           </Link>
-          <Link to="/dspace-explorer" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors flex items-center gap-2">
-            <Database size={16} /> Repository
+
+          {/* DARA AI — amber accent */}
+          <Link
+            to="/tutor"
+            className={`relative px-4 py-2 rounded-full text-sm font-semibold transition-all duration-150 focus:outline-none group ${
+              isActive('/tutor')
+                ? 'text-amber-700 font-black bg-amber-50'
+                : 'text-amber-600 hover:text-amber-800 hover:bg-amber-50/70'
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <Sparkles size={13} className="text-amber-500 shrink-0" />
+              DARA AI
+            </span>
+            {isActive('/tutor') && (
+              <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-[2.5px] rounded-full bg-amber-500" />
+            )}
           </Link>
-          <Link to="/tutor" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-amber-800 hover:bg-amber-50 transition-colors flex items-center gap-2">
-            <Sparkles size={16} className="text-amber-500" /> DARA Tutor
+
+          {/* Research */}
+          <Link to="/research" className={navLinkClass('/research')}>
+            Research
+            {isActive('/research') && (
+              <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-[2.5px] rounded-full bg-green-600" />
+            )}
           </Link>
-          <Link to="/research" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors flex items-center gap-2">
-            <FlaskConical size={16} /> Research
-          </Link>
-          <Link to="/academic" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-orange-800 hover:bg-orange-50 transition-colors flex items-center gap-2">
-            <BookOpen size={16} className="text-orange-600" /> Academic DB
-          </Link>
-          <Link to="/teacher-tools" className="px-4 py-2 rounded-full font-bold text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors flex items-center gap-2">
-            <ClipboardCheck size={16} className="text-green-600" /> Lesson Planner
-          </Link>
+
+          {/* Explore dropdown */}
+          <div className="relative" ref={exploreRef}>
+            <button
+              onClick={() => setIsExploreOpen((v) => !v)}
+              className={`relative flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-150 focus:outline-none ${
+                isExploreOpen
+                  ? 'bg-stone-100 text-stone-900'
+                  : 'text-stone-500 hover:text-stone-900 hover:bg-stone-100/70'
+              }`}
+            >
+              Explore
+              <motion.span
+                animate={{ rotate: isExploreOpen ? 180 : 0 }}
+                transition={{ duration: 0.18 }}
+                className="flex items-center"
+              >
+                <ChevronDown size={14} />
+              </motion.span>
+            </button>
+
+            <AnimatePresence>
+              {isExploreOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                  transition={{ duration: 0.15, ease: 'easeOut' }}
+                  className="absolute left-0 top-full mt-2.5 w-[340px] bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.18)] ring-1 ring-stone-200 p-3 z-50"
+                >
+                  <p className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
+                    Explore
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {EXPLORE_ITEMS.map((item) => (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        className="flex items-start gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors group/item"
+                      >
+                        <span className="text-xl leading-none mt-0.5">{item.emoji}</span>
+                        <div>
+                          <p className="text-sm font-semibold text-stone-800 group-hover/item:text-stone-900 transition-colors">
+                            {item.label}
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5 leading-snug">
+                            {item.sub}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Search Bar - Center */}
-        <div className="flex-1 max-w-md hidden lg:block">
+        {/* ── Global Search — center ────────────────────────────── */}
+        <div className="flex-1 max-w-sm hidden lg:block">
           <GlobalSearch />
         </div>
 
-        {/* Right Auth/Profile Config */}
-        <div className="flex items-center gap-4 shrink-0">
+        {/* ── Right side ──────────────────────────────────────────── */}
+        <div className="flex items-center gap-3 shrink-0">
           {user ? (
             <>
-              <div className="hidden sm:flex items-center gap-3 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
-                <div className="flex items-center gap-1 text-xs font-bold text-orange-600" title="Daily Streak">
+              {/* XP / streak chip */}
+              <div className="hidden sm:flex items-center gap-2.5 bg-stone-100/80 px-3 py-1.5 rounded-full border border-stone-200/60 select-none">
+                <span className="text-xs font-bold text-orange-500" title="Daily streak">
                   🔥 {streak}
-                </div>
-                <div className="w-[1px] h-4 bg-slate-300"></div>
-                <div className="flex items-center gap-1 text-xs font-bold text-blue-600" title="Experience Points">
-                  <Zap size={14} /> {xp}
-                </div>
-                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-900 text-white text-[10px] font-black">
+                </span>
+                <span className="w-px h-3.5 bg-stone-300" />
+                <span className="flex items-center gap-1 text-xs font-bold text-indigo-500" title="XP">
+                  <Zap size={12} className="shrink-0" /> {xp}
+                </span>
+                <span className="flex items-center justify-center w-[18px] h-[18px] rounded-full bg-stone-800 text-white text-[9px] font-black">
                   {level}
-                </div>
+                </span>
               </div>
 
+              {/* Avatar + profile dropdown */}
               <div className="relative" ref={dropdownRef}>
-                <button 
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center gap-2 focus:outline-none"
+                <button
+                  onClick={() => setIsProfileOpen((v) => !v)}
+                  className="flex items-center gap-1.5 focus:outline-none group"
+                  aria-label="Open profile menu"
                 >
-                  <div className="w-10 h-10 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-800 font-bold transition-transform hover:scale-105 active:scale-95">
-                    {profile?.first_name?.[0]?.toUpperCase() || <User size={20} />}
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 border-2 border-amber-200/80 flex items-center justify-center text-amber-800 font-bold text-sm shadow-sm transition-all duration-150 group-hover:scale-105 group-hover:shadow-md active:scale-95">
+                    {profile?.first_name?.[0]?.toUpperCase() || <User size={16} />}
                   </div>
+                  <ChevronDown
+                    size={14}
+                    className={`text-stone-400 transition-transform duration-150 ${isProfileOpen ? 'rotate-180' : ''}`}
+                  />
                 </button>
 
                 <AnimatePresence>
                   {isProfileOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-100 p-2"
+                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                      transition={{ duration: 0.14, ease: 'easeOut' }}
+                      className="absolute right-0 top-full mt-2.5 w-60 bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.18)] ring-1 ring-stone-200 p-2 z-50"
                     >
-                      <div className="px-4 py-3 border-b border-slate-100 mb-2">
-                        <p className="font-bold text-slate-900 truncate">{profile?.first_name || 'Student'}</p>
-                        <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                      {/* User info */}
+                      <div className="px-3 py-2.5 mb-1 border-b border-stone-100">
+                        <p className="font-bold text-stone-900 text-sm truncate">
+                          {profile?.first_name ? `${profile.first_name}` : 'Student'}
+                        </p>
+                        <p className="text-xs text-stone-400 truncate mt-0.5">{user.email}</p>
                       </div>
-                      <Link to="/dashboard" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
-                        <LayoutDashboard size={16} /> Dashboard
-                      </Link>
-                      <Link to="/history" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
-                        <History size={16} /> Reading History
-                      </Link>
-                      <Link to="/leaderboard" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
-                        <Trophy size={16} /> Leaderboard
-                      </Link>
-                      <Link to="/settings" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
-                        <Settings size={16} /> Settings
-                      </Link>
-                      <div className="h-px bg-slate-100 my-2"></div>
-                      <button onClick={signOut} className="w-full flex items-center gap-3 px-4 py-2 hover:bg-red-50 rounded-xl text-sm font-medium text-red-600 transition-colors text-left">
-                        <LogOut size={16} /> Sign Out
+
+                      {[
+                        { to: '/dashboard',  Icon: LayoutDashboard, label: 'Dashboard' },
+                        { to: '/history',    Icon: History,          label: 'Reading History' },
+                        { to: '/leaderboard',Icon: Trophy,           label: 'Leaderboard' },
+                        { to: '/settings',   Icon: Settings,         label: 'Settings' },
+                      ].map(({ to, Icon, label }) => (
+                        <Link
+                          key={to}
+                          to={to}
+                          className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors"
+                        >
+                          <Icon size={15} className="text-stone-400 shrink-0" />
+                          {label}
+                        </Link>
+                      ))}
+
+                      <div className="h-px bg-stone-100 my-1.5" />
+
+                      <button
+                        onClick={signOut}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors text-left"
+                      >
+                        <LogOut size={15} className="shrink-0" />
+                        Sign Out
                       </button>
                     </motion.div>
                   )}
@@ -168,60 +335,192 @@ export default function NavBar() {
               </div>
             </>
           ) : (
-            <div className="hidden sm:flex items-center gap-3">
-              <Link to="/login" className="px-5 py-2.5 rounded-full font-bold text-sm text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer border border-transparent">
+            <div className="hidden sm:flex items-center gap-2">
+              <Link
+                to="/login"
+                className="px-4 py-2 rounded-full text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
+              >
                 Sign In
               </Link>
-              <Link to="/register" className="px-5 py-2.5 rounded-full font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-transform active:scale-95 cursor-pointer shadow-sm border border-slate-800">
+              <Link
+                to="/register"
+                className="px-4 py-2 rounded-full text-sm font-bold text-white transition-all duration-150 active:scale-95 shadow-sm"
+                style={{ background: 'linear-gradient(135deg,#16a34a 0%,#15803d 100%)' }}
+              >
                 Join DARE
               </Link>
             </div>
           )}
 
-          <button 
-            className="sm:hidden focus:outline-none p-2 text-slate-600"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          {/* Hamburger */}
+          <button
+            className="md:hidden flex items-center justify-center w-9 h-9 rounded-xl text-stone-600 hover:bg-stone-100 transition-colors focus:outline-none"
+            onClick={() => setIsMobileOpen((v) => !v)}
+            aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* ── Mobile overlay ───────────────────────────────────────── */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="sm:hidden bg-white border-b border-slate-200 px-6 py-6 overflow-hidden shadow-xl"
-          >
-            <div className="flex flex-col gap-4">
-              <div className="block lg:hidden mb-4 border border-slate-200 rounded-xl p-2 bg-slate-50">
-                <GlobalSearch />
-              </div>
-              <Link to="/library" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Library size={20} /> Browse Library</Link>
-              <Link to="/open-books" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Globe size={20} className="text-teal-500" /> 1M+ Open Source Books</Link>
-              <Link to="/dspace-explorer" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Database size={20} /> Institutional Repository</Link>
-              <Link to="/tutor" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Sparkles size={20} className="text-amber-500" /> DARA AI Tutor</Link>
-              <Link to="/research" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><FlaskConical size={20} /> Research Portal</Link>
-              <Link to="/academic" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><BookOpen size={20} className="text-indigo-500" /> Academic Database</Link>
-              <Link to="/teacher-tools" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><ClipboardCheck size={20} className="text-emerald-500" /> Lesson Planner</Link>
-              <hr className="border-slate-100 my-2" />
-              {!user ? (
-                <div className="flex flex-col gap-3 mt-2">
-                  <Link to="/login" className="w-full py-3 rounded-full font-bold text-center bg-slate-100 text-slate-900 hover:bg-slate-200 transition-colors">Sign In</Link>
-                  <Link to="/register" className="w-full py-3 rounded-full font-bold text-center bg-teal-500 text-white hover:bg-teal-600 transition-colors shadow-md text-lg">Join DARE</Link>
+        {isMobileOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
+              onClick={() => setIsMobileOpen(false)}
+            />
+
+            {/* Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 340, damping: 32 }}
+              className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-white z-50 flex flex-col shadow-2xl md:hidden"
+            >
+              {/* Panel header */}
+              <div className="flex items-center justify-between px-6 py-5 border-b border-stone-100">
+                <div className="flex items-center gap-3">
+                  <LogoIcon size={26} />
+                  <span className="font-black text-base tracking-widest text-stone-900">DARE</span>
                 </div>
-              ) : (
-                 <>
-                   <Link to="/dashboard" className="font-bold text-lg text-slate-900 py-2">Dashboard</Link>
-                   <Link to="/settings" className="font-bold text-lg text-slate-900 py-2">Settings</Link>
-                   <button onClick={signOut} className="font-bold text-lg text-red-500 text-left py-2">Sign Out</button>
-                 </>
-              )}
-            </div>
-          </motion.div>
+                <button
+                  onClick={() => setIsMobileOpen(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-1">
+
+                {/* Search */}
+                <div className="mb-3">
+                  <GlobalSearch />
+                </div>
+
+                {/* Main links */}
+                {[
+                  { label: 'Browse',   href: '/library'  },
+                  { label: 'Academic', href: '/academic' },
+                  { label: 'Research', href: '/research' },
+                ].map(({ label, href }) => (
+                  <Link
+                    key={href}
+                    to={href}
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold transition-colors ${
+                      isActive(href)
+                        ? 'bg-green-50 text-green-700'
+                        : 'text-stone-700 hover:bg-stone-50'
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                ))}
+
+                {/* DARA AI */}
+                <Link
+                  to="/tutor"
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold transition-colors ${
+                    isActive('/tutor')
+                      ? 'bg-amber-50 text-amber-700'
+                      : 'text-amber-600 hover:bg-amber-50/60'
+                  }`}
+                >
+                  <Sparkles size={18} className="text-amber-500 shrink-0" />
+                  DARA AI
+                </Link>
+
+                {/* Explore section */}
+                <div className="mt-3 mb-1 px-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">Explore</p>
+                </div>
+                {EXPLORE_ITEMS.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
+                      isActive(item.href)
+                        ? 'bg-green-50 text-green-700'
+                        : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'
+                    }`}
+                  >
+                    <span className="text-lg leading-none">{item.emoji}</span>
+                    <div>
+                      <p className="font-semibold">{item.label}</p>
+                      <p className="text-xs text-stone-400 font-normal">{item.sub}</p>
+                    </div>
+                  </Link>
+                ))}
+
+                <div className="h-px bg-stone-100 my-3" />
+
+                {/* Auth section */}
+                {user ? (
+                  <>
+                    {/* XP chip */}
+                    <div className="flex items-center gap-3 px-4 py-3 bg-stone-50 rounded-xl mb-1">
+                      <span className="text-sm font-bold text-orange-500">🔥 {streak} day streak</span>
+                      <span className="ml-auto flex items-center gap-1 text-sm font-bold text-indigo-500">
+                        <Zap size={14} /> {xp} XP
+                      </span>
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-stone-800 text-white text-[10px] font-black">
+                        {level}
+                      </span>
+                    </div>
+
+                    {[
+                      { to: '/dashboard',   Icon: LayoutDashboard, label: 'Dashboard' },
+                      { to: '/history',     Icon: History,          label: 'Reading History' },
+                      { to: '/leaderboard', Icon: Trophy,           label: 'Leaderboard' },
+                      { to: '/settings',    Icon: Settings,         label: 'Settings' },
+                    ].map(({ to, Icon, label }) => (
+                      <Link
+                        key={to}
+                        to={to}
+                        className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold text-stone-700 hover:bg-stone-50 transition-colors"
+                      >
+                        <Icon size={18} className="text-stone-400 shrink-0" />
+                        {label}
+                      </Link>
+                    ))}
+
+                    <button
+                      onClick={signOut}
+                      className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold text-red-500 hover:bg-red-50 transition-colors text-left mt-1"
+                    >
+                      <LogOut size={18} className="shrink-0" />
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex flex-col gap-2.5 mt-1">
+                    <Link
+                      to="/login"
+                      className="w-full py-3.5 rounded-xl font-bold text-center text-stone-700 bg-stone-100 hover:bg-stone-200 transition-colors text-base"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="w-full py-3.5 rounded-xl font-bold text-center text-white text-base shadow-md transition-all active:scale-[0.98]"
+                      style={{ background: 'linear-gradient(135deg,#16a34a 0%,#15803d 100%)' }}
+                    >
+                      Join DARE
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </nav>

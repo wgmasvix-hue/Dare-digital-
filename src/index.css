@@ -573,3 +573,105 @@ pre, code {
 /* Scrollbar hide utility (for tab bars) */
 .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+/* ── GLASSMORPHISM ───────────────────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+.glass-dark {
+  background: rgba(15, 20, 18, 0.80);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* ── GRADIENT TEXT UTILITY ───────────────────────────────────── */
+.text-gradient-hero {
+  background-image: linear-gradient(135deg, #166534 0%, #D97706 45%, #C2410C 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.text-gradient-gold {
+  background-image: linear-gradient(135deg, #F59E0B 0%, #B45309 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── INTERACTIVE CARD LIFT ───────────────────────────────────── */
+.card-lift {
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s ease;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px -8px rgba(28,25,23,0.14);
+}
+
+/* ── FOCUS RING — warm amber ─────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid #D97706;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ── SECTION FADE-UP ANIMATION ───────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.fade-up-delay-1 { animation-delay: 0.1s; }
+.fade-up-delay-2 { animation-delay: 0.2s; }
+.fade-up-delay-3 { animation-delay: 0.3s; }
+
+/* ── SMOOTH IMAGE REVEAL ─────────────────────────────────────── */
+img {
+  transition: opacity 0.3s ease;
+}
+
+/* ── LINK UNDERLINE ANIMATION ────────────────────────────────── */
+.link-underline {
+  position: relative;
+  text-decoration: none;
+}
+.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-accent);
+  border-radius: 1px;
+  transition: width 0.25s ease;
+}
+.link-underline:hover::after { width: 100%; }
+
+/* ── SELECTION COLOR ─────────────────────────────────────────── */
+::selection {
+  background: rgba(217, 119, 6, 0.25);
+  color: var(--text-main);
+}
+
+/* ── NAV ACTIVE PIP ──────────────────────────────────────────── */
+.nav-active-pip {
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background: #166534;
+  border-radius: 2px;
+}
+
+/* ── PREMIUM DROPDOWN SHADOW ─────────────────────────────────── */
+.dropdown-shadow {
+  box-shadow: 0 20px 60px -15px rgba(28,25,23,0.18), 0 4px 20px -8px rgba(28,25,23,0.10);
+}

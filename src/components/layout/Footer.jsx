@@ -1,93 +1,158 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone } from 'lucide-react';
 import LogoIcon from '../common/LogoIcon';
-import styles from './Footer.module.css';
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className={styles.footer}>
-      <div className={styles.container}>
-        <div className={styles.topSection}>
-          <div className={styles.brandCol}>
-            <Link to="/" className={styles.logoGroup}>
-              <LogoIcon size={32} className={styles.logoIcon} />
-              <div className={styles.logoText}>
-                <span className={styles.dare}>DARE</span>
-                <span className={styles.libraryLabel}>DIGITAL LIBRARY</span>
+    <footer className="bg-[#0B1612] text-stone-400">
+      {/* Zimbabwe flag stripe */}
+      <div
+        className="h-1 w-full"
+        style={{
+          background:
+            'linear-gradient(90deg, #166534 0% 25%, #D97706 25% 50%, #C2410C 50% 75%, #1C1917 75% 100%)',
+        }}
+      />
+
+      {/* Main content */}
+      <div className="max-w-7xl mx-auto px-6 py-14">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
+
+          {/* Col 1 — Brand */}
+          <div className="flex flex-col gap-5">
+            <Link to="/" className="flex items-center gap-3">
+              <LogoIcon size={36} className="text-white" />
+              <div className="flex flex-col leading-none">
+                <span className="text-white font-black text-xl tracking-tight">DARE</span>
+                <span className="text-green-400 text-[10px] font-bold tracking-widest uppercase">
+                  DIGITAL LIBRARY
+                </span>
               </div>
             </Link>
-            <p className={styles.description}>
-              Zimbabwe's premier open educational resource platform, empowering students and educators with quality digital content.
+
+            <p className="text-stone-400 text-sm leading-relaxed">
+              Zimbabwe's premier open educational resource platform, empowering students and
+              educators with quality digital content.
             </p>
-            <div className={styles.socials}>
-              <a href="#" className={styles.socialLink} aria-label="Facebook"><Facebook size={20} /></a>
-              <a href="#" className={styles.socialLink} aria-label="Twitter"><Twitter size={20} /></a>
-              <a href="#" className={styles.socialLink} aria-label="Instagram"><Instagram size={20} /></a>
-              <a href="#" className={styles.socialLink} aria-label="LinkedIn"><Linkedin size={20} /></a>
+
+            <div className="flex items-center gap-3 mt-1">
+              {[
+                { Icon: Facebook, label: 'Facebook' },
+                { Icon: Twitter, label: 'Twitter' },
+                { Icon: Instagram, label: 'Instagram' },
+                { Icon: Linkedin, label: 'LinkedIn' },
+              ].map(({ Icon, label }) => (
+                <a
+                  key={label}
+                  href="#"
+                  aria-label={label}
+                  className="flex items-center justify-center w-8 h-8 rounded-full border border-stone-700 text-stone-400 hover:text-amber-400 hover:border-amber-400 transition-colors"
+                >
+                  <Icon size={14} />
+                </a>
+              ))}
             </div>
           </div>
 
-          <div className={styles.linksGrid}>
-            <div className={styles.linkCol}>
-              <h4 className={styles.colTitle}>Explore</h4>
-              <Link to="/library">Main Library</Link>
-              <Link to="/openstax">Partner Resources</Link>
-              <Link to="/ai-textbooks">AI Textbooks</Link>
-              <Link to="/author">Publish With Us</Link>
-            </div>
-            <div className={styles.linkCol}>
-              <h4 className={styles.colTitle}>Portals</h4>
-              <Link to="/research">Research Portal</Link>
-              <Link to="/vocational">Secondary Schools</Link>
-              <Link to="/teachers-colleges">Teachers Hub</Link>
-              <Link to="/institutional">Institutional</Link>
-            </div>
-            <div className={styles.linkCol}>
-              <h4 className={styles.colTitle}>Support</h4>
-              <Link to="/help">Help Center</Link>
-              <Link to="/privacy">Privacy Policy</Link>
-              <Link to="/terms">Terms of Service</Link>
-              <Link to="/contact">Contact Us</Link>
-            </div>
+          {/* Col 2 — Explore */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-black uppercase tracking-widest text-stone-500 mb-4">
+              Explore
+            </h4>
+            {[
+              { label: 'Main Library', to: '/library' },
+              { label: 'Open Books', to: '/open-books' },
+              { label: 'Academic Database', to: '/academic' },
+              { label: 'Research Portal', to: '/research' },
+              { label: 'DARA AI Tutor', to: '/tutor' },
+            ].map(({ label, to }) => (
+              <Link
+                key={to}
+                to={to}
+                className="text-sm text-stone-400 hover:text-amber-400 transition-colors"
+              >
+                {label}
+              </Link>
+            ))}
           </div>
 
-          <div className={styles.newsletterCol}>
-            <h4 className={styles.colTitle}>Stay Updated</h4>
-            <p className={styles.newsletterText}>Get the latest updates on new resources and features.</p>
-            <form className={styles.newsletterForm} onSubmit={(e) => e.preventDefault()}>
-              <input type="email" placeholder="Email address" className={styles.newsletterInput} />
-              <button type="submit" className={styles.newsletterBtn}>Subscribe</button>
+          {/* Col 3 — Resources */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-black uppercase tracking-widest text-stone-500 mb-4">
+              Resources
+            </h4>
+            {[
+              { label: 'Lesson Planner', to: '/teacher-tools' },
+              { label: 'Repository', to: '/dspace-explorer' },
+              { label: 'Author Portal', to: '/author' },
+              { label: 'Institutional', to: '/institutional' },
+              { label: 'Leaderboard', to: '/leaderboard' },
+            ].map(({ label, to }) => (
+              <Link
+                key={to}
+                to={to}
+                className="text-sm text-stone-400 hover:text-amber-400 transition-colors"
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Col 4 — Connect */}
+          <div className="flex flex-col gap-4">
+            <h4 className="text-xs font-black uppercase tracking-widest text-stone-500 mb-4">
+              Connect
+            </h4>
+
+            {/* Newsletter form */}
+            <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-2">
+              <input
+                type="email"
+                placeholder="Email address"
+                className="w-full rounded-md bg-stone-800 border border-stone-700 px-3 py-2 text-sm text-white placeholder:text-stone-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              />
+              <button
+                type="submit"
+                className="w-full rounded-md bg-green-700 hover:bg-green-600 text-white text-sm font-semibold py-2 transition-colors"
+              >
+                Subscribe
+              </button>
             </form>
-            <div className={styles.contactDetails}>
-              <div className={styles.contactItem}>
-                <Phone size={14} />
+
+            {/* Contact details */}
+            <div className="flex flex-col gap-2 mt-2">
+              <a
+                href="tel:+263784457922"
+                className="flex items-center gap-2 text-sm text-stone-400 hover:text-amber-400 transition-colors"
+              >
+                <Phone size={14} className="shrink-0" />
                 <span>+263 784 457 922</span>
-              </div>
-              <div className={styles.contactItem}>
-                <Mail size={14} />
+              </a>
+              <a
+                href="mailto:dare.digitallib@gmail.com"
+                className="flex items-center gap-2 text-sm text-stone-400 hover:text-amber-400 transition-colors"
+              >
+                <Mail size={14} className="shrink-0" />
                 <span>dare.digitallib@gmail.com</span>
-              </div>
+              </a>
             </div>
           </div>
         </div>
 
-        <div className={styles.divider}></div>
+        {/* Bottom bar */}
+        <div className="mt-12 border-t border-stone-800 pt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-stone-500">
+            &copy; 2025 DARE Digital Library. A project by ChengetAI Labs.
+          </p>
 
-        <div className={styles.bottomBar}>
-          <div className={styles.copyrightSection}>
-            <p className={styles.copyright}>&copy; {currentYear} Dare Digital Library. A project by ChengetAI Labs.</p>
-          </div>
-          <div className={styles.partnersSection}>
-            <span className={styles.partnerLabel}>Partners:</span>
-            <div className={styles.partnerLogos}>
-              <span title="MHTEISTD">MHTEISTD</span>
-              <span title="ZIMSEC">ZIMSEC</span>
-              <span title="OpenStax">OpenStax</span>
-              <span title="LibreTexts">LibreTexts</span>
-            </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-500">
+            <span>MHTEISTD &middot; ZIMSEC &middot; OpenStax &middot; LibreTexts</span>
+            <Link to="/privacy" className="hover:text-amber-400 transition-colors">
+              Privacy
+            </Link>
+            <Link to="/terms" className="hover:text-amber-400 transition-colors">
+              Terms
+            </Link>
           </div>
         </div>
       </div>

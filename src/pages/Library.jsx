@@ -700,20 +700,30 @@ export default function Library() {
           <Filter size={18} /> Filters
         </button>
 
-        {/* Modern Tabs for Source Filtering */}
-        <div className="flex overflow-x-auto pb-2 mb-4 scrollbar-hide">
-          <div className="flex items-center gap-2 p-1 bg-white border border-slate-200 rounded-2xl w-fit whitespace-nowrap shadow-sm">
-            {['All', 'Featured Items', 'Dare Library', 'Research', 'Partner Resources', 'Project Gutenberg', 'Open Library', 'arXiv Research'].map((source) => (
+        {/* Source Tabs */}
+        <div className="flex overflow-x-auto pb-2 mb-5 scrollbar-hide -mx-1 px-1">
+          <div className="flex items-center gap-1.5 p-1 bg-white border border-stone-200 rounded-2xl w-fit whitespace-nowrap shadow-sm">
+            {[
+              { label: 'All', icon: '✦' },
+              { label: 'Featured Items', icon: '⭐' },
+              { label: 'Dare Library', icon: '🏛' },
+              { label: 'Research', icon: '🔬' },
+              { label: 'Partner Resources', icon: '🌍' },
+              { label: 'Project Gutenberg', icon: '📚' },
+              { label: 'Open Library', icon: '📖' },
+              { label: 'arXiv Research', icon: '🧪' },
+            ].map(({ label, icon }) => (
               <button
-                key={source}
-                onClick={() => handleFilterChange('source', source)}
-                className={`px-5 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${
-                  filters.source === source 
-                    ? 'bg-slate-900 text-white shadow-sm' 
-                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                key={label}
+                onClick={() => handleFilterChange('source', label)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  filters.source === label
+                    ? 'bg-green-800 text-white shadow-sm'
+                    : 'text-stone-500 hover:text-stone-900 hover:bg-stone-50'
                 }`}
               >
-                {source}
+                <span className="text-[11px]">{icon}</span>
+                {label}
               </button>
             ))}
           </div>
@@ -749,111 +759,121 @@ export default function Library() {
 
         {/* Category Filters (Local) */}
         <div className="flex flex-wrap items-center gap-2 mb-8">
-          {['All', 'Vocational', 'Polytechnic', 'Science', 'Mathematics', 'Business', 'Technology', 'Arts'].map((cat) => (
+          {[
+            { label: 'All', emoji: '✦' },
+            { label: 'Vocational', emoji: '🔧' },
+            { label: 'Polytechnic', emoji: '⚙️' },
+            { label: 'Science', emoji: '🔬' },
+            { label: 'Mathematics', emoji: '📐' },
+            { label: 'Business', emoji: '📊' },
+            { label: 'Technology', emoji: '💻' },
+            { label: 'Arts', emoji: '🎨' },
+          ].map(({ label, emoji }) => (
             <button
-              key={cat}
-              onClick={() => setLocalCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${
-                localCategory === cat
-                  ? 'bg-teal-500 border-teal-500 text-white shadow-md'
-                  : 'bg-white border-slate-200 text-slate-500 hover:border-teal-500/50 hover:text-teal-600'
+              key={label}
+              onClick={() => setLocalCategory(label)}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                localCategory === label
+                  ? 'bg-green-800 border-green-800 text-white shadow-md'
+                  : 'bg-white border-stone-200 text-stone-500 hover:border-green-700/40 hover:text-green-800'
               }`}
             >
-              {cat}
+              <span>{emoji}</span>
+              {label}
             </button>
           ))}
         </div>
 
-        {/* 1M+ Open Source Books Connect Spotlight Banner */}
-        <div className="bg-gradient-to-r from-teal-500/15 via-emerald-500/5 to-transparent rounded-3xl p-6 md:p-8 mb-8 border border-teal-500/20 shadow-sm relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="absolute inset-0 z-0 opacity-10">
-            <img 
-              src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=800" 
-              alt=""
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-            />
+        {/* Open Books Spotlight Banner */}
+        <div className="relative overflow-hidden rounded-2xl p-6 md:p-7 mb-8 border border-amber-200/60 bg-gradient-to-r from-amber-50 to-orange-50/40 shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
+          <div className="absolute top-0 right-0 w-64 h-full pointer-events-none opacity-5">
+            <Globe size={220} className="absolute -top-8 -right-8 text-amber-600" />
           </div>
-          <div className="relative z-10 max-w-xl text-left">
-            <div className="inline-flex items-center gap-1.5 bg-teal-100 text-teal-800 font-extrabold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-              <Globe size={11} className="text-teal-600 animate-spin-slow" />
-              1,000,000+ Unified Ebooks Connect Active
+          <div className="relative z-10 max-w-xl">
+            <div className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 font-black text-[10px] px-3 py-1 rounded-full uppercase tracking-widest mb-2.5">
+              <Globe size={10} />
+              Global Open Access
             </div>
-            <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight mb-2">
-              Explore Peer-Reviewed & Classic Ebooks
+            <h3 className="text-lg md:text-xl font-black text-stone-900 tracking-tight mb-1.5">
+              Peer-Reviewed & Classic Ebooks — Free
             </h3>
-            <p className="text-slate-600 text-xs md:text-sm font-semibold leading-relaxed">
-              Query a massive global library containing digitizations, masterworks, and papers from Open Library, Project Gutenberg, and arXiv. Align any text immediately to assignments.
+            <p className="text-stone-600 text-xs md:text-sm leading-relaxed">
+              Open Library, Project Gutenberg, arXiv, and OpenAlex — all unified. Over 1 million titles at your fingertips.
             </p>
           </div>
           <div className="relative z-10 shrink-0 flex flex-wrap gap-2.5 w-full md:w-auto">
-            <Link 
-              to="/open-books" 
-              className="flex-1 md:flex-none text-center px-4.5 py-3 bg-teal-500 hover:bg-teal-400 text-slate-900 rounded-xl font-bold text-xs shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"
+            <Link
+              to="/open-books"
+              className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-5 py-3 bg-amber-500 hover:bg-amber-400 text-white rounded-xl font-bold text-xs shadow-sm transition-all active:scale-95"
             >
-              <span>Launch Custom Ebook Hub</span>
-              <ArrowRight size={13} />
+              Open Book Hub <ArrowRight size={13} />
             </Link>
             <button
-              onClick={() => {
-                handleFilterChange('source', 'Project Gutenberg');
-                setLocalSearch('');
-                handleFilterChange('q', '');
-              }}
-              className="flex-1 md:flex-none text-center px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-xl font-bold text-xs border border-slate-200 shadow-sm transition-all active:scale-95 whitespace-nowrap"
+              onClick={() => { handleFilterChange('source', 'Project Gutenberg'); setLocalSearch(''); handleFilterChange('q', ''); }}
+              className="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-3 bg-white hover:bg-stone-50 text-stone-700 rounded-xl font-bold text-xs border border-stone-200 shadow-sm transition-all active:scale-95 whitespace-nowrap"
             >
-              Filter Gutenberg
+              Gutenberg Classics
             </button>
           </div>
         </div>
 
         {/* Search Header */}
-        <div className="relative overflow-hidden rounded-3xl p-8 mb-8 bg-slate-900 border border-slate-800 shadow-2xl">
-          {/* Real Book Background Image */}
-          <div className="absolute inset-0 z-0">
-            <img 
-              src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=2000" 
-              alt="Library Search Background" 
-              className="w-full h-full object-cover opacity-20 mix-blend-overlay"
-              referrerPolicy="no-referrer"
+        <div className="relative overflow-hidden rounded-3xl mb-8 bg-[#0D1F17] border border-green-900/40 shadow-2xl">
+          {/* Decorative background */}
+          <div className="absolute inset-0 z-0 pointer-events-none">
+            <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-green-800/20 blur-3xl" />
+            <div className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full bg-amber-700/10 blur-3xl" />
+            <div className="absolute top-0 left-0 w-full h-1"
+              style={{ background: 'linear-gradient(90deg, #166534 0% 25%, #D97706 25% 50%, #C2410C 50% 75%, #1C1917 75% 100%)' }}
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90" />
           </div>
 
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <h1 className="text-3xl font-black text-white px-2">Library</h1>
-                <div className="flex items-center gap-2 bg-slate-800/50 p-1 rounded-xl backdrop-blur-sm border border-slate-700/50">
-                  <button 
+          <div className="relative z-10 p-7 md:p-10">
+            {/* Title row */}
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+              <div>
+                <div className="inline-flex items-center gap-2 bg-green-900/60 border border-green-700/40 text-green-300 text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3">
+                  <Database size={11} />
+                  1,000,000+ Titles Indexed
+                </div>
+                <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-none">
+                  DARE <span className="text-green-400">Library</span>
+                </h1>
+                <p className="text-stone-400 text-sm mt-1.5 font-medium">
+                  Zimbabwe's largest open educational resource collection
+                </p>
+              </div>
+
+              <div className="flex flex-col items-start sm:items-end gap-2 shrink-0">
+                {/* Search mode toggle */}
+                <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 p-1 rounded-xl backdrop-blur-sm">
+                  <button
                     onClick={() => setUseSemanticSearch(false)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${!useSemanticSearch ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-300'}`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${!useSemanticSearch ? 'bg-white text-slate-900 shadow' : 'text-stone-400 hover:text-stone-200'}`}
                   >
                     Keyword
                   </button>
-                  <button 
+                  <button
                     onClick={() => setUseSemanticSearch(true)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${useSemanticSearch ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-300'}`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${useSemanticSearch ? 'bg-amber-400 text-slate-900 shadow' : 'text-stone-400 hover:text-stone-200'}`}
                   >
-                    Semantic (AI)
+                    <Sparkles size={11} /> AI Semantic
                   </button>
                 </div>
+                {semanticResults && (
+                  <button
+                    onClick={() => { setSemanticResults(null); fetchPublications(false); }}
+                    className="text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
+                  >
+                    ✕ Clear AI Results
+                  </button>
+                )}
               </div>
-              {semanticResults && (
-                <button 
-                  onClick={() => {
-                    setSemanticResults(null);
-                    fetchPublications(false);
-                  }}
-                  className="text-xs font-bold text-amber-400 hover:underline"
-                >
-                  Clear AI Results
-                </button>
-              )}
             </div>
-            
-            <div className="mt-6 max-w-3xl">
-              <SearchBar 
+
+            {/* Search bar */}
+            <div className="max-w-3xl">
+              <SearchBar
                 value={isAiSearch ? aiQuery : localSearch}
                 onChange={(val) => isAiSearch ? setAiQuery(val) : setLocalSearch(val)}
                 onSearch={isAiSearch ? handleAiSearch : () => {
@@ -877,6 +897,20 @@ export default function Library() {
                 setShowSuggestions={setShowSuggestions}
               />
             </div>
+
+            {/* Quick stat pills */}
+            <div className="flex flex-wrap gap-2 mt-5">
+              {[
+                { label: 'Open Access', color: 'bg-green-900/50 text-green-300 border-green-800/50' },
+                { label: 'Gutenberg Classics', color: 'bg-amber-900/40 text-amber-300 border-amber-800/40' },
+                { label: 'Peer-Reviewed', color: 'bg-purple-900/40 text-purple-300 border-purple-800/40' },
+                { label: 'Zimbabwe Authored', color: 'bg-orange-900/40 text-orange-300 border-orange-800/40' },
+              ].map(({ label, color }) => (
+                <span key={label} className={`text-[11px] font-bold px-3 py-1 rounded-full border ${color}`}>
+                  {label}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -894,46 +928,44 @@ export default function Library() {
         )}
 
         {/* Controls */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest">
-              {(1000000 + totalCount).toLocaleString()} Titles Indexed
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6 bg-white border border-stone-200 rounded-2xl px-5 py-3.5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-black text-green-800 uppercase tracking-widest">
+              {(1000000 + totalCount).toLocaleString()}
             </span>
-            <div className="h-4 w-[1px] bg-slate-300" />
-            <div className="flex items-center gap-2 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
-              <button 
-                className={`p-1.5 rounded-lg transition-all ${viewMode === 'tile' ? 'bg-slate-100 text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}
-                onClick={() => setViewMode('tile')}
-                title="Modern Tile View"
+            <span className="text-xs text-stone-400 font-medium">titles indexed</span>
+            <div className="h-4 w-px bg-stone-200" />
+            <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-lg">
+              <button
+                className={`p-1.5 rounded-md transition-all ${viewMode === 'tile' ? 'bg-white text-green-800 shadow-sm' : 'text-stone-400 hover:text-stone-700'}`}
+                onClick={() => setViewMode('tile')} title="Tile View"
               >
-                <LayoutGrid size={16} />
+                <LayoutGrid size={15} />
               </button>
-              <button 
-                className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-slate-100 text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}
-                onClick={() => setViewMode('grid')}
-                title="Compact Grid View"
+              <button
+                className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-green-800 shadow-sm' : 'text-stone-400 hover:text-stone-700'}`}
+                onClick={() => setViewMode('grid')} title="Compact Grid"
               >
-                <Sparkles size={16} />
+                <Sparkles size={15} />
               </button>
-              <button 
-                className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-slate-100 text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}
-                onClick={() => setViewMode('list')}
-                title="List View"
+              <button
+                className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-green-800 shadow-sm' : 'text-stone-400 hover:text-stone-700'}`}
+                onClick={() => setViewMode('list')} title="List View"
               >
-                <ListIcon size={16} />
+                <ListIcon size={15} />
               </button>
             </div>
           </div>
-          
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sort By</span>
-            <select 
-              className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 outline-none focus:border-teal-500 focus:ring-4 ring-teal-500/20 transition-all shadow-sm"
+
+          <div className="flex items-center gap-2.5">
+            <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Sort</span>
+            <select
+              className="bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-bold text-stone-700 outline-none focus:border-green-700 focus:ring-2 ring-green-700/15 transition-all"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
               {filters.q && <option value="relevance">Relevance</option>}
-              <option value="title">Title (A-Z)</option>
+              <option value="title">Title (A–Z)</option>
               <option value="newest">Newest</option>
               <option value="rating">Rating</option>
               <option value="downloads">Most Read</option>
