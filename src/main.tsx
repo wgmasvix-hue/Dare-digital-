@@ -45,6 +45,7 @@ import VocationalSchools from './pages/VocationalSchools';
 import PremiumResource from './pages/PremiumResource';
 import DSpaceIntegration from './pages/DSpaceIntegration';
 import DSpaceExplorer from './pages/DSpaceExplorer';
+import InstitutionalRepository from './pages/InstitutionalRepository';
 import HBCTransformer from './pages/HBCTransformer';
 import AIModelsTools from './pages/AIModelsTools';
 import TutorPage from './pages/TutorPage';
@@ -173,7 +174,8 @@ createRoot(rootElement).render(
             <Route path="/institutional-login" element={<InstitutionalLogin />} />
             <Route path="/vocational" element={<VocationalSchools />} />
             <Route path="/dspace" element={<DSpaceIntegration />} />
-            <Route path="/dspace-explorer" element={<DSpaceExplorer />} />
+            <Route path="/dspace-explorer" element={<InstitutionalRepository />} />
+            <Route path="/repository" element={<InstitutionalRepository />} />
             <Route path="/hbc-transformer" element={<HBCTransformer />} />
             <Route path="/ai-tools" element={<AIModelsTools />} />
             <Route path="/institutional" element={<DareInstitutional />} />
