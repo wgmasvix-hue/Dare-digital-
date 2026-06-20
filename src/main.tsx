@@ -63,6 +63,15 @@ import UnifiedSearch from './pages/UnifiedSearch';
 import SearchResults from './pages/SearchResults';
 import Institutions from './pages/Institutions';
 import Institution from './pages/Institution';
+import AdvancedSearch from './pages/AdvancedSearch';
+import GlobalRepositories from './pages/GlobalRepositories';
+import ForInstitutions from './pages/ForInstitutions';
+import Settings from './pages/Settings';
+import ReadingHistory from './pages/ReadingHistory';
+import Help from './pages/Help';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Contact from './pages/Contact';
 
 // Check if ALL_LOCAL_OER is loaded
 console.log("ALL_LOCAL_OER length:", window.ALL_LOCAL_OER?.length || "undefined");
@@ -150,6 +159,9 @@ createRoot(rootElement).render(
             <Route path="/open-books" element={<OpenAccessBooks />} />
             <Route path="/research" element={<LocalResearch />} />
             <Route path="/research/:id" element={<ResearchDetail />} />
+            <Route path="/advanced-search" element={<AdvancedSearch />} />
+            <Route path="/global-repos" element={<GlobalRepositories />} />
+            <Route path="/for-institutions" element={<ForInstitutions />} />
             <Route path="/teachers-colleges" element={<TeachersColleges />} />
             <Route path="/teacher-tools" element={<TeacherTools />} />
             <Route path="/vocational-tools" element={<VocationalTools />} />
@@ -166,42 +178,12 @@ createRoot(rootElement).render(
             <Route path="/ai-tools" element={<AIModelsTools />} />
             <Route path="/institutional" element={<DareInstitutional />} />
             <Route path="/premium" element={<PremiumResource />} />
-            <Route path="/settings" element={
-                <div style={{ padding: '120px 20px', textAlign: 'center', fontFamily: 'var(--font-display)' }}>
-                  <h1 style={{ fontSize: '2rem', color: 'var(--soil)', marginBottom: '12px' }}>Settings</h1>
-                  <p style={{ color: 'var(--clay)' }}>Account settings coming soon.</p>
-                </div>
-            } />
-            <Route path="/history" element={
-                <div style={{ padding: '120px 20px', textAlign: 'center', fontFamily: 'var(--font-display)' }}>
-                  <h1 style={{ fontSize: '2rem', color: 'var(--soil)', marginBottom: '12px' }}>Reading History</h1>
-                  <p style={{ color: 'var(--clay)' }}>Your reading history will appear here.</p>
-                </div>
-            } />
-            <Route path="/help" element={
-              <div style={{ padding: '120px 20px', textAlign: 'center', fontFamily: 'var(--font-display)' }}>
-                <h1 style={{ fontSize: '2rem', color: 'var(--soil)', marginBottom: '12px' }}>Help Center</h1>
-                <p style={{ color: 'var(--clay)' }}>Need help? Our support team is here to assist you.</p>
-              </div>
-            } />
-            <Route path="/privacy" element={
-              <div style={{ padding: '120px 20px', textAlign: 'center', fontFamily: 'var(--font-display)' }}>
-                <h1 style={{ fontSize: '2rem', color: 'var(--soil)', marginBottom: '12px' }}>Privacy Policy</h1>
-                <p style={{ color: 'var(--clay)' }}>Your privacy is important to us. Read our policy here.</p>
-              </div>
-            } />
-            <Route path="/terms" element={
-              <div style={{ padding: '120px 20px', textAlign: 'center', fontFamily: 'var(--font-display)' }}>
-                <h1 style={{ fontSize: '2rem', color: 'var(--soil)', marginBottom: '12px' }}>Terms of Service</h1>
-                <p style={{ color: 'var(--clay)' }}>By using DARE, you agree to our terms of service.</p>
-              </div>
-            } />
-            <Route path="/contact" element={
-              <div style={{ padding: '120px 20px', textAlign: 'center', fontFamily: 'var(--font-display)' }}>
-                <h1 style={{ fontSize: '2rem', color: 'var(--soil)', marginBottom: '12px' }}>Contact Us</h1>
-                <p style={{ color: 'var(--clay)' }}>Get in touch with the DARE team.</p>
-              </div>
-            } />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/history" element={<ReadingHistory />} />
+            <Route path="/help" element={<Help />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="*" element={
               <div style={{ padding: '120px 20px', textAlign: 'center', fontFamily: 'var(--font-display)' }}>
                 <h1 style={{ fontSize: '3rem', color: 'var(--soil)' }}>404</h1>
