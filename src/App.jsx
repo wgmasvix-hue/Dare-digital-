@@ -2,7 +2,6 @@ import { Outlet, useLocation } from "react-router-dom"
 import { AnimatePresence, motion } from "motion/react"
 import NavBar from "./components/layout/NavBar"
 import Footer from "./components/layout/Footer"
-import { isSupabaseConfigured } from "./lib/supabase"
 
 const PageWrapper = ({ children }) => {
   const location = useLocation();
@@ -23,18 +22,11 @@ const PageWrapper = ({ children }) => {
 };
 
 export default function App() {
-  const isConfigured = isSupabaseConfigured();
-
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-slate-50 text-slate-900 selection:bg-teal-500/30">
-      {!isConfigured && (
-        <div className="bg-amber-100 border-b border-amber-200 text-amber-800 px-4 py-3 text-center text-sm">
-          <strong>Setup Required:</strong> Missing Vercel Environment Variables (`VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY`). 
-          Please configure these in your Vercel project settings to enable backend features.
-        </div>
-      )}
+    <div className="min-h-screen flex flex-col font-sans bg-white text-stone-900 selection:bg-amber-200/60">
+      <a href="#main-content" className="skip-nav">Skip to main content</a>
       <NavBar />
-      <main className="flex-1 w-full flex flex-col relative w-full h-full">
+      <main id="main-content" className="flex-1 w-full flex flex-col relative">
         <PageWrapper>
           <Outlet />
         </PageWrapper>

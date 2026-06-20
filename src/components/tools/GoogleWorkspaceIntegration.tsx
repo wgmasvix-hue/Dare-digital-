@@ -267,7 +267,7 @@ export default function GoogleWorkspaceIntegration() {
                   <div className="overflow-hidden">
                     <h4 className="font-bold text-slate-700 truncate line-clamp-1">{from}</h4>
                     <p className="text-sm text-slate-600 truncate mt-1">{subject}</p>
-                    <p className="text-xs text-slate-400 mt-1">{email.snippet}</p>
+                    <p className="text-xs text-slate-400 mt-1">{email.snippet as string}</p>
                   </div>
                 </a>
               );

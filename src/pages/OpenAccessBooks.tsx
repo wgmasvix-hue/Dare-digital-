@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Search, 
-  ChevronLeft, 
-  ChevronRight, 
-  Download, 
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Download,
   BookMarked,
   Globe,
   Database,
@@ -15,6 +15,11 @@ import { Book } from '../types';
 import { gutenbergService } from '../services/gutenbergService';
 import { openLibraryService } from '../services/openLibraryService';
 import { arxivService } from '../services/arxivService';
+import { internetArchiveService } from '../services/internetArchiveService';
+import { standardEbooksService } from '../services/standardEbooksService';
+import { oapenService } from '../services/oapenService';
+import { librivoxService } from '../services/librivoxService';
+import { openTextbookService } from '../services/openTextbookService';
 import { useGamification } from '../context/GamificationContext';
 import AIInsightModal from '../components/library/AIInsightModal';
 
@@ -24,6 +29,11 @@ const SCALE_STATS = [
   { label: 'arXiv Papers', count: '2.3M+', desc: 'Research & university prep preprints', color: 'text-emerald-600', bg: 'bg-emerald-50' },
   { label: 'Project Gutenberg', count: '70,000+', desc: 'Classic literature & masterworks', color: 'text-amber-600', bg: 'bg-amber-50' },
   { label: 'OpenStax & OER', count: '10,000+', desc: 'Peer-reviewed higher-ed textbooks', color: 'text-purple-600', bg: 'bg-purple-50' },
+  { label: 'Internet Archive', count: '30M+', desc: 'Scanned books, texts & historical documents', color: 'text-rose-600', bg: 'bg-rose-50' },
+  { label: 'LibriVox', count: '15,000+', desc: 'Free public domain audiobooks', color: 'text-indigo-600', bg: 'bg-indigo-50' },
+  { label: 'Standard Ebooks', count: '700+', desc: 'Curated, beautifully formatted classics', color: 'text-teal-600', bg: 'bg-teal-50' },
+  { label: 'OAPEN', count: '20,000+', desc: 'Peer-reviewed open access academic books', color: 'text-cyan-600', bg: 'bg-cyan-50' },
+  { label: 'Open Textbook Library', count: '1,200+', desc: 'Peer-reviewed higher education textbooks', color: 'text-orange-600', bg: 'bg-orange-50' },
 ];
 
 const PRESET_QUERIES = [
@@ -35,10 +45,21 @@ const PRESET_QUERIES = [
   { label: 'Mathematics', query: 'Calculus Algebra', icon: '🧮' },
 ];
 
+type SourceFilter =
+  | 'all'
+  | 'open_library'
+  | 'gutenberg'
+  | 'arxiv'
+  | 'internet_archive'
+  | 'librivox'
+  | 'standard_ebooks'
+  | 'oapen'
+  | 'open_textbooks';
+
 export default function OpenAccessBooks() {
   const location = useLocation();
   const { gainXp } = useGamification();
-  
+
   const [showInsightModal, setShowInsightModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
@@ -48,8 +69,8 @@ export default function OpenAccessBooks() {
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'open_library' | 'gutenberg' | 'arxiv'>('all');
-  
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
+
   // Reader and AI Interaction states
   const [showXPReward, setShowXPReward] = useState(false);
 
@@ -61,8 +82,12 @@ export default function OpenAccessBooks() {
     if (search) {
       setSearchQuery(search);
     }
-    if (source && ['open_library', 'gutenberg', 'arxiv'].includes(source)) {
-      setSourceFilter(source as 'open_library' | 'gutenberg' | 'arxiv');
+    const validSources: SourceFilter[] = [
+      'open_library', 'gutenberg', 'arxiv',
+      'internet_archive', 'librivox', 'standard_ebooks', 'oapen', 'open_textbooks'
+    ];
+    if (source && validSources.includes(source as SourceFilter)) {
+      setSourceFilter(source as SourceFilter);
     }
   }, [location.search]);
 
@@ -76,10 +101,23 @@ export default function OpenAccessBooks() {
       let count = 0;
 
       if (source === 'all') {
-        // Query both Open Library and Gutenberg in parallel to give a stunning multi-source result deck
-        const [olResponse, gutResponse] = await Promise.allSettled([
+        // Query all sources in parallel
+        const [
+          olResponse,
+          gutResponse,
+          iaResponse,
+          seResponse,
+          oapenResponse,
+          librivoxResponse,
+          otlResponse,
+        ] = await Promise.allSettled([
           openLibraryService.searchBooks(query, pageNum).catch(() => ({ books: [], numFound: 0 })),
-          gutenbergService.searchBooks(query, pageNum).catch(() => ({ books: [], count: 0 }))
+          gutenbergService.searchBooks(query, pageNum).catch(() => ({ books: [], count: 0 })),
+          internetArchiveService.searchBooks(query, pageNum),
+          standardEbooksService.searchBooks(query, pageNum),
+          oapenService.searchBooks(query, pageNum),
+          librivoxService.searchBooks(query, pageNum),
+          openTextbookService.searchBooks(query, pageNum),
         ]);
 
         const olBooks = olResponse.status === 'fulfilled' ? olResponse.value.books : [];
@@ -88,27 +126,69 @@ export default function OpenAccessBooks() {
         const gutBooks = gutResponse.status === 'fulfilled' ? gutResponse.value.books : [];
         const gutCount = gutResponse.status === 'fulfilled' ? gutResponse.value.count : 0;
 
-        // Interleave top results
-        const minLength = Math.min(olBooks.length, gutBooks.length);
-        for (let i = 0; i < minLength; i++) {
-          results.push(olBooks[i]);
-          results.push(gutBooks[i]);
+        const iaBooks = iaResponse.status === 'fulfilled' ? iaResponse.value.books : [];
+        const iaCount = iaResponse.status === 'fulfilled' ? iaResponse.value.totalResults : 0;
+
+        const seBooks = seResponse.status === 'fulfilled' ? seResponse.value.books : [];
+        const seCount = seResponse.status === 'fulfilled' ? seResponse.value.totalResults : 0;
+
+        const oapenBooks = oapenResponse.status === 'fulfilled' ? oapenResponse.value.books : [];
+        const oapenCount = oapenResponse.status === 'fulfilled' ? oapenResponse.value.totalResults : 0;
+
+        const librivoxBooks = librivoxResponse.status === 'fulfilled' ? librivoxResponse.value.books : [];
+        const librivoxCount = librivoxResponse.status === 'fulfilled' ? librivoxResponse.value.totalResults : 0;
+
+        const otlBooks = otlResponse.status === 'fulfilled' ? otlResponse.value.books : [];
+        const otlCount = otlResponse.status === 'fulfilled' ? otlResponse.value.totalResults : 0;
+
+        // Interleave results from all sources for variety
+        const allSources = [olBooks, gutBooks, iaBooks, seBooks, oapenBooks, librivoxBooks, otlBooks];
+        const maxLen = Math.max(...allSources.map((s) => s.length));
+        for (let i = 0; i < maxLen; i++) {
+          for (const src of allSources) {
+            if (i < src.length) results.push(src[i]);
+          }
         }
-        results = [...results, ...olBooks.slice(minLength), ...gutBooks.slice(minLength)];
-        count = olCount + gutCount;
-      } 
+
+        count = olCount + gutCount + iaCount + seCount + oapenCount + librivoxCount + otlCount;
+      }
       else if (source === 'open_library') {
         const data = await openLibraryService.searchBooks(query, pageNum);
         results = data.books;
         count = data.numFound;
-      } 
+      }
       else if (source === 'gutenberg') {
         const data = await gutenbergService.searchBooks(query, pageNum);
         results = data.books;
         count = data.count;
-      } 
+      }
       else if (source === 'arxiv') {
         const data = await arxivService.searchResearch(query, pageNum);
+        results = data.books;
+        count = data.totalResults;
+      }
+      else if (source === 'internet_archive') {
+        const data = await internetArchiveService.searchBooks(query, pageNum);
+        results = data.books;
+        count = data.totalResults;
+      }
+      else if (source === 'standard_ebooks') {
+        const data = await standardEbooksService.searchBooks(query, pageNum);
+        results = data.books;
+        count = data.totalResults;
+      }
+      else if (source === 'oapen') {
+        const data = await oapenService.searchBooks(query, pageNum);
+        results = data.books;
+        count = data.totalResults;
+      }
+      else if (source === 'librivox') {
+        const data = await librivoxService.searchBooks(query, pageNum);
+        results = data.books;
+        count = data.totalResults;
+      }
+      else if (source === 'open_textbooks') {
+        const data = await openTextbookService.searchBooks(query, pageNum);
         results = data.books;
         count = data.totalResults;
       }
@@ -152,7 +232,7 @@ export default function OpenAccessBooks() {
   const handleReadOnline = (book: Book) => {
     // Open in separate secure tab without referrer leak
     window.open(book.file_url || book.url, '_blank', 'noopener,noreferrer');
-    
+
     // Award daily educational XP
     gainXp(25);
     setShowXPReward(true);
@@ -161,24 +241,24 @@ export default function OpenAccessBooks() {
 
   return (
     <div className="min-h-screen bg-slate-50 pt-28 pb-20 font-sans text-slate-900 selection:bg-teal-200 selection:text-teal-900">
-      
+
       {/* 1. Header Hero Panel */}
       <section className="relative overflow-hidden bg-slate-900 text-white py-16 px-6 lg:px-12 mb-12">
         {/* Unsplash Academic Aesthetic */}
         <div className="absolute inset-0 opacity-15 mix-blend-overlay">
-          <img 
-            src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=2000" 
-            alt="Library Archive Background" 
+          <img
+            src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=2000"
+            alt="Library Archive Background"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
         </div>
-        
+
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded-full text-xs font-bold leading-none tracking-widest uppercase mb-6">
             <Globe size={14} className="animate-spin-slow" /> Unified Open Repositories
           </div>
-          
+
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight max-w-2xl mb-4">
             1,000,000+ <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Open Source</span> Scholar Library
           </h1>
@@ -197,8 +277,8 @@ export default function OpenAccessBooks() {
                   setActivePreset(p.label);
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95 ${
-                  activePreset === p.label 
-                    ? 'bg-teal-500 text-slate-900 border-teal-500 shadow-md' 
+                  activePreset === p.label
+                    ? 'bg-teal-500 text-slate-900 border-teal-500 shadow-md'
                     : 'bg-slate-800/80 text-slate-200 border-slate-700 hover:border-slate-500'
                 }`}
               >
@@ -214,7 +294,7 @@ export default function OpenAccessBooks() {
         {/* Floating Reward Animation */}
         <AnimatePresence>
           {showXPReward && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 30, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
@@ -232,7 +312,7 @@ export default function OpenAccessBooks() {
         </AnimatePresence>
 
         {/* 2. Scale Statistics Grid */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
           {SCALE_STATS.map((s) => (
             <div key={s.label} className="bg-white rounded-3xl border border-slate-200/60 p-6 shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow">
               <div className={`p-3 rounded-2xl ${s.bg}`}>
@@ -249,16 +329,16 @@ export default function OpenAccessBooks() {
 
         {/* 3. Search Bar and Navigation Panels */}
         <div className="flex flex-col lg:flex-row gap-8 items-start">
-          
+
           {/* Main Content Pane */}
           <div className="flex-1 w-full order-1 lg:order-none">
-            
+
             {/* Control Panel: Filters, Sorter, Search */}
             <div className="bg-white rounded-3xl border border-slate-200/60 p-6 mb-8 shadow-sm">
-              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                
+              <div className="flex flex-col gap-4">
+
                 {/* Search query input */}
-                <div className="relative w-full md:w-96">
+                <div className="relative w-full">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                     <Search size={18} />
                   </span>
@@ -274,27 +354,34 @@ export default function OpenAccessBooks() {
                   />
                 </div>
 
-                {/* Directory Selector tabs */}
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">Repository Scope:</span>
-                  {[
-                    { id: 'all', label: 'All Sources' },
-                    { id: 'open_library', label: 'Open Library' },
-                    { id: 'gutenberg', label: 'Gutenberg' },
-                    { id: 'arxiv', label: 'arXiv Papers' }
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setSourceFilter(tab.id as 'all' | 'open_library' | 'gutenberg' | 'arxiv')}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                        sourceFilter === tab.id 
-                          ? 'bg-slate-900 text-white shadow-sm' 
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
+                {/* Directory Selector tabs — scrollable on small screens */}
+                <div className="overflow-x-auto">
+                  <div className="flex items-center gap-1.5 min-w-max">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2 shrink-0">Repository Scope:</span>
+                    {[
+                      { id: 'all', label: 'All Sources' },
+                      { id: 'open_library', label: 'Open Library' },
+                      { id: 'gutenberg', label: 'Gutenberg' },
+                      { id: 'arxiv', label: 'arXiv Papers' },
+                      { id: 'internet_archive', label: 'Internet Archive' },
+                      { id: 'librivox', label: 'LibriVox' },
+                      { id: 'standard_ebooks', label: 'Standard Ebooks' },
+                      { id: 'oapen', label: 'OAPEN' },
+                      { id: 'open_textbooks', label: 'Open Textbooks' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setSourceFilter(tab.id as SourceFilter)}
+                        className={`whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                          sourceFilter === tab.id
+                            ? 'bg-slate-900 text-white shadow-sm'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
               </div>
@@ -329,8 +416,8 @@ export default function OpenAccessBooks() {
                 ))
               ) : books.length > 0 ? (
                 books.map((book) => (
-                  <div 
-                    key={book.id} 
+                  <div
+                    key={book.id}
                     onClick={() => {
                       setSelectedBook(book);
                       setShowInsightModal(true);
@@ -351,6 +438,11 @@ export default function OpenAccessBooks() {
                       <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-slate-900/80 backdrop-blur text-[8px] font-black text-white uppercase tracking-wider">
                         {book.source}
                       </div>
+                      {book.source === 'LibriVox' && (
+                        <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-indigo-600/90 backdrop-blur text-[8px] font-black text-white uppercase tracking-wider">
+                          🎧 Audiobook
+                        </div>
+                      )}
                     </div>
 
                     {/* Meta Data */}
@@ -373,7 +465,7 @@ export default function OpenAccessBooks() {
                           className="flex-1 py-2 rounded-xl bg-slate-950 text-white hover:bg-slate-800 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow"
                         >
                           <Download size={13} />
-                          Read Online
+                          {book.source === 'LibriVox' ? 'Listen Now' : 'Read Online'}
                         </button>
                       </div>
                     </div>
@@ -386,8 +478,8 @@ export default function OpenAccessBooks() {
                   </div>
                   <h3 className="font-serif font-black text-lg text-slate-800 mb-1">No Books Matched</h3>
                   <p className="text-slate-400 text-sm font-medium mb-6">Try broadening your search term or selecting "All Sources" scope.</p>
-                  <button 
-                    onClick={() => { setSearchQuery(''); setSourceFilter('all'); }} 
+                  <button
+                    onClick={() => { setSearchQuery(''); setSourceFilter('all'); }}
                     className="px-6 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white shadow"
                   >
                     Clear Search Filters
@@ -420,10 +512,10 @@ export default function OpenAccessBooks() {
           </div>
         </div>
       </div>
-      <AIInsightModal 
-        isOpen={showInsightModal} 
-        onClose={() => setShowInsightModal(false)} 
-        book={selectedBook} 
+      <AIInsightModal
+        isOpen={showInsightModal}
+        onClose={() => setShowInsightModal(false)}
+        book={selectedBook}
       />
     </div>
   );

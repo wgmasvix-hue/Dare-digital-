@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -32,20 +32,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     } else {
       // Default to Gemini
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-      const geminiModel = genAI.getGenerativeModel({ 
-        model: model || "gemini-1.5-flash" 
-      });
+      const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
-      const prompt = context 
+      const prompt = context
         ? `Context: ${context}\n\nAs DARA, the Zimbabwean AI Tutor, please answer: ${message}`
         : message;
 
-      const result = await geminiModel.generateContent(prompt);
-      const response = await result.response;
-      
+      const result = await genAI.models.generateContent({
+        model: model || "gemini-2.5-flash",
+        contents: prompt,
+        config: {
+          systemInstruction: "You are DARA, a Zimbabwean AI tutor helping Form 1–6 and University students on the DARE platform."
+        }
+      });
+
       return res.status(200).json({
-        reply: response.text(),
+        reply: result.text,
       });
     }
 

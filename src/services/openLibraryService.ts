@@ -27,7 +27,6 @@ interface OpenLibraryRawResponse {
 export const openLibraryService = {
   async searchBooks(query: string, page = 1): Promise<OpenLibraryResponse> {
     try {
-      const { supabase } = await import('../lib/supabase');
       const limit = 20;
       const targetUrl = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`;
       
