@@ -172,11 +172,16 @@ export default function Reader() {
           setPreviewMode(false);
           setIsOffline(true);
         } else {
-          const { data: dbBook, error: dbError } = await supabase
-            .from('books')
-            .select('*')
-            .eq('id', id)
-            .single();
+          let dbBook = null, dbError = null;
+          if (supabase) {
+            const result = await supabase
+              .from('books')
+              .select('*')
+              .eq('id', id)
+              .single();
+            dbBook = result.data;
+            dbError = result.error;
+          }
 
           if (dbBook && !dbError) {
             bookData = {
@@ -191,12 +196,9 @@ export default function Reader() {
           const gId = id.replace('gutenberg-', '');
           try {
             const targetUrl = `https://gutendex.com/books/?ids=${gId}`;
-            const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
-              body: { url: targetUrl }
-            });
-            if (proxyError) throw proxyError;
-
-            const data = proxyResponse.data;
+            const gutRes = await fetch(targetUrl);
+            if (!gutRes.ok) throw new Error(`Gutenberg API error: ${gutRes.status}`);
+            const data = await gutRes.json();
             if (data.results && data.results.length > 0) {
               const gBook = data.results[0];
               bookData = {
@@ -233,12 +235,9 @@ export default function Reader() {
             const identifier = id.replace('openstax-', '');
             try {
               const targetUrl = `https://archive.org/metadata/${identifier}`;
-              const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
-                body: { url: targetUrl }
-              });
-              if (proxyError) throw proxyError;
-
-              const data = proxyResponse.data;
+              const archRes = await fetch(targetUrl);
+              if (!archRes.ok) throw new Error(`Archive.org error: ${archRes.status}`);
+              const data = await archRes.json();
               if (data.metadata) {
                 const meta = data.metadata;
                 bookData = {
@@ -295,12 +294,9 @@ export default function Reader() {
             const identifier = id.replace('arxiv-', '');
             try {
               const targetUrl = `https://export.arxiv.org/api/query?id_list=${identifier}`;
-              const { data: proxyResponse, error: proxyError } = await supabase.functions.invoke('external-proxy', {
-                body: { url: targetUrl }
-              });
-              if (proxyError) throw proxyError;
-
-              const text = proxyResponse.data;
+              const arxivRes = await fetch(targetUrl);
+              if (!arxivRes.ok) throw new Error(`arXiv API error: ${arxivRes.status}`);
+              const text = await arxivRes.text();
               const entryMatch = text.match(/<entry>([\s\S]*?)<\/entry>/);
               if (entryMatch) {
                 const entry = entryMatch[1];
@@ -374,7 +370,7 @@ export default function Reader() {
           setUseNativeViewer(finalUrl.toLowerCase().includes('.pdf'));
         }
 
-        if (user) {
+        if (supabase && user) {
           const updateSession = async () => {
             try {
               await supabase.from('reading_sessions').upsert({
@@ -401,7 +397,7 @@ export default function Reader() {
   const [relatedBooks, setRelatedBooks] = useState([]);
 
   useEffect(() => {
-    if (book?.subject) {
+    if (supabase && book?.subject) {
       const fetchRelated = async () => {
         try {
           const { data, error } = await supabase
@@ -410,7 +406,7 @@ export default function Reader() {
             .eq('subject', book.subject)
             .neq('id', id)
             .limit(3);
-          
+
           if (!error && data) {
             setRelatedBooks(data);
           }
@@ -435,7 +431,7 @@ export default function Reader() {
     try {
       // 1. Ensure we have a session if user is logged in
       let currentSessionId = sessionId;
-      if (user && !currentSessionId) {
+      if (supabase && user && !currentSessionId) {
         const { data: session, error: sError } = await supabase
           .from('dara_sessions')
           .insert({
@@ -445,7 +441,7 @@ export default function Reader() {
           })
           .select()
           .single();
-        
+
         if (!sError && session) {
           currentSessionId = session.id;
           setSessionId(currentSessionId);
@@ -453,7 +449,7 @@ export default function Reader() {
       }
 
       // 2. Save user message to DB
-      if (user && currentSessionId) {
+      if (supabase && user && currentSessionId) {
         await supabase.from('dara_messages').insert({
           session_id: currentSessionId,
           user_id: user.id,
@@ -491,7 +487,7 @@ export default function Reader() {
       setAiMessages(prev => [...prev, { role: 'assistant', text: response }]);
 
       // 4. Save AI response to DB
-      if (user && currentSessionId) {
+      if (supabase && user && currentSessionId) {
         await supabase.from('dara_messages').insert({
           session_id: currentSessionId,
           user_id: user.id,

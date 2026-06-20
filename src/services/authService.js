@@ -1,8 +1,11 @@
 import { supabase } from '../lib/supabase';
 
+const SUPABASE_UNAVAILABLE = 'Account features are not available on this deployment. Please contact the DARE team.';
+
 export const authService = {
   // Sign up with email and password
   async signUp(email, password, fullName, role = 'student') {
+    if (!supabase) return { data: null, error: SUPABASE_UNAVAILABLE };
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -25,6 +28,7 @@ export const authService = {
 
   // Sign in with email and password
   async signIn(email, password) {
+    if (!supabase) return { data: null, error: SUPABASE_UNAVAILABLE };
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -51,6 +55,7 @@ export const authService = {
 
   // Reset password (send reset email)
   async resetPassword(email) {
+    if (!supabase) return { data: null, error: SUPABASE_UNAVAILABLE };
     try {
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/update-password`
