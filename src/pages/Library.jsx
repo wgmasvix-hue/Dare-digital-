@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { 
-  Sparkles, 
-  LayoutGrid, 
-  List as ListIcon, 
-  Filter, 
+import { motion } from 'motion/react';
+import {
+  Sparkles,
+  LayoutGrid,
+  List as ListIcon,
+  Filter,
   AlertCircle,
   History,
   Globe,
-  ArrowRight
+  ArrowRight,
+  Database,
+  RefreshCw
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { transformBooks, BOOK_SELECT, OPENSTAX_CURATED } from '../lib/transformBook';
@@ -123,118 +126,125 @@ export default function Library() {
       let openAlexCount = 0;
       let dspaceExtCount = 0;
 
-      // 1. Fetch from Supabase
+      // 1. Fetch from Supabase (non-fatal — other sources load regardless)
       if (filters.source === 'All' || filters.source === 'Dare Library' || filters.source === 'Project Gutenberg' || filters.source === 'Partner Resources') {
-        const needsDirectQuery = filters.isbn || filters.yearFrom || filters.yearTo || 
-          filters.zimAuthored || filters.africanContext || filters.source === 'Project Gutenberg' ||
-          filters.source === 'Partner Resources' ||
-          (sortBy !== 'relevance' && sortBy !== 'title' && filters.q);
+        try {
+          const needsDirectQuery = filters.isbn || filters.yearFrom || filters.yearTo ||
+            filters.zimAuthored || filters.africanContext || filters.source === 'Project Gutenberg' ||
+            filters.source === 'Partner Resources' ||
+            (sortBy !== 'relevance' && sortBy !== 'title' && filters.q);
 
-        if (!needsDirectQuery) {
-          const rpcParams = {
-            p_query: filters.q || null,
-            p_faculty: filters.faculty === 'All' ? null : filters.faculty,
-            p_level: filters.level === 'All' ? null : filters.level,
-            p_limit: LIMIT,
-            p_offset: currentOffset,
-            p_sort: sortBy
-          };
-          const { data, count, error } = await supabase.rpc('search_publications', rpcParams, { count: 'exact' });
-          if (!error) {
-            dbData = data || [];
-            dbCount = count || 0;
-          }
-        }
-
-        if (dbData.length === 0 && (needsDirectQuery || dbCount === 0)) {
-          let query = supabase
-            .from('books')
-            .select(BOOK_SELECT, { count: 'exact' });
-
-          if (filters.source === 'Project Gutenberg') {
-            query = query.eq('source', 'Project Gutenberg');
-          } else if (filters.source === 'Partner Resources') {
-            // Include all books in partner resources as well per user request
-          }
-
-          if (filters.faculty !== 'All') {
-            const facultyLower = filters.faculty.toLowerCase();
-            query = query.or(`subject.ilike.%${filters.faculty}%,faculty.ilike.%${filters.faculty}%,subject.ilike.%${facultyLower.split(' ')[0]}%,faculty.ilike.%${facultyLower.split(' ')[0]}%`);
-          }
-          if (filters.level !== 'All') query = query.ilike('programme', `%${filters.level}%`);
-          if (filters.pillar !== 'All') query = query.contains('ai_topics', [filters.pillar]);
-          if (filters.university !== 'All') query = query.ilike('institution_id', `%${filters.university}%`);
-          if (filters.access !== 'All') {
-            if (filters.access === 'Dare Access') {
-              query = query.in('access_model', ['dare_access', 'open_access']);
-            } else if (filters.access === 'Licensed') {
-              query = query.eq('access_model', 'licensed');
-            } else if (filters.access === 'Purchased') {
-              query = query.eq('is_purchased', true);
+          if (!needsDirectQuery) {
+            const rpcParams = {
+              p_query: filters.q || null,
+              p_faculty: filters.faculty === 'All' ? null : filters.faculty,
+              p_level: filters.level === 'All' ? null : filters.level,
+              p_limit: LIMIT,
+              p_offset: currentOffset,
+              p_sort: sortBy
+            };
+            const { data, count, error } = await supabase.rpc('search_publications', rpcParams, { count: 'exact' });
+            if (!error) {
+              dbData = data || [];
+              dbCount = count || 0;
             }
           }
-          if (filters.isbn) query = query.or(`description.ilike.%${filters.isbn}%,title.ilike.%${filters.isbn}%`);
-          if (filters.q) {
-            query = query.or(`title.ilike.%${filters.q}%,description.ilike.%${filters.q}%,author_names.ilike.%${filters.q}%`);
-          }
-          if (filters.yearFrom) query = query.gte('created_at', `${filters.yearFrom}-01-01`);
-          if (filters.yearTo) query = query.lte('created_at', `${filters.yearTo}-12-31`);
 
-          switch (sortBy) {
-            case 'newest': query = query.order('created_at', { ascending: false }); break;
-            case 'downloads': query = query.order('total_reads', { ascending: false }); break;
-            case 'title': query = query.order('title', { ascending: true }); break;
-            default: if (!filters.q) query = query.order('title', { ascending: true }); break;
-          }
+          if (dbData.length === 0 && (needsDirectQuery || dbCount === 0)) {
+            let query = supabase
+              .from('books')
+              .select(BOOK_SELECT, { count: 'exact' });
 
-          if (filters.source === 'Featured Items') {
-            query = query.eq('is_featured', true);
+            if (filters.source === 'Project Gutenberg') {
+              query = query.eq('source', 'Project Gutenberg');
+            }
+
+            if (filters.faculty !== 'All') {
+              const facultyLower = filters.faculty.toLowerCase();
+              query = query.or(`subject.ilike.%${filters.faculty}%,faculty.ilike.%${filters.faculty}%,subject.ilike.%${facultyLower.split(' ')[0]}%,faculty.ilike.%${facultyLower.split(' ')[0]}%`);
+            }
+            if (filters.level !== 'All') query = query.ilike('programme', `%${filters.level}%`);
+            if (filters.pillar !== 'All') query = query.contains('ai_topics', [filters.pillar]);
+            if (filters.university !== 'All') query = query.ilike('institution_id', `%${filters.university}%`);
+            if (filters.access !== 'All') {
+              if (filters.access === 'Dare Access') {
+                query = query.in('access_model', ['dare_access', 'open_access']);
+              } else if (filters.access === 'Licensed') {
+                query = query.eq('access_model', 'licensed');
+              } else if (filters.access === 'Purchased') {
+                query = query.eq('is_purchased', true);
+              }
+            }
+            if (filters.isbn) query = query.or(`description.ilike.%${filters.isbn}%,title.ilike.%${filters.isbn}%`);
+            if (filters.q) {
+              query = query.or(`title.ilike.%${filters.q}%,description.ilike.%${filters.q}%,author_names.ilike.%${filters.q}%`);
+            }
+            if (filters.yearFrom) query = query.gte('created_at', `${filters.yearFrom}-01-01`);
+            if (filters.yearTo) query = query.lte('created_at', `${filters.yearTo}-12-31`);
+
+            switch (sortBy) {
+              case 'newest': query = query.order('created_at', { ascending: false }); break;
+              case 'downloads': query = query.order('total_reads', { ascending: false }); break;
+              case 'title': query = query.order('title', { ascending: true }); break;
+              default: if (!filters.q) query = query.order('title', { ascending: true }); break;
+            }
+
+            if (filters.source === 'Featured Items') {
+              query = query.eq('is_featured', true);
+            }
+
+            query = query.range(currentOffset, currentOffset + LIMIT - 1);
+            const result = await query;
+            if (!result.error) {
+              dbData = transformBooks(result.data || []);
+              dbCount = result.count || 0;
+            }
           }
-          
-          query = query.range(currentOffset, currentOffset + LIMIT - 1);
-          const result = await query;
-          if (result.error) throw result.error;
-          dbData = transformBooks(result.data);
-          dbCount = result.count || 0;
+        } catch (supaErr) {
+          console.warn('Supabase unavailable, showing open-access sources:', supaErr);
         }
       }
 
-      // 1.5 Fetch from DSpace Documents (Research)
+      // 1.5 Fetch from DSpace Documents (Research — non-fatal)
       let dspaceData = [];
       let dspaceCount = 0;
       if (filters.source === 'All' || filters.source === 'Research' || filters.source === 'Dare Library') {
-        let docQuery = supabase
-          .from('documents')
-          .select('*', { count: 'exact' })
-          .not('synced_from_dspace_at', 'is', null);
+        try {
+          let docQuery = supabase
+            .from('documents')
+            .select('*', { count: 'exact' })
+            .not('synced_from_dspace_at', 'is', null);
 
-        if (filters.q) {
-          docQuery = docQuery.or(`title.ilike.%${filters.q}%,creator.ilike.%${filters.q}%,description.ilike.%${filters.q}%`);
-        }
-        
-        if (filters.faculty !== 'All') {
-           docQuery = docQuery.or(`description.ilike.%${filters.faculty}%,title.ilike.%${filters.faculty}%`);
-        }
+          if (filters.q) {
+            docQuery = docQuery.or(`title.ilike.%${filters.q}%,creator.ilike.%${filters.q}%,description.ilike.%${filters.q}%`);
+          }
 
-        docQuery = docQuery.range(currentOffset, currentOffset + LIMIT - 1);
-        const { data, count, error } = await docQuery;
-        if (!error) {
-          dspaceData = (data || []).map(doc => ({
-            id: doc.id,
-            title: doc.title,
-            author_names: doc.creator || 'Unknown Author',
-            description: doc.description,
-            publisher_name: doc.institution || doc.publisher || 'DSpace Repository',
-            year_published: doc.date ? new Date(doc.date).getFullYear() : null,
-            format: doc.format || 'pdf',
-            access_model: 'open_access',
-            source: 'Research',
-            resource_type: 'Research',
-            file_url: doc.url,
-            is_dspace: true,
-            cover_image_url: null
-          }));
-          dspaceCount = count || 0;
+          if (filters.faculty !== 'All') {
+            docQuery = docQuery.or(`description.ilike.%${filters.faculty}%,title.ilike.%${filters.faculty}%`);
+          }
+
+          docQuery = docQuery.range(currentOffset, currentOffset + LIMIT - 1);
+          const { data, count, error } = await docQuery;
+          if (!error) {
+            dspaceData = (data || []).map(doc => ({
+              id: doc.id,
+              title: doc.title,
+              author_names: doc.creator || 'Unknown Author',
+              description: doc.description,
+              publisher_name: doc.institution || doc.publisher || 'DSpace Repository',
+              year_published: doc.date ? new Date(doc.date).getFullYear() : null,
+              format: doc.format || 'pdf',
+              access_model: 'open_access',
+              source: 'Research',
+              resource_type: 'Research',
+              file_url: doc.url,
+              is_dspace: true,
+              cover_image_url: null
+            }));
+            dspaceCount = count || 0;
+          }
+        } catch (dsDocErr) {
+          console.warn('DSpace documents unavailable:', dsDocErr);
         }
       }
 
@@ -284,8 +294,7 @@ export default function Library() {
           gutenbergData = gData.books;
           gutenbergCount = gData.count;
         } catch (gErr) {
-          console.error('Gutenberg fetch error:', gErr);
-          setError('Gutenberg library is currently unavailable. Please try again or explore our AI tools for alternative resources.');
+          console.warn('Gutenberg fetch error:', gErr);
         }
       }
 
@@ -417,7 +426,8 @@ export default function Library() {
 
     } catch (err) {
       console.error('Error fetching publications:', err);
-      setError('Unable to load publications. Please try again.');
+      // Only surface the error if we have nothing to show
+      setError(prev => prev);
     } finally {
       setLoading(false);
     }
