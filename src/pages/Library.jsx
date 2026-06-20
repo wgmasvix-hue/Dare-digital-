@@ -42,6 +42,111 @@ import { openLibraryService } from '../services/openLibraryService';
 import { arxivService } from '../services/arxivService';
 import { openAlexService } from '../services/openAlexService';
 import { dspaceService } from '../services/dspaceService';
+import { useNavigate } from 'react-router-dom';
+import { BookOpen as BookOpenIcon, Download as DownloadIcon, Sparkles as SparklesIcon, ExternalLink as ExternalLinkIcon, ChevronDown as ChevronDownIcon, ChevronUp as ChevronUpIcon } from 'lucide-react';
+
+const SOURCE_PILL_LIB = {
+  'OpenStax': 'bg-blue-50 text-blue-700 border-blue-200',
+  'Project Gutenberg': 'bg-amber-50 text-amber-700 border-amber-200',
+  'Open Library': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  'arXiv': 'bg-purple-50 text-purple-700 border-purple-200',
+  'OpenAlex': 'bg-cyan-50 text-cyan-700 border-cyan-200',
+  'DSpace': 'bg-orange-50 text-orange-700 border-orange-200',
+  'Research': 'bg-slate-100 text-slate-600 border-slate-200',
+};
+
+function LibraryListRow({ book, progress }) {
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
+  const PREVIEW = 200;
+  const desc = book.description || book.abstract || null;
+  const hasLong = desc && desc.length > PREVIEW;
+  const displayDesc = expanded ? desc : (desc?.slice(0, PREVIEW) + (hasLong ? '…' : ''));
+  const sourcePill = SOURCE_PILL_LIB[book.source] || SOURCE_PILL_LIB['Research'];
+
+  return (
+    <div className="px-4 py-4 hover:bg-slate-50/70 transition-colors group border-b border-slate-100 last:border-0">
+      <div className="flex gap-3">
+        <div className="pt-0.5 shrink-0">
+          <BookOpenIcon size={15} className="text-slate-300 group-hover:text-green-600 transition-colors mt-0.5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          {/* Meta */}
+          <div className="flex flex-wrap items-center gap-1.5 mb-1">
+            {book.source && (
+              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${sourcePill}`}>{book.source}</span>
+            )}
+            {book.access_model === 'open_access' || book.access_model === 'free' || book.access_model === 'public_domain' ? (
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Open Access</span>
+            ) : null}
+            {book.year_published && <span className="text-[11px] text-slate-400 font-mono">{book.year_published}</span>}
+            {book.format && <span className="text-[11px] text-slate-400 uppercase">{book.format}</span>}
+          </div>
+          {/* Title */}
+          <h3 className="font-bold text-[15px] text-slate-900 leading-snug mb-0.5 group-hover:text-green-800 transition-colors line-clamp-2 cursor-pointer"
+            onClick={() => navigate(`/reader/${book.id}`)}>
+            {book.title}
+          </h3>
+          {/* Author */}
+          {book.author_names && (
+            <p className="text-sm text-slate-600 mb-0.5 truncate">{book.author_names}</p>
+          )}
+          {book.publisher_name && (
+            <p className="text-xs text-slate-400 italic mb-1.5 truncate">{book.publisher_name}</p>
+          )}
+          {/* Progress bar */}
+          {progress > 0 && (
+            <div className="h-1 bg-slate-100 rounded-full mb-2 w-48 max-w-full">
+              <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
+            </div>
+          )}
+          {/* Description */}
+          {displayDesc && (
+            <div className="mb-2">
+              <p className="text-sm text-slate-600 leading-relaxed">{displayDesc}</p>
+              {hasLong && (
+                <button onClick={() => setExpanded(!expanded)} className="text-xs text-green-700 hover:text-green-600 mt-0.5 font-semibold flex items-center gap-0.5">
+                  {expanded ? <><ChevronUpIcon size={12} /> Less</> : <><ChevronDownIcon size={12} /> More</>}
+                </button>
+              )}
+            </div>
+          )}
+          {/* Subject tags */}
+          {(book.faculty || book.subject) && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {[book.faculty, book.subject].filter(Boolean).slice(0,3).map(s => (
+                <span key={s} className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">{s}</span>
+              ))}
+            </div>
+          )}
+          {/* Actions */}
+          <div className="flex flex-wrap gap-1.5 pt-0.5">
+            <button onClick={() => navigate(`/reader/${book.id}`)}
+              className="flex items-center gap-1 px-3 py-1.5 bg-green-700 text-white text-xs font-bold rounded-lg hover:bg-green-600 transition-colors">
+              <BookOpenIcon size={11} /> Read
+            </button>
+            {book.file_url && (
+              <a href={book.file_url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition-colors border border-slate-200">
+                <DownloadIcon size={11} /> Download
+              </a>
+            )}
+            {book.url && (
+              <a href={book.url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition-colors border border-slate-200">
+                <ExternalLinkIcon size={11} /> Source
+              </a>
+            )}
+            <button onClick={() => navigate(`/book-action/${book.id}?action=edu5`, { state: { book } })}
+              className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg hover:bg-amber-100 transition-colors border border-amber-200">
+              <SparklesIcon size={11} /> DARA Assist
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Library() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -65,7 +170,7 @@ export default function Library() {
   });
 
   // UI States
-  const [viewMode, setViewMode] = useState(searchParams.get('view') || 'tile'); // 'grid' | 'list' | 'tile'
+  const [viewMode, setViewMode] = useState(searchParams.get('view') || 'list'); // 'grid' | 'list' | 'tile'
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || (searchParams.get('q') ? 'relevance' : 'title'));
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isDigitizationModalOpen, setIsDigitizationModalOpen] = useState(false);
@@ -890,47 +995,69 @@ export default function Library() {
           </motion.div>
         )}
 
-        <div className={
-          viewMode === 'tile' ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6" : 
-          viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" : 
-          "flex flex-col gap-4"
-        }>
-          {loading && publications.length === 0 ? (
-            // Skeletons
-            Array(12).fill(0).map((_, i) => (
-              <BookCard key={i} loading={true} variant={viewMode} />
-            ))
-          ) : filteredPublications.length > 0 ? (
-            filteredPublications.map(book => (
-              <BookCard 
-                key={book.id} 
-                publication={book} 
-                variant={viewMode} 
-                progress={bookProgress[book.id] || 0}
-              />
-            ))
-          ) : (
-            <div className="col-span-full py-32 flex flex-col items-center justify-center text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
-              <div className="w-20 h-20 bg-slate-50 rounded-3xl shadow-inner flex items-center justify-center text-slate-400 mb-6 border border-slate-100">
-                <AlertCircle size={32} />
-              </div>
-              <h3 className="text-xl font-black text-slate-900 mb-2">No books found</h3>
-              <p className="text-slate-500 max-w-sm text-base">
-                We couldn't find any resources matching your current search or format filters.
-              </p>
-              <button 
-                onClick={() => {
-                  setLocalSearch('');
-                  setLocalCategory('All');
-                  clearFilters();
-                }}
-                className="mt-8 px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-base hover:bg-slate-800 hover:-translate-y-0.5 transition-all shadow-md active:translate-y-0"
-              >
-                Clear All Filters
-              </button>
+        {/* Results */}
+        {loading && publications.length === 0 ? (
+          <div className={viewMode === 'list'
+            ? "bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100"
+            : `grid gap-4 ${viewMode === 'tile' ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'}`
+          }>
+            {Array(viewMode === 'list' ? 8 : 12).fill(0).map((_, i) => (
+              viewMode === 'list' ? (
+                <div key={i} className="px-4 py-4 animate-pulse flex gap-4">
+                  <div className="w-4 h-4 bg-slate-100 rounded mt-1 shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 bg-slate-100 rounded w-1/4" />
+                    <div className="h-5 bg-slate-100 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded w-1/2" />
+                    <div className="h-3 bg-slate-100 rounded w-full" />
+                    <div className="h-3 bg-slate-100 rounded w-4/5" />
+                  </div>
+                </div>
+              ) : (
+                <BookCard key={i} loading={true} variant={viewMode} />
+              )
+            ))}
+          </div>
+        ) : filteredPublications.length > 0 ? (
+          viewMode === 'list' ? (
+            <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100">
+              {filteredPublications.map(book => (
+                <LibraryListRow
+                  key={book.id}
+                  book={book}
+                  progress={bookProgress[book.id] || 0}
+                />
+              ))}
             </div>
-          )}
-        </div>
+          ) : (
+            <div className={`grid gap-4 ${viewMode === 'tile' ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'}`}>
+              {filteredPublications.map(book => (
+                <BookCard
+                  key={book.id}
+                  publication={book}
+                  variant={viewMode}
+                  progress={bookProgress[book.id] || 0}
+                />
+              ))}
+            </div>
+          )
+        ) : (
+          <div className="py-32 flex flex-col items-center justify-center text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
+            <div className="w-20 h-20 bg-slate-50 rounded-3xl shadow-inner flex items-center justify-center text-slate-400 mb-6 border border-slate-100">
+              <AlertCircle size={32} />
+            </div>
+            <h3 className="text-xl font-black text-slate-900 mb-2">No books found</h3>
+            <p className="text-slate-500 max-w-sm text-base">
+              We couldn't find any resources matching your current search or filters.
+            </p>
+            <button
+              onClick={() => { setLocalSearch(''); setLocalCategory('All'); clearFilters(); }}
+              className="mt-8 px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-base hover:bg-slate-800 hover:-translate-y-0.5 transition-all shadow-md"
+            >
+              Clear All Filters
+            </button>
+          </div>
+        )}
 
         {/* Infinite Scroll Sentinel */}
         <div ref={loadMoreRef} className="py-12 flex justify-center w-full">
