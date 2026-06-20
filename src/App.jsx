@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom"
 import { AnimatePresence, motion } from "motion/react"
 import NavBar from "./components/layout/NavBar"
 import Footer from "./components/layout/Footer"
+import PWAInstallPrompt from "./components/PWAInstallPrompt"
 
 const PageWrapper = ({ children }) => {
   const location = useLocation();
@@ -32,6 +33,7 @@ export default function App() {
         </PageWrapper>
       </main>
       <Footer />
+      <PWAInstallPrompt />
     </div>
   )
 }

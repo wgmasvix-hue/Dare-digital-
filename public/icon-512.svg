@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="#166534"/>
+  <!-- Kente stripe accent -->
+  <rect x="0" y="400" width="512" height="48" fill="#D97706"/>
+  <rect x="0" y="448" width="512" height="64" fill="#C2410C"/>
+  <!-- Open book shape -->
+  <g transform="translate(256,230)">
+    <!-- Left page -->
+    <path d="M-10,-118 L-138,-96 L-138,96 L-10,74 Z" fill="white" opacity="0.95"/>
+    <!-- Right page -->
+    <path d="M10,-118 L138,-96 L138,96 L10,74 Z" fill="white" opacity="0.85"/>
+    <!-- Spine -->
+    <rect x="-10" y="-118" width="20" height="192" fill="#D97706"/>
+    <!-- Text lines left -->
+    <rect x="-118" y="-52" width="86" height="10" rx="5" fill="#166534" opacity="0.4"/>
+    <rect x="-118" y="-28" width="76" height="10" rx="5" fill="#166534" opacity="0.4"/>
+    <rect x="-118" y="0" width="86" height="10" rx="5" fill="#166534" opacity="0.4"/>
+    <rect x="-118" y="26" width="64" height="10" rx="5" fill="#166534" opacity="0.4"/>
+    <!-- Text lines right -->
+    <rect x="32" y="-52" width="86" height="10" rx="5" fill="#166534" opacity="0.3"/>
+    <rect x="32" y="-28" width="76" height="10" rx="5" fill="#166534" opacity="0.3"/>
+    <rect x="32" y="0" width="86" height="10" rx="5" fill="#166534" opacity="0.3"/>
+    <rect x="32" y="26" width="64" height="10" rx="5" fill="#166534" opacity="0.3"/>
+  </g>
+  <!-- DARE text -->
+  <text x="256" y="390" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="900" font-size="58" fill="white" letter-spacing="16">DARE</text>
+</svg>
