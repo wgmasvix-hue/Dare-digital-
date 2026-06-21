@@ -42,6 +42,12 @@ const EXPLORE_ITEMS = [
     sub: 'Top scholars',
     href: '/leaderboard',
   },
+  {
+    emoji: '📱',
+    label: 'Android App',
+    sub: 'Free APK download',
+    href: '/download',
+  },
 ];
 
 export default function NavBar() {

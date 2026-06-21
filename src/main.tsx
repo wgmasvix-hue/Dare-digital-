@@ -65,6 +65,7 @@ import SearchResults from './pages/SearchResults';
 import Institutions from './pages/Institutions';
 import Institution from './pages/Institution';
 import ResourceHub from './pages/ResourceHub';
+import Download from './pages/Download';
 
 // Check if ALL_LOCAL_OER is loaded
 console.log("ALL_LOCAL_OER length:", window.ALL_LOCAL_OER?.length || "undefined");
@@ -161,6 +162,7 @@ createRoot(rootElement).render(
 
             {/* Resource Hub */}
             <Route path="/resources" element={<ResourceHub />} />
+            <Route path="/download" element={<Download />} />
 
             {/* Placeholder Routes */}
             <Route path="/browse" element={<DareLibrary />} />

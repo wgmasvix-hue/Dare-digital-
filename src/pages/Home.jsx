@@ -248,6 +248,19 @@ export default function Home() {
             </Link>
           </motion.div>
 
+          {/* Android download banner */}
+          <motion.div variants={fadeIn} className="mt-6">
+            <Link to="/download"
+              className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl font-bold text-sm transition-all hover:-translate-y-0.5 shadow-lg"
+              style={{ background: 'linear-gradient(135deg,#1C1917,#292524)', color: '#fff' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.523 15.341c-.294.157-.637.157-.931 0l-4.592-2.65v-5.3l4.592-2.65c.294-.157.637-.157.931 0l4.592 2.65v5.3l-4.592 2.65zM12 17.5L7.408 14.85v-5.3L12 6.9l4.592 2.65v5.3L12 17.5zm-5.523-2.159c-.294.157-.637.157-.931 0L1 12.692v-5.3L5.546 4.74c.294-.157.637-.157.931 0L12 7.4 6.477 10.391v5.3z"/>
+              </svg>
+              <span>📱 Get the Android App — Free Download</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black" style={{ background: '#22c55e', color: '#fff' }}>NEW</span>
+            </Link>
+          </motion.div>
+
           {/* Stats bar */}
           <motion.div variants={fadeIn} className="mt-16 pt-10 border-t border-stone-200/60 w-full max-w-3xl">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -638,6 +651,11 @@ export default function Home() {
               className="inline-flex items-center justify-center px-10 py-4 rounded-full font-black text-xl text-white transition-all hover:-translate-y-1 active:translate-y-0 shadow-xl"
               style={{ background: "linear-gradient(135deg, #166534 0%, #15803D 100%)", boxShadow: "0 8px 32px rgba(21,128,61,0.30)" }}>
               Start Learning Free
+            </Link>
+            <Link to="/download"
+              className="inline-flex items-center justify-center gap-3 px-10 py-4 rounded-full font-black text-xl text-white transition-all hover:-translate-y-1 active:translate-y-0 shadow-xl"
+              style={{ background: "linear-gradient(135deg, #1C1917 0%, #44403C 100%)" }}>
+              📱 Android App
             </Link>
             <Link to="/academic"
               className="inline-flex items-center justify-center px-10 py-4 bg-white text-stone-900 border-2 border-stone-200 rounded-full font-black text-xl hover:border-amber-400 hover:bg-amber-50 transition-all">
