@@ -247,18 +247,63 @@ body {
 
 /* ── TYPOGRAPHY ─────────────────────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  font-family: var(--font-accent); /* Bricolage Grotesque — wide, punchy display face */
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
   color: var(--text-main);
+  text-rendering: optimizeLegibility;
+}
+
+h1 { font-size: clamp(2.25rem, 5vw, 4rem);   font-weight: 900; letter-spacing: -0.04em; }
+h2 { font-size: clamp(1.75rem, 3.5vw, 2.75rem); font-weight: 800; }
+h3 { font-size: clamp(1.25rem, 2.5vw, 1.875rem); font-weight: 700; }
+h4 { font-size: clamp(1.1rem,  2vw,  1.375rem);  font-weight: 700; }
+h5 { font-size: 1.125rem; font-weight: 700; }
+h6 { font-size: 0.9375rem; font-weight: 700; letter-spacing: 0; }
+
+/* Semantic section labels — small, caps, coloured */
+.section-label {
+  font-family: var(--font-accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-accent);
+}
+
+/* Utility: dominant page-title style */
+.heading-display {
+  font-family: var(--font-accent);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.0;
+  color: var(--text-main);
+}
+
+/* High-contrast heading for light sections */
+.heading-vivid {
+  font-family: var(--font-accent);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #1C1917;
+  text-shadow: 0 1px 0 rgba(28,25,23,0.08);
+}
+
+/* Heading on dark/hero backgrounds */
+.heading-light {
+  font-family: var(--font-accent);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #FFFBF0;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.35);
 }
 
 .text-balance { text-wrap: balance; }
 
 .micro-label {
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text-muted);
