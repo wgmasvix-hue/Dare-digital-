@@ -675,3 +675,174 @@ img {
 .dropdown-shadow {
   box-shadow: 0 20px 60px -15px rgba(28,25,23,0.18), 0 4px 20px -8px rgba(28,25,23,0.10);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   AFROCENTRIC DESIGN SYSTEM — ENHANCED PATTERNS & ANIMATIONS
+   Inspired by Ndebele murals, Kente cloth, Great Zimbabwe walls,
+   and the natural beauty of the African savanna.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── NDEBELE GEOMETRIC PATTERN ───────────────────────────────── */
+/* Inspired by the bold geometric mural art of the Ndebele people */
+.pattern-ndebele {
+  background-color: #fef9ee;
+  background-image:
+    linear-gradient(45deg,
+      rgba(194,65,12,0.09)  25%, transparent 25%,
+      transparent 50%, rgba(194,65,12,0.09) 50%,
+      rgba(194,65,12,0.09)  75%, transparent 75%),
+    linear-gradient(-45deg,
+      rgba(217,119,6,0.07)  25%, transparent 25%,
+      transparent 50%, rgba(217,119,6,0.07) 50%,
+      rgba(217,119,6,0.07)  75%, transparent 75%),
+    linear-gradient(90deg,
+      rgba(22,101,52,0.04)  0 1px, transparent 1px);
+  background-size: 28px 28px, 28px 28px, 14px 14px;
+}
+
+/* ── NDEBELE HORIZONTAL DECORATIVE BAND ──────────────────────── */
+.ndebele-band {
+  height: 12px;
+  background: repeating-linear-gradient(
+    90deg,
+    #166534 0px,  #166534 10px,
+    #D97706 10px, #D97706 20px,
+    #C2410C 20px, #C2410C 30px,
+    #1C1917 30px, #1C1917 40px,
+    #D97706 40px, #D97706 50px,
+    #166534 50px, #166534 60px
+  );
+}
+
+/* ── KENTE CLOTH BOLD DIVIDER ────────────────────────────────── */
+/* Inspired by Ghanaian/West African Kente woven cloth */
+.kente-divider {
+  height: 8px;
+  background: linear-gradient(90deg,
+    #1C1917 0%   2%,
+    #166534 2%  18%,
+    #1C1917 18% 20%,
+    #D97706 20% 36%,
+    #1C1917 36% 38%,
+    #C2410C 38% 54%,
+    #1C1917 54% 56%,
+    #D97706 56% 72%,
+    #1C1917 72% 74%,
+    #166534 74% 90%,
+    #1C1917 90% 92%,
+    #FEF9EE 92% 98%,
+    #1C1917 98% 100%
+  );
+}
+
+/* ── GREAT ZIMBABWE WALL PATTERN ─────────────────────────────── */
+/* Inspired by the dry-stone courses of the Great Zimbabwe monument */
+.pattern-great-zimbabwe {
+  background-image:
+    repeating-linear-gradient(
+      180deg,
+      transparent     0px, transparent 12px,
+      rgba(180,83,9,0.08)  12px, rgba(180,83,9,0.08) 14px
+    );
+}
+
+/* ── ADINKRA-INSPIRED CIRCULAR PATTERN ───────────────────────── */
+.pattern-adinkra {
+  background-image:
+    radial-gradient(circle, transparent 35%,
+      rgba(217,119,6,0.08) 35%, rgba(217,119,6,0.08) 45%, transparent 45%),
+    linear-gradient(rgba(194,65,12,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(194,65,12,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── AFRICAN SUNSET GRADIENT ─────────────────────────────────── */
+.gradient-african-sunset {
+  background: linear-gradient(135deg,
+    #1C0A00 0%, #7C2D12 25%, #C2410C 50%, #D97706 75%, #FCD34D 100%);
+}
+
+/* ── SAVANNA WARM SECTION BG ─────────────────────────────────── */
+.bg-savanna {
+  background: linear-gradient(180deg, #FEF9EE 0%, #FEF3C7 50%, #FDE68A 100%);
+}
+
+/* ── GRADIENT TEXT — AFRICAN SUNSET ──────────────────────────── */
+.text-gradient-africa {
+  background-image: linear-gradient(135deg, #D97706 0%, #C2410C 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── ANIMATED KENTE SHIMMER TEXT ──────────────────────────────── */
+@keyframes kenteShimmer {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+.animate-kente-shimmer {
+  background: linear-gradient(270deg, #166534, #D97706, #C2410C, #D97706, #166534);
+  background-size: 400% 400%;
+  animation: kenteShimmer 8s ease infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── BAOBAB FLOAT ANIMATION ──────────────────────────────────── */
+@keyframes floatAfrica {
+  0%,  100% { transform: translateY(0px)  rotate(0deg); }
+  33%        { transform: translateY(-8px) rotate(1deg); }
+  66%        { transform: translateY(-4px) rotate(-1deg); }
+}
+.animate-float-africa { animation: floatAfrica 6s ease-in-out infinite; }
+
+/* ── WARM GLOW PULSE ─────────────────────────────────────────── */
+@keyframes warmGlow {
+  0%,  100% { box-shadow: 0 0 20px rgba(217,119,6,0.3); }
+  50%        { box-shadow: 0 0 40px rgba(217,119,6,0.6); }
+}
+.animate-warm-glow { animation: warmGlow 3s ease-in-out infinite; }
+
+/* ── EARTH CARD ──────────────────────────────────────────────── */
+.card-earth {
+  background: linear-gradient(135deg, #FEF9EE 0%, #FEF3C7 100%);
+  border: 1px solid rgba(217,119,6,0.2);
+  border-radius: var(--radius-lg);
+  transition: all 0.3s ease;
+}
+.card-earth:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(217,119,6,0.15);
+  border-color: rgba(217,119,6,0.4);
+}
+
+/* ── DARK EARTH CARD (for dark sections) ─────────────────────── */
+.card-dark-earth {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius-lg);
+  transition: all 0.3s ease;
+}
+.card-dark-earth:hover {
+  background: rgba(217,119,6,0.06);
+  border-color: rgba(217,119,6,0.25);
+  transform: translateY(-2px);
+}
+
+/* ── HERITAGE BADGE ──────────────────────────────────────────── */
+.badge-heritage {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: rgba(217,119,6,0.12);
+  border: 1px solid rgba(217,119,6,0.30);
+  color: #FCD34D;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

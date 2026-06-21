@@ -22,6 +22,7 @@ import {
   TrendingUp,
   Star,
   Quote,
+  MapPin,
 } from "lucide-react"
 import { OPENSTAX_EXPANDED, AI_PRIORITY_OER } from "../lib/oerCatalog"
 import SearchBar from "../components/library/SearchBar"
@@ -156,6 +157,53 @@ const TESTIMONIALS = [
   },
 ]
 
+/* ── Ndebele-inspired geometric section divider ───────────────── */
+const NdebeleDivider = ({ flip = false }) => {
+  const palette = ['#166534','#D97706','#C2410C','#1C1917','#D97706','#166534','#FFFBF0','#1C1917'];
+  return (
+    <div className="w-full overflow-hidden" aria-hidden="true"
+      style={{ transform: flip ? 'scaleY(-1)' : 'none' }}>
+      <svg viewBox="0 0 1200 28" xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="none" className="w-full" style={{ height: '28px', display: 'block' }}>
+        <rect width="1200" height="28" fill="#1C1917" />
+        {[...Array(60)].map((_, i) => {
+          const fill = palette[i % palette.length];
+          const x    = i * 20;
+          const even = i % 2 === 0;
+          return (
+            <g key={i}>
+              <rect x={x} y="0" width="20" height="28" fill={fill} />
+              <polygon
+                points={even ? `${x},0 ${x+10},28 ${x+20},0` : `${x},28 ${x+10},0 ${x+20},28`}
+                fill="rgba(0,0,0,0.2)"
+              />
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+};
+
+/* ── Baobab tree SVG silhouette ───────────────────────────────── */
+const BaobabSvg = ({ className = '' }) => (
+  <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg"
+    className={className} fill="currentColor" aria-hidden="true">
+    <rect x="46" y="100" width="28" height="100" rx="6" />
+    <ellipse cx="60" cy="198" rx="46" ry="9" opacity="0.5" />
+    <line x1="60" y1="100" x2="18"  y2="58"  stroke="currentColor" strokeWidth="11" strokeLinecap="round" />
+    <line x1="60" y1="100" x2="102" y2="58"  stroke="currentColor" strokeWidth="11" strokeLinecap="round" />
+    <line x1="60" y1="100" x2="34"  y2="36"  stroke="currentColor" strokeWidth="8"  strokeLinecap="round" />
+    <line x1="60" y1="100" x2="86"  y2="36"  stroke="currentColor" strokeWidth="8"  strokeLinecap="round" />
+    <line x1="60" y1="100" x2="60"  y2="20"  stroke="currentColor" strokeWidth="9"  strokeLinecap="round" />
+    <circle cx="18"  cy="48" r="22" />
+    <circle cx="102" cy="48" r="22" />
+    <circle cx="34"  cy="26" r="18" />
+    <circle cx="86"  cy="26" r="18" />
+    <circle cx="60"  cy="12" r="20" />
+  </svg>
+);
+
 export default function Home() {
   const navigate = useNavigate()
   const [featuredBooks, setFeaturedBooks] = useState([])
@@ -274,27 +322,61 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Photo gallery strip */}
+          {/* Photo gallery strip — African education context */}
           <motion.div variants={fadeIn} className="mt-10 w-full max-w-4xl">
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
               {[
-                { url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=400&q=80", alt: "Students studying together", span: "col-span-2 row-span-2" },
-                { url: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80", alt: "Open books in library" },
-                { url: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=400&q=80", alt: "Library shelves" },
-                { url: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=400&q=80", alt: "Classroom learning" },
-                { url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80", alt: "Group study session" },
+                {
+                  url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80",
+                  alt: "African students studying together in a university library",
+                  large: true,
+                  badge: "🎓 Learning Together",
+                },
+                {
+                  url: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=400&q=80",
+                  alt: "Classroom learning in Africa",
+                  badge: null,
+                },
+                {
+                  url: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=400&q=80",
+                  alt: "Library filled with knowledge and books",
+                  badge: null,
+                },
+                {
+                  url: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80",
+                  alt: "Open access books and research resources",
+                  badge: null,
+                },
+                {
+                  url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80",
+                  alt: "Students collaborating on research",
+                  badge: null,
+                },
               ].map((img, i) => (
                 <div key={i}
                   className={`relative overflow-hidden rounded-2xl bg-stone-100 ${i === 0 ? "col-span-2 row-span-2" : ""}`}
-                  style={{ aspectRatio: i === 0 ? "1/1" : "1/1" }}>
+                  style={{ aspectRatio: "1/1" }}>
                   <img
                     src={img.url}
                     alt={img.alt}
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                    style={{ aspectRatio: "1/1" }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-stone-900/30 to-transparent" />
+                  {/* Cultural gradient overlay */}
+                  <div className="absolute inset-0"
+                    style={{ background: 'linear-gradient(to top, rgba(13,31,23,0.55) 0%, transparent 50%)' }} />
+                  {/* Kente-stripe accent at bottom of large image */}
+                  {img.large && (
+                    <>
+                      <div className="absolute bottom-0 left-0 right-0 h-1"
+                        style={{ background: 'linear-gradient(90deg,#166534 0% 25%,#D97706 25% 50%,#C2410C 50% 75%,#1C1917 75% 100%)' }} />
+                      <div className="absolute bottom-3 left-4">
+                        <span className="text-[10px] font-black text-white/80 uppercase tracking-widest">
+                          {img.badge}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -313,12 +395,15 @@ export default function Home() {
         </motion.div>
       </section>
 
+      {/* Ndebele divider below hero */}
+      <NdebeleDivider />
+
       {/* ── FEATURES 6-GRID ───────────────────────────────────── */}
       <section className="py-24 px-6 lg:px-12 border-y border-amber-100/80"
         style={{ background: "linear-gradient(180deg, #FFFBF0 0%, #FFFFFF 100%)" }}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <div className="stripe-kente w-16 mx-auto mb-6 rounded-full"></div>
+            <div className="kente-divider w-20 mx-auto mb-6 rounded-full"></div>
             <h2 className="text-4xl lg:text-5xl font-black tracking-tight text-stone-900 mb-5"
               style={{ fontFamily: 'var(--font-accent)' }}>
               Everything a Zimbabwean scholar needs.
@@ -384,6 +469,121 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Ndebele divider */}
+      <NdebeleDivider />
+
+      {/* ── ZIMBABWE HERITAGE ─────────────────────────────────── */}
+      <section className="relative py-20 px-6 lg:px-12 overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #0A1A0F 0%, #0D1F17 60%, #1C1917 100%)' }}>
+
+        {/* Diagonal hatching overlay */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.04]"
+          style={{
+            backgroundImage: 'repeating-linear-gradient(45deg, rgba(217,119,6,1) 0, rgba(217,119,6,1) 1px, transparent 0, transparent 50%)',
+            backgroundSize: '18px 18px',
+          }} />
+
+        {/* Decorative baobab */}
+        <div className="absolute bottom-0 right-10 opacity-[0.06] pointer-events-none select-none"
+          style={{ width: '160px' }}>
+          <BaobabSvg className="text-green-300 w-full" />
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+            {/* Left: Cultural copy */}
+            <div>
+              <div className="badge-heritage mb-8 inline-flex">
+                <span>🏛️</span> Proudly Zimbabwean
+              </div>
+
+              <h2 className="text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.1] mb-6"
+                style={{ fontFamily: 'var(--font-accent)' }}>
+                Rooted in African heritage.{' '}
+                <span className="text-transparent bg-clip-text"
+                  style={{ backgroundImage: 'linear-gradient(135deg, #D97706 0%, #C2410C 100%)' }}>
+                  Built for tomorrow.
+                </span>
+              </h2>
+
+              <p className="text-stone-400 text-lg leading-relaxed mb-8">
+                DARE is proudly Zimbabwean — serving the Heritage-Based Curriculum, supporting
+                ZIMSEC students from O&#8209;Level to PhD, and championing indigenous knowledge
+                alongside global scholarship. Every feature is designed with Africa in mind.
+              </p>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon: '🏛️', label: 'ZIMSEC Aligned',  desc: 'O-Level & A-Level' },
+                  { icon: '🌳', label: 'Heritage-Based',   desc: 'HBC Curriculum'    },
+                  { icon: '🗣️', label: 'Shona & Ndebele', desc: 'Native language AI' },
+                  { icon: '🏫', label: '44 Institutions',  desc: 'Zim universities'  },
+                ].map(item => (
+                  <motion.div key={item.label}
+                    initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }} transition={{ duration: 0.4 }}
+                    className="card-dark-earth flex items-start gap-3 p-4 rounded-2xl">
+                    <span className="text-2xl leading-none mt-0.5">{item.icon}</span>
+                    <div>
+                      <p className="font-black text-white text-sm mb-0.5">{item.label}</p>
+                      <p className="text-stone-500 text-xs">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Stats visual */}
+            <div className="relative">
+              <div className="absolute -inset-8 rounded-full blur-3xl opacity-20 pointer-events-none"
+                style={{ background: 'linear-gradient(135deg, #166534, #D97706)' }} />
+              <div className="relative grid grid-cols-2 gap-4">
+                {[
+                  { value: '50K+', label: 'Active Learners', color: '#22C55E', border: 'rgba(34,197,94,0.25)',  bg: 'rgba(34,197,94,0.07)'  },
+                  { value: '87',   label: 'OER Textbooks',   color: '#F59E0B', border: 'rgba(245,158,11,0.25)', bg: 'rgba(245,158,11,0.07)' },
+                  { value: '44',   label: 'Institutions',    color: '#C2410C', border: 'rgba(194,65,12,0.25)',  bg: 'rgba(194,65,12,0.07)'  },
+                  { value: '#1',   label: 'Zim Platform',    color: '#D97706', border: 'rgba(217,119,6,0.25)',  bg: 'rgba(217,119,6,0.07)'  },
+                ].map((stat, i) => (
+                  <motion.div key={stat.label}
+                    initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.4 }}
+                    className="rounded-2xl p-6 text-center border"
+                    style={{ background: stat.bg, borderColor: stat.border }}>
+                    <div className="text-4xl font-black mb-1 leading-none" style={{ color: stat.color }}>
+                      {stat.value}
+                    </div>
+                    <p className="text-stone-400 text-sm font-bold">{stat.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Baobab illustration */}
+              <div className="mt-8 flex justify-center">
+                <motion.div
+                  initial={{ opacity: 0 }} whileInView={{ opacity: 0.25 }}
+                  viewport={{ once: true }} transition={{ delay: 0.5, duration: 1 }}
+                  className="animate-float-africa">
+                  <BaobabSvg className="text-amber-400 w-24 h-auto" />
+                </motion.div>
+                <div className="ml-6 flex flex-col justify-center">
+                  <p className="text-stone-500 text-sm font-bold italic">
+                    "Like the baobab —<br/>ancient, vast, and life-giving."
+                  </p>
+                  <p className="text-amber-600 text-xs font-black mt-1 uppercase tracking-wider">
+                    — BAKO AI
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Ndebele divider (flipped) */}
+      <NdebeleDivider flip />
 
       {/* ── BROWSE CATEGORIES ─────────────────────────────────── */}
       <section className="py-20 px-6 lg:px-12 max-w-7xl mx-auto border-t border-stone-100">
@@ -475,10 +675,15 @@ export default function Home() {
       </section>
 
       {/* ── TESTIMONIALS ──────────────────────────────────────── */}
-      <section className="py-24 px-6 lg:px-12 border-y border-amber-100/80"
+      <section className="py-24 px-6 lg:px-12 border-y border-amber-100/80 relative overflow-hidden"
         style={{ background: "linear-gradient(180deg, #FFFBF0 0%, #FFF8E8 100%)" }}>
-        <div className="max-w-7xl mx-auto">
+
+        {/* Subtle ndebele pattern overlay */}
+        <div className="absolute inset-0 pattern-ndebele opacity-40 pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-14">
+            <div className="kente-divider w-20 mx-auto mb-6 rounded-full"></div>
             <div className="flex justify-center gap-0.5 mb-4">
               {[...Array(5)].map((_, i) => <Star key={i} size={18} className="fill-amber-400 text-amber-400" />)}
             </div>
@@ -496,13 +701,30 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.5, delay: i * 0.12 }}
-                className="bg-white rounded-3xl border border-stone-100 shadow-sm p-8 flex flex-col gap-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                className="bg-white rounded-3xl border border-stone-100 shadow-sm p-8 flex flex-col gap-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
               >
+                {/* Subtle kente stripe at top of card */}
+                <div className="absolute top-0 left-0 right-0 h-[3px]"
+                  style={{ background: 'linear-gradient(90deg,#166534 0% 33%,#D97706 33% 66%,#C2410C 66% 100%)' }} />
+
                 <Quote size={28} className="text-amber-300 shrink-0" />
                 <p className="text-stone-700 font-medium leading-relaxed text-[15px] flex-1">"{t.quote}"</p>
                 <div className="flex items-center gap-3 pt-2 border-t border-stone-100">
-                  <div className={`w-10 h-10 rounded-full ${t.color} font-black text-sm flex items-center justify-center shrink-0`}>
-                    {t.initials}
+                  {/* Kente-pattern geometric avatar */}
+                  <div className="w-11 h-11 rounded-full shrink-0 flex items-center justify-center font-black text-sm text-white overflow-hidden relative"
+                    style={{
+                      background: i === 0
+                        ? 'linear-gradient(135deg, #166534, #D97706)'
+                        : i === 1
+                        ? 'linear-gradient(135deg, #D97706, #C2410C)'
+                        : 'linear-gradient(135deg, #C2410C, #166534)',
+                    }}>
+                    <span className="relative z-10">{t.initials}</span>
+                    {/* Kente pattern overlay */}
+                    <div className="absolute inset-0 opacity-20"
+                      style={{
+                        backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.6) 0, rgba(255,255,255,0.6) 2px, transparent 2px, transparent 8px)',
+                      }} />
                   </div>
                   <div>
                     <p className="font-bold text-stone-900 text-sm">{t.name}</p>
@@ -512,6 +734,37 @@ export default function Home() {
               </motion.div>
             ))}
           </div>
+
+          {/* Cultural photo strip */}
+          <motion.div
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
+            viewport={{ once: true }} transition={{ delay: 0.4, duration: 0.8 }}
+            className="mt-14 flex gap-3 overflow-hidden rounded-3xl shadow-sm"
+            style={{ height: '120px' }}>
+            {[
+              { url: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=75', alt: 'Students studying' },
+              { url: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=400&q=75', alt: 'Classroom' },
+              { url: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=400&q=75', alt: 'Library' },
+              { url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=75', alt: 'Group study' },
+            ].map((img, i) => (
+              <div key={i} className="flex-1 relative overflow-hidden min-w-0">
+                <img src={img.url} alt={img.alt} referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover" />
+                <div className="absolute inset-0"
+                  style={{ background: 'rgba(13,31,23,0.35)' }} />
+              </div>
+            ))}
+            {/* Zimbabwe Heritage overlay */}
+            <div className="flex-shrink-0 w-48 flex items-center justify-center text-center p-4"
+              style={{ background: 'linear-gradient(135deg, #0D1F17, #1C1917)' }}>
+              <div>
+                <div className="text-3xl mb-1">🌍</div>
+                <p className="text-white font-black text-xs uppercase tracking-wider leading-tight">
+                  Empowering<br/>Zimbabwe
+                </p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -630,20 +883,34 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Ndebele divider before CTA */}
+      <NdebeleDivider />
+
       {/* ── FOOTER CTA ────────────────────────────────────────── */}
-      <section className="py-32 px-6 relative overflow-hidden border-t border-stone-200"
-        style={{ background: "linear-gradient(180deg, #FFFBF0 0%, #FEF3C7 100%)" }}>
-        <div className="absolute inset-0 pattern-kente -z-10 opacity-60"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] -z-10"
-          style={{ background: "rgba(217,119,6,0.15)" }}></div>
+      <section className="py-32 px-6 relative overflow-hidden"
+        style={{ background: "linear-gradient(180deg, #1C1917 0%, #0D1F17 100%)" }}>
+
+        {/* Pattern overlay */}
+        <div className="absolute inset-0 pattern-great-zimbabwe opacity-60 pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-[140px] pointer-events-none"
+          style={{ background: "rgba(217,119,6,0.10)" }} />
+
+        {/* Baobab decorations */}
+        <div className="absolute bottom-0 left-0 opacity-[0.07] pointer-events-none select-none" style={{ width: '180px' }}>
+          <BaobabSvg className="text-green-300 w-full" />
+        </div>
+        <div className="absolute bottom-0 right-0 opacity-[0.07] pointer-events-none select-none"
+          style={{ width: '140px', transform: 'scaleX(-1)' }}>
+          <BaobabSvg className="text-amber-300 w-full" />
+        </div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="stripe-kente w-20 mx-auto mb-8 rounded-full"></div>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-stone-900 mb-8 leading-tight"
+          <div className="kente-divider w-24 mx-auto mb-8 rounded-full"></div>
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-white mb-8 leading-tight"
             style={{ fontFamily: 'var(--font-accent)' }}>
             Shape the future<br className="hidden md:block"/> of African learning.
           </h2>
-          <p className="text-xl lg:text-2xl text-stone-600 font-medium mb-12 max-w-2xl mx-auto text-balance">
+          <p className="text-xl lg:text-2xl text-stone-300 font-medium mb-12 max-w-2xl mx-auto text-balance">
             Join thousands of Zimbabwean students and educators transforming how Africa learns. Free, open, and incredibly smart.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -654,16 +921,22 @@ export default function Home() {
             </Link>
             <Link to="/download"
               className="inline-flex items-center justify-center gap-3 px-10 py-4 rounded-full font-black text-xl text-white transition-all hover:-translate-y-1 active:translate-y-0 shadow-xl"
-              style={{ background: "linear-gradient(135deg, #1C1917 0%, #44403C 100%)" }}>
+              style={{ background: "linear-gradient(135deg, #D97706 0%, #C2410C 100%)", boxShadow: "0 8px 32px rgba(217,119,6,0.25)" }}>
               📱 Android App
             </Link>
             <Link to="/academic"
-              className="inline-flex items-center justify-center px-10 py-4 bg-white text-stone-900 border-2 border-stone-200 rounded-full font-black text-xl hover:border-amber-400 hover:bg-amber-50 transition-all">
+              className="inline-flex items-center justify-center px-10 py-4 rounded-full font-black text-xl transition-all hover:-translate-y-1"
+              style={{ background: 'rgba(255,255,255,0.08)', color: '#fff', border: '2px solid rgba(255,255,255,0.15)' }}
+              onMouseEnter={e => { e.currentTarget.style.background='rgba(217,119,6,0.15)'; e.currentTarget.style.borderColor='rgba(217,119,6,0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background='rgba(255,255,255,0.08)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.15)'; }}>
               Explore 500M+ Papers
             </Link>
           </div>
         </div>
       </section>
+
+      {/* Bottom Ndebele strip */}
+      <NdebeleDivider flip />
     </div>
   )
 }
