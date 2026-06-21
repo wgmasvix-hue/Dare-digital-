@@ -1,8 +1,10 @@
+import { useState } from "react"
 import { Outlet, useLocation } from "react-router-dom"
 import { AnimatePresence, motion } from "motion/react"
 import NavBar from "./components/layout/NavBar"
 import Footer from "./components/layout/Footer"
 import PWAInstallPrompt from "./components/PWAInstallPrompt"
+import DareLoader from "./components/common/DareLoader"
 
 const PageWrapper = ({ children }) => {
   const location = useLocation();
@@ -23,8 +25,16 @@ const PageWrapper = ({ children }) => {
 };
 
 export default function App() {
+  const [loading, setLoading] = useState(() => {
+    // Only show splash once per browser session
+    if (sessionStorage.getItem('dare_splash_shown')) return false;
+    sessionStorage.setItem('dare_splash_shown', '1');
+    return true;
+  });
+
   return (
     <div className="min-h-screen flex flex-col font-sans bg-white text-stone-900 selection:bg-amber-200/60">
+      {loading && <DareLoader onDone={() => setLoading(false)} />}
       <a href="#main-content" className="skip-nav">Skip to main content</a>
       <NavBar />
       <main id="main-content" className="flex-1 w-full flex flex-col relative">
