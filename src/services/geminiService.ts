@@ -1,115 +1,100 @@
-import { DARA_SYSTEM_PROMPT } from "../lib/daraSystemPrompt";
-import { supabase } from "../lib/supabase";
+import { DARA_SYSTEM_PROMPT } from '../lib/daraSystemPrompt';
+import { callDeepSeek, toDS } from '../lib/deepseek';
+import { supabase } from '../lib/supabase';
 
-/**
- * Truncate text to avoid token limits
- */
 const truncateText = (text: string, maxLength = 30000) => {
-  if (!text) return "";
+  if (!text) return '';
   if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + "... [Text truncated for AI processing]";
+  return text.substring(0, maxLength) + '... [Text truncated for AI processing]';
 };
 
-const callGemini = async (contents: unknown, config: Record<string, unknown> = {}) => {
-  // Use Supabase Edge Function for portability (Webzim compatible)
-  const { data, error } = await supabase.functions.invoke('dara-ai', {
-    body: {
-      message: typeof contents === 'string' ? contents : JSON.stringify(contents),
-      context: config.systemInstruction || DARA_SYSTEM_PROMPT,
-      provider: 'gemini',
-      model: config.model
-    }
-  });
-
-  if (error) throw error;
-  return { text: data.reply };
-};
+async function callAI(
+  contents: unknown,
+  config: Record<string, unknown> = {}
+): Promise<{ text: string }> {
+  const systemPrompt = (config.systemInstruction as string) || DARA_SYSTEM_PROMPT;
+  const jsonMode = config.responseMimeType === 'application/json';
+  const messages = toDS(contents);
+  const text = await callDeepSeek(messages, { systemPrompt, jsonMode });
+  return { text };
+}
 
 export const geminiService = {
-  /**
-   * Generate a summary for a book or a specific context
-   */
-  async summarize(text: string, context = "") {
-    const taskPrompt = `
-      Task: Provide a concise and insightful summary of the following text.
-      Focus on key concepts, main arguments, and educational value.
-      
-      Context: ${context}
-      
-      Text to summarize:
-      ${truncateText(text)}
-    `;
+  async summarize(text: string, context = '') {
+    const prompt = `Task: Provide a concise and insightful summary of the following text.
+Focus on key concepts, main arguments, and educational value.
 
+Context: ${context}
+
+Text to summarize:
+${truncateText(text)}`;
     try {
-      const data = await callGemini(taskPrompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Gemini Summarization Error:", error);
+      console.error('BAKO Summarization Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Answer a question based on book context
-   */
   async askQuestion(question: string, bookContext: string) {
-    const taskPrompt = `
-      Task: Answer the student's question based on the provided book context.
-      
-      Book Context:
-      ${truncateText(bookContext)}
-      
-      Student Question:
-      ${question}
-    `;
+    const prompt = `Task: Answer the student's question based on the provided book context.
 
+Book Context:
+${truncateText(bookContext)}
+
+Student Question:
+${question}`;
     try {
-      const data = await callGemini(taskPrompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Gemini Q&A Error:", error);
+      console.error('BAKO Q&A Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Get search suggestions based on query
-   */
   async getSearchSuggestions(query: string) {
     try {
-      const data = await callGemini(`Task: Provide 5 related academic search terms or Boolean search combinations for the following query.\nQuery: ${query}`, {
-        systemInstruction: "You are DARA, an academic librarian. Return only a JSON array of strings. No markdown, no explanation.",
-        responseMimeType: "application/json"
-      });
-      return JSON.parse(data.text || "[]");
+      const data = await callAI(
+        `Task: Provide 5 related academic search terms or Boolean search combinations for the following query.\nQuery: ${query}\n\nReturn ONLY a JSON array of strings. No markdown, no explanation.`,
+        {
+          systemInstruction: 'You are BAKO, an academic librarian. Return only a JSON array of strings. No markdown, no explanation.',
+          responseMimeType: 'application/json',
+        }
+      );
+      return JSON.parse(data.text || '[]');
     } catch {
       return [];
     }
   },
 
-  /**
-   * AI-powered book search/filtering
-   */
   async searchBooks(query: string) {
     try {
-      const data = await callGemini(`Task: Analyze the user's request and extract search parameters.\nRequest: ${query}`, {
-        systemInstruction: `You are DARA. Extract keywords, faculty, and level from the user's request. 
-        Return JSON: { "keywords": [], "faculty": "All", "level": "All" }. 
-        Faculties: STEM, Agriculture, Health, Business, Education, Engineering, Law, Humanities, AI & Future Tech.
-        Levels: Certificate, Diploma, HND, Degree, Masters, PhD.`,
-        responseMimeType: "application/json"
-      });
+      const data = await callAI(
+        `Task: Analyze the user's request and extract search parameters.\nRequest: ${query}\n\nReturn ONLY valid JSON: { "keywords": [], "faculty": "All", "level": "All" }`,
+        {
+          systemInstruction: `You are BAKO. Extract keywords, faculty, and level from the user's request.
+Return ONLY valid JSON: { "keywords": [], "faculty": "All", "level": "All" }.
+Faculties: STEM, Agriculture, Health, Business, Education, Engineering, Law, Humanities, AI & Future Tech.
+Levels: Certificate, Diploma, HND, Degree, Masters, PhD.`,
+          responseMimeType: 'application/json',
+        }
+      );
       return JSON.parse(data.text || '{"keywords": [], "faculty": "All", "level": "All"}');
     } catch {
       return { keywords: [query], faculty: 'All', level: 'All' };
     }
   },
 
-  /**
-   * Generate a lesson plan for teachers (HBC Aligned)
-   */
-  async generateLessonPlan(details: { subject: string; level: string; topic: string; duration: string; resources?: string }) {
-    const prompt = `You are DARA, Zimbabwe's Heritage-Based Curriculum (HBC) aligned teacher training AI. 
+  async generateLessonPlan(details: {
+    subject: string;
+    level: string;
+    topic: string;
+    duration: string;
+    resources?: string;
+  }) {
+    const prompt = `You are BAKO, Zimbabwe's Heritage-Based Curriculum (HBC) aligned teacher training AI.
 Generate a complete, detailed lesson plan for a Zimbabwean teacher or student teacher.
 
 HERITAGE-BASED CURRICULUM (HBC) CORE PRINCIPLES:
@@ -123,7 +108,7 @@ LESSON DETAILS:
 - Level: ${details.level}
 - Topic: ${details.topic}
 - Duration: ${details.duration}
-- Available Resources: ${details.resources || "Chalk, blackboard, local environment, textbook"}
+- Available Resources: ${details.resources || 'Chalk, blackboard, local environment, textbook'}
 
 Generate a FULL lesson plan using this EXACT structure in Markdown:
 
@@ -131,55 +116,35 @@ Generate a FULL lesson plan using this EXACT structure in Markdown:
 **Subject:** | **Level:** | **Topic:** | **Duration:**
 
 ## 1. Syllabus Reference
-(ZJC/ZIMSEC/HBC syllabus reference code)
-
 ## 2. Specific Objectives
-By the end of the lesson, learners should be able to: (3-5 measurable objectives)
-
 ## 3. Heritage & Unhu/Ubuntu Integration
-(How this lesson incorporates Zimbabwean values, local history, or cultural context)
-
 ## 4. Prior Knowledge & Skills
-(What learners already know or can do)
-
 ## 5. Media/Resources
-(Locally available materials and digital OERs from Dare Library)
-
-## 6. Lesson Development (Interactive & Learner-Centered)
+## 6. Lesson Development
 
 | Stage | Teacher Activity | Learner Activity | Points to Note |
 |-------|-----------------|------------------|----------------|
-| Introduction (5 min) | | | |
-| Step 1: Discovery | | | |
-| Step 2: Heritage Link | | | |
-| Step 3: Practical/Production | | | |
-| Conclusion (5 min) | | | |
 
 ## 7. Assessment & Evaluation
-(Interactive methods to check understanding)
-
 ## 8. Innovation & Production Task
-(A practical task where learners apply knowledge to solve a local problem)
-
-## 9. DARA HBC Teaching Tips
-(3 practical tips for making this lesson more interactive and heritage-aligned)
-
-Make it detailed, practical, and strictly aligned with Zimbabwe's Heritage-Based Curriculum.`;
+## 9. BAKO HBC Teaching Tips`;
 
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Gemini Lesson Plan Error:", error);
+      console.error('BAKO Lesson Plan Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Generate an interactive assessment (HBC Aligned)
-   */
-  async generateAssessment(details: { subject: string; topic: string; level: string; type?: string }) {
-    const prompt = `You are DARA. Generate an interactive, Heritage-Based Curriculum (HBC) aligned assessment for:
+  async generateAssessment(details: {
+    subject: string;
+    topic: string;
+    level: string;
+    type?: string;
+  }) {
+    const prompt = `You are BAKO. Generate an interactive, Heritage-Based Curriculum (HBC) aligned assessment for:
 - Subject: ${details.subject}
 - Topic: ${details.topic}
 - Level: ${details.level}
@@ -194,400 +159,314 @@ Include:
 Format as clean Markdown.`;
 
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Gemini Assessment Error:", error);
+      console.error('BAKO Assessment Error:', error);
       throw error;
     }
   },
 
-  /**
-   * General chat with DARA via Supabase Edge Function
-   */
-  async chat(message: string, history: { role: string; text: string }[] = [], options: { programmeCode?: string; faculty?: string; institutionId?: string; temperature?: number; topP?: number; topK?: number; responseMimeType?: string; responseSchema?: unknown; systemInstruction?: string } = {}) {
+  async chat(
+    message: string,
+    history: { role: string; text: string }[] = [],
+    options: {
+      programmeCode?: string;
+      faculty?: string;
+      institutionId?: string;
+      temperature?: number;
+      systemInstruction?: string;
+    } = {}
+  ) {
     try {
-      const truncatedMessage = truncateText(message, 12000);
-      const contents = history.map(msg => ({
-        role: msg.role === 'ai' ? 'model' : 'user',
-        parts: [{ text: msg.text }]
-      }));
-      contents.push({ role: 'user', parts: [{ text: truncatedMessage }] });
-
-      const data = await callGemini(contents, {
-        temperature: options.temperature,
-        topP: options.topP,
-        topK: options.topK,
-        responseMimeType: options.responseMimeType,
-        responseSchema: options.responseSchema,
-        systemInstruction: options.systemInstruction
+      const { callDeepSeek: callDS } = await import('../lib/deepseek');
+      const messages = [
+        ...history.map((m) => ({
+          role: (m.role === 'ai' ? 'assistant' : 'user') as 'user' | 'assistant',
+          content: truncateText(m.text, 4000),
+        })),
+        { role: 'user' as const, content: truncateText(message, 12000) },
+      ];
+      return await callDS(messages, {
+        systemPrompt: options.systemInstruction || DARA_SYSTEM_PROMPT,
+        temperature: options.temperature ?? 0.7,
       });
-
-      return data.text;
     } catch (error) {
-      console.error("DARA Edge Function Error:", error);
+      console.error('BAKO Chat Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Generates a practical skill guide for vocational training.
-   * Aligned with Zimbabwe's Heritage-Based Curriculum and Education 5.0.
-   */
-  async generateVocationalGuide({ trade, skill, level, resources }: { trade: string; skill: string; level: string; resources: string }) {
+  async generateVocationalGuide({
+    trade,
+    skill,
+    level,
+    resources,
+  }: {
+    trade: string;
+    skill: string;
+    level: string;
+    resources: string;
+  }) {
     const prompt = `Generate a comprehensive, practical skill guide for a vocational training student in Zimbabwe.
-    
-    Trade: ${trade}
-    Specific Skill: ${skill}
-    Level: ${level}
-    Available Resources: ${resources}
-    
-    The guide MUST follow Zimbabwe's Heritage-Based Curriculum (HBC) and Education 5.0 principles:
-    1. Practicality: Focus on hands-on execution.
-    2. Local Context: Use materials and examples relevant to Zimbabwe.
-    3. Unhu/Ubuntu: Incorporate professional ethics and community responsibility.
-    4. Innovation: Suggest ways to improve or adapt the skill for local needs.
-    5. Safety: Include detailed safety precautions specific to the Zimbabwean workshop context.
-    
-    Structure the output in Markdown with the following sections:
-    - Title: Clear and descriptive.
-    - Objective: What the student will achieve.
-    - Tools & Materials: List required items (prefer locally available ones).
-    - Safety First: Critical safety protocols.
-    - Step-by-Step Procedure: Detailed, numbered instructions.
-    - Unhu/Ubuntu in the Trade: Ethical considerations and professional conduct.
-    - Innovation/Production Task: A small challenge to apply the skill to solve a local problem.
-    - Troubleshooting: Common mistakes and how to fix them.`;
+
+Trade: ${trade}
+Specific Skill: ${skill}
+Level: ${level}
+Available Resources: ${resources}
+
+Follow Zimbabwe's Heritage-Based Curriculum (HBC) and Education 5.0 principles.
+Structure in Markdown: Title, Objective, Tools & Materials, Safety First, Step-by-Step Procedure,
+Unhu/Ubuntu in the Trade, Innovation/Production Task, Troubleshooting.`;
 
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Vocational Guide Error:", error);
+      console.error('Vocational Guide Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Generates a structured skill learning module (Tasks, Steps, Practice, Test).
-   */
-  async generateVocationalSkillModule({ trade, skill, level, part }: { trade: string; skill: string; level: string; part: 'tasks' | 'steps' | 'practice' | 'test' }) {
-    let prompt = "";
-
-    if (part === 'tasks') {
-      prompt = `Generate a list of 3-5 real-world "TASKS" for the skill: ${skill} in the trade: ${trade} at ${level} level.
-      Focus on production-oriented tasks relevant to the Zimbabwean economy.
-      Keep descriptions minimal and action-oriented. Format in Markdown.`;
-    } else if (part === 'steps') {
-      prompt = `Generate a "SHOW ME HOW" step-by-step guide for a specific task related to: ${skill} in the trade: ${trade} at ${level} level.
-      Include:
-      - Required Tools (Locally available)
-      - Safety Mode (Critical safety tips)
-      - Minimalist, numbered steps (Max 10 words per step)
-      - A visual description for each step.
-      Format in Markdown.`;
-    } else if (part === 'practice') {
-      prompt = `Generate a "PRACTICE" challenge for the skill: ${skill} in the trade: ${trade} at ${level} level.
-      This should be a "Try This Task" interactive challenge that encourages real-world practice.
-      Include a specific goal and a "Success Criteria" checklist.
-      Format in Markdown.`;
-    } else if (part === 'test') {
-      prompt = `Generate a "TEST" for the skill: ${skill} in the trade: ${trade} at ${level} level.
-      Focus on practical knowledge and troubleshooting.
-      Provide 3 scenario-based questions (e.g., "If X happens, what do you do?").
-      Include correct answers. Format in Markdown.`;
-    }
-
+  async generateVocationalSkillModule({
+    trade,
+    skill,
+    level,
+    part,
+  }: {
+    trade: string;
+    skill: string;
+    level: string;
+    part: 'tasks' | 'steps' | 'practice' | 'test';
+  }) {
+    const prompts = {
+      tasks: `Generate a list of 3-5 real-world "TASKS" for the skill: ${skill} in the trade: ${trade} at ${level} level. Focus on production-oriented tasks relevant to the Zimbabwean economy. Format in Markdown.`,
+      steps: `Generate a "SHOW ME HOW" step-by-step guide for: ${skill} in ${trade} at ${level} level. Include required tools, safety tips, and max 10 numbered steps. Format in Markdown.`,
+      practice: `Generate a "PRACTICE" challenge for: ${skill} in ${trade} at ${level} level. Include a specific goal and success criteria checklist. Format in Markdown.`,
+      test: `Generate a "TEST" for: ${skill} in ${trade} at ${level} level. Provide 3 scenario-based questions with correct answers. Format in Markdown.`,
+    };
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompts[part]);
       return data.text;
     } catch (error) {
-      console.error("Vocational Skill Module Error:", error);
+      console.error('Vocational Skill Module Error:', error);
       throw error;
     }
   },
 
-  /**
-   * DARE Assist for Vocational Skills
-   */
-  async vocationalAssist({ action, trade, skill, context }: { action: string; trade: string; skill: string; context: string }) {
-    let prompt = "";
-
-    if (action === 'explain') {
-      prompt = `Explain this concept simply for a workshop setting: ${context}. Skill: ${skill}, Trade: ${trade}.`;
-    } else if (action === 'steps' || action === 'show_how') {
-      prompt = `Show me exactly how to do this: ${context}. Provide 5-7 clear, minimal steps for ${skill} in ${trade}. Include safety.`;
-    } else if (action === 'task' || action === 'try_task') {
-      prompt = `Give me a real-world "Try This Task" challenge for ${skill} in ${trade}. Focus on production.`;
-    } else if (action === 'fix_mistake') {
-      prompt = `I made a mistake while doing ${skill} in ${trade}. Context: ${context}. How do I fix it safely and professionally?`;
-    } else if (action === 'next_task') {
-      prompt = `I finished the current task for ${skill} in ${trade}. What is the next logical task to advance my skills?`;
-    } else if (action === 'safety_tips') {
-      prompt = `Provide critical safety tips for ${skill} in ${trade}. Focus on workshop hazards in Zimbabwe.`;
-    } else if (action === 'quiz') {
-      prompt = `Ask me one practical troubleshooting question about ${skill} in ${trade}.`;
-    }
-
+  async vocationalAssist({
+    action,
+    trade,
+    skill,
+    context,
+  }: {
+    action: string;
+    trade: string;
+    skill: string;
+    context: string;
+  }) {
+    const prompts: Record<string, string> = {
+      explain: `Explain this concept simply for a workshop setting: ${context}. Skill: ${skill}, Trade: ${trade}.`,
+      steps: `Show me exactly how to do this: ${context}. Provide 5-7 clear steps for ${skill} in ${trade}. Include safety.`,
+      show_how: `Show me exactly how to do this: ${context}. Provide 5-7 clear steps for ${skill} in ${trade}. Include safety.`,
+      task: `Give me a real-world "Try This Task" challenge for ${skill} in ${trade}. Focus on production.`,
+      try_task: `Give me a real-world "Try This Task" challenge for ${skill} in ${trade}. Focus on production.`,
+      fix_mistake: `I made a mistake doing ${skill} in ${trade}. Context: ${context}. How do I fix it safely?`,
+      next_task: `I finished the current task for ${skill} in ${trade}. What is the next logical task to advance my skills?`,
+      safety_tips: `Critical safety tips for ${skill} in ${trade}. Focus on workshop hazards in Zimbabwe.`,
+      quiz: `Ask me one practical troubleshooting question about ${skill} in ${trade}.`,
+    };
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompts[action] || context);
       return data.text;
     } catch (error) {
-      console.error("Vocational Assist Error:", error);
+      console.error('Vocational Assist Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Generates a project cost estimator and material list for vocational projects.
-   */
-  async generateProjectEstimator({ project, trade, scale }: { project: string; trade: string; scale: string }) {
+  async generateProjectEstimator({
+    project,
+    trade,
+    scale,
+  }: {
+    project: string;
+    trade: string;
+    scale: string;
+  }) {
     const prompt = `Generate a project estimation and material list for a vocational training project in Zimbabwe.
-    
-    Project: ${project}
-    Trade: ${trade}
-    Scale: ${scale} (e.g., Small/Individual, Medium/Group, Large/Commercial)
-    
-    Provide a detailed breakdown in Markdown:
-    - Project Overview: Brief description.
-    - Material List: Itemized list of materials needed.
-    - Estimated Quantities: Based on the scale provided.
-    - Local Sourcing Tips: Where to find these materials in Zimbabwe or how to repurpose local items.
-    - Production Timeline: Estimated time for each phase.
-    - Costing Strategy: How to calculate the final price including labor and overheads (Education 5.0 focus on commercialization).
-    - Sustainability Note: How to minimize waste and use eco-friendly practices.`;
+
+Project: ${project} | Trade: ${trade} | Scale: ${scale}
+
+Provide in Markdown: Project Overview, Material List, Estimated Quantities, Local Sourcing Tips,
+Production Timeline, Costing Strategy, Sustainability Note.`;
 
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Project Estimator Error:", error);
+      console.error('Project Estimator Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Generates a TP Companion response for student teachers.
-   * Supports reflection, supervisor prep, and feedback analysis.
-   */
-  async generateTPCompanionResponse({ type, details }: { type: 'reflection' | 'supervisor_prep' | 'feedback_analysis'; details: { subject: string; topic: string; level?: string; experience?: string; challenges?: string; feedback?: string } }) {
-    let prompt = "";
+  async generateTPCompanionResponse({
+    type,
+    details,
+  }: {
+    type: 'reflection' | 'supervisor_prep' | 'feedback_analysis';
+    details: {
+      subject: string;
+      topic: string;
+      level?: string;
+      experience?: string;
+      challenges?: string;
+      feedback?: string;
+    };
+  }) {
+    const prompts: Record<string, string> = {
+      reflection: `You are BAKO, the Teaching Practice (TP) Companion for a student teacher in Zimbabwe.
+Subject: ${details.subject} | Topic: ${details.topic}
+Experience: ${details.experience} | Challenges: ${details.challenges}
 
-    if (type === "reflection") {
-      prompt = `You are DARA, the Teaching Practice (TP) Companion for a student teacher in Zimbabwe.
-Analyze the following lesson observation/experience and provide a structured reflection journal entry.
+Provide in Markdown: BAKO Reflection Prompts, Pedagogical Analysis, Unhu/Ubuntu Check, Action Plan, MoPSE Compliance Note.`,
+      supervisor_prep: `You are BAKO, preparing a student teacher for a supervisor visit.
+Subject: ${details.subject} | Topic: ${details.topic} | Level: ${details.level}
 
-LESSON DETAILS:
-- Subject: ${details.subject}
-- Topic: ${details.topic}
-- What happened: ${details.experience}
-- Challenges faced: ${details.challenges}
+Provide in Markdown: Likely Supervisor Questions, Model Answers, Classroom Management Tips, Documentation Checklist, BAKO's Encouragement.`,
+      feedback_analysis: `You are BAKO, analyzing supervisor feedback for a student teacher in Zimbabwe.
+Feedback: ${details.feedback}
 
-Provide a response in Markdown with:
-1. **DARA Reflection Prompts**: 3 deep questions to help the student reflect on their teaching strategy.
-2. **Pedagogical Analysis**: Link what happened to teaching theories (e.g., Vygotsky, Piaget) in a Zimbabwean context.
-3. **Unhu/Ubuntu Check**: How was character and values integrated or managed?
-4. **Action Plan**: 3 specific steps for the next lesson to improve.
-5. **MoPSE Compliance Note**: How this aligns with the Heritage-Based Curriculum.`;
-    } else if (type === "supervisor_prep") {
-      prompt = `You are DARA, preparing a student teacher for a supervisor's visit in Zimbabwe.
-The student is teaching:
-- Subject: ${details.subject}
-- Topic: ${details.topic}
-- Level: ${details.level}
-
-Provide a "Mock Observation" prep guide in Markdown:
-1. **Likely Supervisor Questions**: 5 tough questions a supervisor might ask about the lesson plan or execution.
-2. **Model Answers**: How to answer those questions professionally using HBC terminology.
-3. **Classroom Management Tips**: 3 tips for handling a large Zimbabwean class under observation.
-4. **Documentation Checklist**: What files (Scheme of work, Lesson plans, Records) must be on the desk.
-5. **DARA's Encouragement**: A short, motivating message for the student teacher.`;
-    } else if (type === "feedback_analysis") {
-      prompt = `You are DARA, analyzing supervisor feedback for a student teacher in Zimbabwe.
-SUPERVISOR FEEDBACK:
-${details.feedback}
-
-Provide a structured Improvement Plan in Markdown:
-1. **Key Strengths**: Identify what the supervisor praised.
-2. **Areas for Growth**: Translate the supervisor's criticisms into actionable growth areas.
-3. **DARA's Strategy**: Specific teaching strategies (e.g., "Think-Pair-Share", "Discovery Method") to address the weaknesses.
-4. **Resource Suggestions**: Which Dare Library resources could help with these specific areas.
-5. **Next Observation Goal**: A clear, measurable goal for the next visit.`;
-    }
-
+Provide in Markdown: Key Strengths, Areas for Growth, BAKO's Strategy, Resource Suggestions, Next Observation Goal.`,
+    };
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompts[type]);
       return data.text;
     } catch (error) {
-      console.error("TP Companion Error:", error);
+      console.error('TP Companion Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Generates a ZTC Portfolio structure or accreditation report.
-   */
-  async generatePortfolioStructure({ collegeName, department, focusArea }: { collegeName: string; department: string; focusArea: string }) {
-    const prompt = `You are DARA, an expert in Zimbabwean Teacher Education (ZIMCHE standards).
-Generate a comprehensive "ZTC Portfolio Structure" for:
-- College: ${collegeName}
-- Department: ${department}
-- Focus Area: ${focusArea}
+  async generatePortfolioStructure({
+    collegeName,
+    department,
+    focusArea,
+  }: {
+    collegeName: string;
+    department: string;
+    focusArea: string;
+  }) {
+    const prompt = `You are BAKO, an expert in Zimbabwean Teacher Education (ZIMCHE standards).
+Generate a ZTC Portfolio Structure for:
+- College: ${collegeName} | Department: ${department} | Focus Area: ${focusArea}
 
-The response should be in Markdown and include:
-1. **Portfolio Components**: 5-7 required sections for a professional teacher's portfolio in Zimbabwe.
-2. **Evidence Checklist**: Specific documents needed for each section (e.g., Scheme of work, Peer observation records).
-3. **ZIMCHE Compliance Guide**: How this portfolio meets the Resource Adequacy and Quality Assurance standards.
-4. **Heritage-Based Curriculum Integration**: How to demonstrate HBC principles in the portfolio.
-5. **DARA's Professional Advice**: 3 tips for maintaining an award-winning portfolio.`;
+In Markdown: Portfolio Components, Evidence Checklist, ZIMCHE Compliance Guide, HBC Integration, BAKO's Professional Advice.`;
 
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Portfolio Generation Error:", error);
+      console.error('Portfolio Generation Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Generates curriculum guidance for a specific topic and level.
-   */
   async generateCurriculumGuidance({ level, topic }: { level: string; topic: string }) {
-    const prompt = `You are DARA, the Zimbabwe Curriculum Intelligence Engine.
-Provide a deep-dive analysis of the following curriculum topic:
-- Level: ${level}
-- Topic: ${topic}
+    const prompt = `You are BAKO, the Zimbabwe Curriculum Intelligence Engine.
+Level: ${level} | Topic: ${topic}
 
-The response should be in Markdown and include:
-1. **Syllabus Objective Breakdown**: Explain what the MoPSE/ZIMSEC objective actually means for a teacher.
-2. **Teaching Sequence**: A suggested 3-lesson sequence to cover this topic effectively.
-3. **Common Misconceptions**: What do Zimbabwean students usually struggle with in this topic?
-4. **HBC Integration**: How to link this topic to Zimbabwe's heritage and values (Unhu/Ubuntu).
-5. **Exam Pattern Analysis**: How this topic is typically tested in ZIMSEC exams (if applicable).`;
+In Markdown: Syllabus Objective Breakdown, Teaching Sequence (3 lessons), Common Misconceptions, HBC Integration, Exam Pattern Analysis.`;
 
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Curriculum Engine Error:", error);
+      console.error('Curriculum Engine Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Semantic search using embeddings via Supabase Edge Function
-   */
   async semanticSearch(query: string, matchThreshold = 0.4, matchCount = 20) {
+    if (!supabase) return null;
     try {
       const { data, error } = await supabase.functions.invoke('search-books', {
-        body: { query, match_threshold: matchThreshold, match_count: matchCount }
+        body: { query, match_threshold: matchThreshold, match_count: matchCount },
       });
-
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error("Semantic Search Error:", error);
-      // Fallback to keyword search if semantic search fails
+      console.error('Semantic Search Error:', error);
       return null;
     }
   },
 
-  /**
-   * Generate an archival report or summary for a resource
-   */
-  async generateArchivalReport(resourceData: { title: string; author: string; subject: string; abstract: string; institution: string; year: string | number }) {
-    const prompt = `
-      As a professional archivist, generate a comprehensive archival report for the following local resource:
-      
-      Title: ${resourceData.title}
-      Author: ${resourceData.author}
-      Subject: ${resourceData.subject}
-      Abstract: ${resourceData.abstract}
-      Institution: ${resourceData.institution}
-      Year: ${resourceData.year}
-      
-      The report should include:
-      1. Historical Context: Why this resource is significant to Zimbabwean heritage.
-      2. Key Findings/Themes: A summary of the main points.
-      3. Archival Value: How this contributes to the local knowledge repository.
-      4. Recommendations for Researchers: How this resource can be used for future studies.
-      
-      Format the output in professional Markdown.
-    `;
+  async generateArchivalReport(resourceData: {
+    title: string;
+    author: string;
+    subject: string;
+    abstract: string;
+    institution: string;
+    year: string | number;
+  }) {
+    const prompt = `As a professional archivist, generate a comprehensive archival report for this Zimbabwean resource:
+
+Title: ${resourceData.title} | Author: ${resourceData.author} | Subject: ${resourceData.subject}
+Abstract: ${resourceData.abstract} | Institution: ${resourceData.institution} | Year: ${resourceData.year}
+
+In Markdown: Historical Context, Key Findings/Themes, Archival Value, Recommendations for Researchers.`;
 
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Error generating archival report:", error);
+      console.error('Error generating archival report:', error);
       throw error;
     }
   },
 
-  /**
-   * Extract academic metadata from raw text using Gemini
-   */
   async extractMetadata(rawText: string) {
-    const prompt = `
-      Extract academic metadata from the following text and return ONLY a JSON object.
-      Required fields: title, authors (list of strings), date (YYYY-MM-DD format if possible), abstract.
-      
-      Text: ${truncateText(rawText, 10000)}
-    `;
-    
+    const prompt = `Extract academic metadata from the following text. Return ONLY a JSON object with fields: title, authors (array), date (YYYY-MM-DD), abstract.
+
+Text: ${truncateText(rawText, 10000)}`;
     try {
-      const data = await callGemini(prompt, {
-        systemInstruction: "You are an academic metadata extractor. Return only pure JSON. No markdown, no explanation.",
-        responseMimeType: "application/json"
+      const data = await callAI(prompt, {
+        systemInstruction:
+          'You are an academic metadata extractor. Return only pure JSON. No markdown, no explanation.',
+        responseMimeType: 'application/json',
       });
-      return JSON.parse(data.text || "{}");
+      return JSON.parse(data.text || '{}');
     } catch (error) {
-      console.error("Gemini Metadata Extraction Error:", error);
+      console.error('Metadata Extraction Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Process institutional content (Summarize, Explain, Quiz)
-   */
   async processInstitutionalContent(text: string, type: string) {
-    let prompt = "";
-
-    if (type === "summary" || type === "summarize") {
-      prompt = `Summarize this for a Zimbabwean student:\n${text}`;
-    } else if (type === "explain") {
-      prompt = `Explain this simply for a Form 4 student:\n${text}`;
-    } else if (type === "key-points") {
-      prompt = `Extract the most important key points from this content. Please format as a bulleted list:\n${text}`;
-    } else if (type === "quiz") {
-      prompt = `Generate 5 quiz questions from this:\n${text}`;
-    } else {
-      prompt = `Analyze this content:\n${text}`;
-    }
-
+    const prompts: Record<string, string> = {
+      summary: `Summarize this for a Zimbabwean student:\n${text}`,
+      summarize: `Summarize this for a Zimbabwean student:\n${text}`,
+      explain: `Explain this simply for a Form 4 student:\n${text}`,
+      'key-points': `Extract the most important key points. Format as a bulleted list:\n${text}`,
+      quiz: `Generate 5 quiz questions from this:\n${text}`,
+    };
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompts[type] || `Analyze this content:\n${text}`);
       return data.text;
     } catch (error) {
-      console.error("Gemini Institutional Content Error:", error);
+      console.error('Institutional Content Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Transforms textbook content into structured HBC learning material.
-   */
   async transformToHBC(content: string) {
     const prompt = `You are a Zimbabwean curriculum expert specializing in the Heritage-Based Curriculum (HBC).
+Transform this textbook content into structured HBC learning material.
 
-Using the provided textbook content, transform it into structured HBC learning material.
-
-INPUT CONTENT:
+INPUT:
 ${truncateText(content, 15000)}
 
-OUTPUT:
-
+OUTPUT FORMAT:
 1. Topic:
 2. Subtopics:
 3. Simplified Explanation (student-friendly):
@@ -596,128 +475,103 @@ OUTPUT:
 6. 5 Exam-style Questions:
 7. Answers and explanations:
 
-Ensure:
-* Alignment with ZIMSEC/HBC
-* Clear, simple language
-* Practical relevance
-* do not make any other changes.`;
+Align with ZIMSEC/HBC. Use clear, simple language.`;
 
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Gemini HBC Transformation Error:", error);
+      console.error('HBC Transformation Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Analyze a student's exam answer
-   */
   async analyzeExamAnswer(question: Record<string, unknown>, answer: string) {
-    const prompt = `
-      You are an expert Zimbabwean examiner for the Heritage-Based Curriculum.
-      Analyze the following student answer for the given exam question.
-      
-      Question: ${question.question}
-      Subject: ${question.subject}
-      Topic: ${question.topic}
-      Total Marks: ${question.marks}
-      Model Answer/Key Points: ${question.answer}
-      Examiner Notes: ${question.notes}
-      
-      Student Answer: "${answer}"
-      
-      Provide a detailed assessment in JSON format with the following structure:
-      {
-        "score": number (0 to 100 percentage based on quality and accuracy),
-        "comments": "Overall feedback on the answer, encouraging and constructive",
-        "strengths": ["Strength 1", "Strength 2"],
-        "improvements": ["Improvement 1", "Improvement 2"]
-      }
-    `;
+    const prompt = `You are an expert Zimbabwean examiner for the Heritage-Based Curriculum.
+Analyze this student answer.
+
+Question: ${question.question}
+Subject: ${question.subject} | Topic: ${question.topic} | Total Marks: ${question.marks}
+Model Answer: ${question.answer}
+Examiner Notes: ${question.notes}
+
+Student Answer: "${answer}"
+
+Return ONLY valid JSON:
+{
+  "score": <0-100>,
+  "comments": "<overall feedback>",
+  "strengths": ["<strength 1>"],
+  "improvements": ["<improvement 1>"]
+}`;
 
     try {
-      const data = await callGemini(prompt, {
-        responseMimeType: "application/json"
-      });
-      return JSON.parse(data.text || "{}");
+      const data = await callAI(prompt, { responseMimeType: 'application/json' });
+      return JSON.parse(data.text || '{}');
     } catch (error) {
-      console.error("Gemini Exam Analysis Error:", error);
+      console.error('Exam Analysis Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Generate a book action (Summary, Notes, Remix, etc.)
-   */
   async generateBookAction(bookContext: string, task: string) {
-    const prompt = `${bookContext}\n\nTask: ${task}\n\nPlease format your response using Markdown.`;
+    const prompt = `${bookContext}\n\nTask: ${task}\n\nFormat your response using Markdown.`;
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Gemini Book Action Error:", error);
+      console.error('Book Action Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Chat with a book result
-   */
   async chatWithBook(context: string, question: string) {
-    const prompt = `Context: ${context}\n\nFollow-up Question: ${question}\n\nPlease format your response using Markdown.`;
+    const prompt = `Context: ${context}\n\nFollow-up Question: ${question}\n\nFormat your response using Markdown.`;
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Gemini Book Chat Error:", error);
+      console.error('Book Chat Error:', error);
       throw error;
     }
   },
 
-  /**
-   * Generate a summary for the library view
-   */
-  async generateSummary(resource: Record<string, unknown>, domainInfo: Record<string, unknown>) {
-    const prompt = `You are an expert academic librarian. Provide a concise, high-impact summary (max 100 words) for the following book/resource. 
-    Focus on key takeaways and why it's important for students in the field of ${domainInfo?.name || 'Education'}.
-    
-    Title: ${resource.title}
-    Authors: ${Array.isArray(resource.authors) ? resource.authors.join(", ") : resource.authors}
-    Abstract: ${resource.abstract}
-    
-    Format the response as a single paragraph of text.`;
+  async generateSummary(
+    resource: Record<string, unknown>,
+    domainInfo: Record<string, unknown>
+  ) {
+    const prompt = `You are an expert academic librarian. Provide a concise summary (max 100 words) for this resource.
+Focus on key takeaways for students in ${domainInfo?.name || 'Education'}.
+
+Title: ${resource.title}
+Authors: ${Array.isArray(resource.authors) ? resource.authors.join(', ') : resource.authors}
+Abstract: ${resource.abstract}
+
+Format as a single paragraph.`;
 
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Gemini Library Summary Error:", error);
+      console.error('Library Summary Error:', error);
       throw error;
     }
   },
 
-  /**
-   * AI Librarian search
-   */
   async librarianSearch(query: string, domains: Record<string, unknown>[]) {
-    const prompt = `You are the DARA AI Librarian for a Zimbabwean educational library. 
-    A user is asking: "${query}"
-    
-    Based on your knowledge of educational resources, provide a helpful, concise answer. 
-    If they are looking for specific topics, suggest what they should look for in our library.
-    Our library focuses on: ${domains.map(d => d.name).join(", ")}.
-    
-    Keep the response under 150 words and focus on saving the user's data by providing the most essential information directly.`;
+    const prompt = `You are BAKO, the AI Librarian for a Zimbabwean educational library.
+A user is asking: "${query}"
+
+Provide a helpful, concise answer (under 150 words). Our library covers: ${domains
+      .map((d) => d.name)
+      .join(', ')}.`;
 
     try {
-      const data = await callGemini(prompt);
+      const data = await callAI(prompt);
       return data.text;
     } catch (error) {
-      console.error("Gemini Librarian Search Error:", error);
+      console.error('Librarian Search Error:', error);
       throw error;
     }
-  }
+  },
 };
-
