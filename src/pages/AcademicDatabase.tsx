@@ -52,10 +52,10 @@ const DOC_TYPES = ['All', 'Article', 'Book', 'Thesis', 'Report', 'Dataset', 'Con
 const LANGUAGES = ['All Languages', 'English', 'French', 'Portuguese', 'Swahili', 'Arabic', 'Shona', 'Ndebele'];
 
 const SOURCE_STATS = [
+  { label: 'OpenAlex Works', count: '240M+' },
   { label: 'Semantic Scholar', count: '200M+' },
-  { label: 'DOAJ Articles', count: '10M+' },
   { label: 'Europe PMC', count: '40M+' },
-  { label: 'BASE Theses', count: '300M+' },
+  { label: 'DOAJ Articles', count: '8M+' },
   { label: 'Historical Docs', count: '19M+' },
 ];
 
@@ -560,7 +560,7 @@ export default function AcademicDatabase() {
             <div>
               <div className="inline-flex items-center gap-2 bg-green-900/60 border border-green-700/40 text-green-300 text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3">
                 <GraduationCap size={11} />
-                769M+ Peer-Reviewed Documents
+                500M+ Peer-Reviewed Documents
               </div>
               <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-none">
                 Academic <span className="text-green-400">Database</span>

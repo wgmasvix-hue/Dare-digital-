@@ -834,7 +834,7 @@ export default function Library() {
               <div>
                 <div className="inline-flex items-center gap-2 bg-green-900/60 border border-green-700/40 text-green-300 text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3">
                   <Database size={11} />
-                  1,000,000+ Titles Indexed
+                  500M+ Titles Indexed
                 </div>
                 <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-none">
                   DARE <span className="text-green-400">Library</span>

@@ -36,9 +36,9 @@ const staggerContainer = {
 }
 
 const STATS = [
-  { value: "250M+",  label: "Global Papers",    icon: <FileText  size={18} /> },
-  { value: "10M+",   label: "Open Books",       icon: <BookOpen  size={18} /> },
-  { value: "1M+",    label: "Audiobooks",       icon: <Headphones size={18}/> },
+  { value: "500M+",  label: "Global Papers",    icon: <FileText  size={18} /> },
+  { value: "50M+",   label: "Open Books",       icon: <BookOpen  size={18} /> },
+  { value: "15K+",   label: "Audiobooks",       icon: <Headphones size={18}/> },
   { value: "50K+",   label: "Zim Students",     icon: <Users     size={18} /> },
 ]
 
@@ -49,7 +49,7 @@ const FEATURES = [
     bg:    "bg-green-50",
     text:  "text-green-700",
     title: "Global Open Access",
-    desc:  "Search across OpenAlex, Semantic Scholar, DSpace, OpenStax, and Project Gutenberg. One intelligent search — 560 million results.",
+    desc:  "Search across OpenAlex, Semantic Scholar, DSpace, OpenStax, and Project Gutenberg. One intelligent search — 500 million results.",
   },
   {
     icon:  <Sparkles size={28} />,
@@ -73,7 +73,7 @@ const FEATURES = [
     bg:    "bg-emerald-50",
     text:  "text-emerald-700",
     title: "Academic Research",
-    desc:  "560M+ scholarly papers from Semantic Scholar, Europe PMC, BASE, DOAJ and historical archives — ProQuest-level depth, free.",
+    desc:  "500M+ scholarly papers from Semantic Scholar, OpenAlex, Europe PMC, DOAJ and historical archives — ProQuest-level depth, free.",
   },
   {
     icon:  <Award size={28} />,
@@ -110,7 +110,7 @@ const HOW_IT_WORKS = [
     bg: "bg-green-50",
     border: "border-green-200",
     title: "Search Everything",
-    desc: "One search across 560M+ papers, 10M+ books, OpenStax textbooks, and Zimbabwe institutional repositories — results in under a second.",
+    desc: "One search across 500M+ papers, 50M+ books, OpenStax textbooks, and Zimbabwe institutional repositories — results in under a second.",
   },
   {
     step: "02",
@@ -213,8 +213,8 @@ export default function Home() {
 
           {/* Subtitle */}
           <motion.p variants={fadeIn} className="text-xl lg:text-2xl text-stone-600 font-medium max-w-3xl mx-auto mb-10 leading-relaxed text-balance">
-            DARE is Zimbabwe's Digital Academic Resource Engine — millions of open-access books,
-            560M+ scholarly papers, and an AI tutor powered by indigenous context.
+            DARE is Zimbabwe's Digital Academic Resource Engine — 50M+ open-access books,
+            500M+ scholarly papers, and an AI tutor powered by indigenous context.
           </motion.p>
 
           {/* Search */}
@@ -233,8 +233,8 @@ export default function Home() {
             {[
               { label: "DARE Institutional",  to: "/library?source=DARE%20Institutional" },
               { label: "OpenStax",            to: "/library?source=OpenStax" },
-              { label: "560M Papers",         to: "/academic" },
-              { label: "1M+ Open Books",      to: "/open-books" },
+              { label: "500M+ Papers",         to: "/academic" },
+              { label: "50M+ Open Books",      to: "/open-books" },
               { label: "Research Portal",     to: "/research" },
             ].map(l => (
               <Link key={l.label} to={l.to}
@@ -641,7 +641,7 @@ export default function Home() {
             </Link>
             <Link to="/academic"
               className="inline-flex items-center justify-center px-10 py-4 bg-white text-stone-900 border-2 border-stone-200 rounded-full font-black text-xl hover:border-amber-400 hover:bg-amber-50 transition-all">
-              Explore 560M Papers
+              Explore 500M+ Papers
             </Link>
           </div>
         </div>

@@ -20,7 +20,7 @@ const EXPLORE_ITEMS = [
   {
     emoji: '📚',
     label: 'Open Books',
-    sub: '1M+ free titles',
+    sub: '50M+ free titles',
     href: '/open-books',
   },
   {

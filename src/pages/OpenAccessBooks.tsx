@@ -260,7 +260,7 @@ export default function OpenAccessBooks() {
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight max-w-2xl mb-4">
-            1,000,000+ <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Open Source</span> Scholar Library
+            50M+ <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Open Access</span> Books & Texts
           </h1>
           <p className="text-lg text-slate-300 max-w-xl font-medium leading-relaxed">
             Search scientific preprints, curriculum reference textbooks, and classic literature dynamically. All fully licensed for Zimbabwe Education 5.0 scholar training.
@@ -349,7 +349,7 @@ export default function OpenAccessBooks() {
                       setSearchQuery(e.target.value);
                       setActivePreset(null);
                     }}
-                    placeholder="Search over 1M scientific and OER books..."
+                    placeholder="Search over 50M open-access books and texts..."
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 focus:bg-white transition-all"
                   />
                 </div>

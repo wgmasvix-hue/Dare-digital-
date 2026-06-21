@@ -423,7 +423,7 @@ export default function LocalResearch() {
             onClick={() => setActiveTab('openalex')}
           >
             <Globe size={13} className="inline mr-1 -mt-0.5" />
-            Global Papers (200M+)
+            Global Papers (500M+)
           </button>
         </div>
 
@@ -701,7 +701,7 @@ export default function LocalResearch() {
                       <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-400"
-                        placeholder="Search 200M+ papers by title, author, keyword…"
+                        placeholder="Search 500M+ papers by title, author, keyword…"
                         value={oaQuery}
                         onChange={e => setOaQuery(e.target.value)}
                       />
