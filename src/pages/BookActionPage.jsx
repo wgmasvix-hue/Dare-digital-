@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, FileText, Sparkles, Brain, ArrowLeft, Loader2, Send, Download, MessageSquare, Edit3, Copy, Save, CheckCircle2, Zap, AlertCircle } from 'lucide-react';
+import { BookOpen, FileText, Sparkles, Brain, ArrowLeft, Loader2, Send, Download, MessageSquare, Edit3, Copy, Save, CheckCircle2, Zap, AlertCircle, GraduationCap } from 'lucide-react';
 import { geminiService } from '../services/geminiService';
 import { supabase } from '../lib/supabase';
 import { transformBook, BOOK_SELECT, OPENSTAX_CURATED } from '../lib/transformBook';
@@ -10,6 +10,7 @@ import jsPDF from 'jspdf';
 import ReactMarkdown from 'react-markdown';
 import Toast from '../components/ui/Toast';
 import { useGamification } from '../context/GamificationContext';
+import generatedContent from '../data/generatedBookContent.json';
 
 const ALL_OER = [...OPENSTAX_CURATED, ...ALL_ADDITIONAL_OER];
 
@@ -33,6 +34,14 @@ export default function BookActionPage() {
   const [chatHistory, setChatHistory] = useState([]);
   const [followUp, setFollowUp] = useState('');
   const [toast, setToast] = useState(null);
+
+  // BAKO auto-generated content
+  const [bakoSummary, setBakoSummary] = useState(null);
+  const [bakoLessonPlan, setBakoLessonPlan] = useState(null);
+  const [bakoLoading, setBakoLoading] = useState(false);
+  const [bakoTab, setBakoTab] = useState('summary'); // 'summary' | 'lesson'
+  const bakoAutoRanRef = useRef(false);
+
   const chatEndRef = useRef(null);
   const { gainXp } = useGamification();
 
@@ -231,6 +240,66 @@ export default function BookActionPage() {
     fetchBookData();
   }, [id, book]);
 
+  // Auto-generate BAKO summary + lesson plan when book loads
+  useEffect(() => {
+    if (!book || bakoAutoRanRef.current) return;
+    bakoAutoRanRef.current = true;
+
+    const cacheKey = `bako_content_${book.id}`;
+
+    // 1. Check pre-generated JSON bundle first
+    if (generatedContent[book.id]?.summary && generatedContent[book.id]?.lessonPlan) {
+      setBakoSummary(generatedContent[book.id].summary);
+      setBakoLessonPlan(generatedContent[book.id].lessonPlan);
+      return;
+    }
+
+    // 2. Check localStorage cache
+    try {
+      const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+      if (cached?.summary && cached?.lessonPlan) {
+        setBakoSummary(cached.summary);
+        setBakoLessonPlan(cached.lessonPlan);
+        return;
+      }
+    } catch { /* ignore */ }
+
+    // 3. Generate via DeepSeek in the browser
+    setBakoLoading(true);
+    const bookContext = {
+      id: book.id,
+      title: book.title,
+      author_names: book.author_names,
+      subject: book.subject || book.faculty,
+      description: book.description,
+    };
+
+    Promise.all([
+      geminiService.summarize(
+        `Title: ${bookContext.title}\nAuthor: ${bookContext.author_names || 'Unknown'}\nSubject: ${bookContext.subject || 'General'}\nDescription: ${bookContext.description || ''}`,
+        `Write a concise educational summary (150–200 words) for Zimbabwean students. Include what the book covers, why it matters, and key concepts. No bullet points.`
+      ),
+      geminiService.generateLessonPlan({
+        subject: bookContext.subject || 'General Studies',
+        level: 'Secondary/Tertiary',
+        topic: bookContext.title,
+        duration: '60 minutes',
+        resources: 'Textbook, chalk, local environment',
+      }),
+    ])
+      .then(([summary, lessonPlan]) => {
+        setBakoSummary(summary);
+        setBakoLessonPlan(lessonPlan);
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({ summary, lessonPlan, generatedAt: new Date().toISOString() }));
+        } catch { /* storage full */ }
+      })
+      .catch((err) => {
+        console.warn('BAKO auto-gen failed:', err);
+      })
+      .finally(() => setBakoLoading(false));
+  }, [book]);
+
   const runAiAction = async (actionName, prompt) => {
     if (!book) {
       setResult("Error: Book information not found.");
@@ -244,7 +313,7 @@ export default function BookActionPage() {
     setChatHistory([]);
 
     const messages = [
-      "Initializing DARA neural link...",
+      "Initializing BAKO neural link...",
       "Extracting core concepts...",
       "Cross-referencing with Zimbabwe Heritage-Based Curriculum...",
       "Analyzing key themes...",
@@ -262,7 +331,7 @@ export default function BookActionPage() {
     try {
       // Modify prompt for highly gamified output
       const addictivePrompt = `
-        You are DARA, a highly advanced, engaging, and enthusiastic AI Tutor.
+        You are BAKO (Boundless African Knowledge Oracle), a highly advanced, engaging, and enthusiastic AI Tutor.
         Your task: ${prompt}
         
         Make your response incredibly engaging to read. Use structured markdown formatting, emojis, bold text for key insights, and an encouraging tone.
@@ -293,7 +362,7 @@ export default function BookActionPage() {
           if (i === words.length - 1) {
             setIsTyping(false);
             gainXp(parseInt(import.meta.env.VITE_XP_BOOK_ACTION || '50')); // add XP!
-            setToast({ message: `DARA completed analysis! +50 XP`, type: "success" });
+            setToast({ message: `BAKO completed analysis! +50 XP`, type: "success" });
           }
         }, delay);
         delay += speed;
@@ -318,7 +387,7 @@ export default function BookActionPage() {
     
     try {
       const addictivePrompt = `
-        You are DARA. The user is asking a follow-up about the study material.
+        You are BAKO. The user is asking a follow-up about the study material.
         Question: ${userMessage}
         
         Make your response incredibly engaging to read. Use structured markdown formatting, emojis, bold text for key insights, and an encouraging tone.
@@ -403,7 +472,7 @@ export default function BookActionPage() {
       <div className="min-h-screen bg-bg-base p-4 md:p-8 flex flex-col items-center justify-center text-center">
         <Loader2 className="animate-spin text-teal-600 mb-4" size={48} />
         <h3 className="text-xl font-bold font-display text-primary">Loading Book and AI Tools...</h3>
-        <p className="text-sm text-text-muted mt-2">DARA is loading content from the OER system.</p>
+        <p className="text-sm text-text-muted mt-2">BAKO is loading content from the OER system.</p>
       </div>
     );
   }
@@ -497,6 +566,81 @@ export default function BookActionPage() {
 
           {/* Right Column: Results & Chat */}
           <div className="lg:col-span-7 space-y-8">
+
+            {/* BAKO Auto-Generated Summary + Lesson Plan */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="rounded-3xl overflow-hidden shadow-sm border border-amber-100"
+              style={{ background: 'linear-gradient(135deg, #1C0A00 0%, #451A03 100%)' }}
+            >
+              {/* Header */}
+              <div className="px-6 pt-5 pb-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🌳</span>
+                  <div>
+                    <p className="text-amber-300 font-bold text-sm tracking-wide uppercase">BAKO AI — Auto Analysis</p>
+                    <p className="text-amber-100/60 text-xs">Boundless African Knowledge Oracle</p>
+                  </div>
+                </div>
+                {bakoLoading && (
+                  <div className="flex items-center gap-2 text-amber-400 text-xs font-medium">
+                    <Loader2 size={14} className="animate-spin" />
+                    Generating…
+                  </div>
+                )}
+              </div>
+
+              {/* Tabs */}
+              <div className="flex gap-1 px-6 pb-0">
+                <button
+                  onClick={() => setBakoTab('summary')}
+                  className={`px-4 py-2 text-sm font-semibold rounded-t-xl transition-all ${bakoTab === 'summary' ? 'bg-amber-500 text-white' : 'text-amber-300/70 hover:text-amber-300'}`}
+                >
+                  📖 Summary
+                </button>
+                <button
+                  onClick={() => setBakoTab('lesson')}
+                  className={`px-4 py-2 text-sm font-semibold rounded-t-xl transition-all ${bakoTab === 'lesson' ? 'bg-amber-500 text-white' : 'text-amber-300/70 hover:text-amber-300'}`}
+                >
+                  📋 Lesson Plan
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="bg-[#fdf8f0] min-h-[160px] rounded-b-3xl p-6">
+                {bakoLoading ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-amber-800 gap-3">
+                    <Loader2 size={28} className="animate-spin text-amber-600" />
+                    <p className="text-sm font-medium">BAKO is preparing your {bakoTab === 'summary' ? 'summary' : 'lesson plan'}…</p>
+                  </div>
+                ) : bakoTab === 'summary' ? (
+                  bakoSummary ? (
+                    <div className="prose prose-sm prose-amber max-w-none text-stone-800 prose-headings:text-amber-900 prose-strong:text-amber-800">
+                      <ReactMarkdown>{bakoSummary}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-8 text-amber-700 gap-2">
+                      <GraduationCap size={28} className="opacity-40" />
+                      <p className="text-sm italic">BAKO summary will appear here once generated.</p>
+                    </div>
+                  )
+                ) : (
+                  bakoLessonPlan ? (
+                    <div className="prose prose-sm prose-amber max-w-none text-stone-800 prose-headings:text-amber-900 prose-strong:text-amber-800 prose-table:text-xs">
+                      <ReactMarkdown>{bakoLessonPlan}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-8 text-amber-700 gap-2">
+                      <GraduationCap size={28} className="opacity-40" />
+                      <p className="text-sm italic">BAKO lesson plan will appear here once generated.</p>
+                    </div>
+                  )
+                )}
+              </div>
+            </motion.div>
+
             <AnimatePresence mode="wait">
               {loadingAction ? (
                 <motion.div 
@@ -519,7 +663,7 @@ export default function BookActionPage() {
                   </motion.div>
 
                   <h3 className="text-3xl font-display font-black text-white mb-3 tracking-wide z-10 relative">
-                    DARA IS ANALYZING
+                    BAKO IS ANALYZING
                   </h3>
                   
                   <AnimatePresence mode="wait">
@@ -564,7 +708,7 @@ export default function BookActionPage() {
                         ) : (
                           <CheckCircle2 className="text-emerald-500" size={24} />
                         )}
-                        {isTyping ? 'DARA is Synching Data...' : 'Analysis Complete'}
+                        {isTyping ? 'BAKO is Synching Data...' : 'Analysis Complete'}
                       </h2>
                       <div className="flex gap-2">
                         <button onClick={copyToClipboard} className="p-2 bg-bg-muted rounded-xl text-text-muted hover:text-primary hover:bg-primary/10 transition-all" title="Copy">
