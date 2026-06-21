@@ -56,8 +56,8 @@ const FEATURES = [
     color: "amber",
     bg:    "bg-amber-50",
     text:  "text-amber-600",
-    title: "DARA AI Tutor",
-    desc:  "Powered by the latest AI, DARA explains concepts, generates ZIMSEC-aligned quizzes, and speaks Shona and Ndebele.",
+    title: "BAKO AI Tutor",
+    desc:  "Powered by the latest AI, BAKO explains concepts, generates ZIMSEC-aligned quizzes, and speaks Shona and Ndebele.",
   },
   {
     icon:  <GraduationCap size={28} />,
@@ -118,8 +118,8 @@ const HOW_IT_WORKS = [
     color: "text-amber-600",
     bg: "bg-amber-50",
     border: "border-amber-200",
-    title: "Learn with DARA AI",
-    desc: "Open any resource and DARA becomes your personal tutor — summarising chapters, answering questions in Shona or English, generating quizzes.",
+    title: "Learn with BAKO AI",
+    desc: "Open any resource and BAKO becomes your personal tutor — summarising chapters, answering questions in Shona or English, generating quizzes.",
   },
   {
     step: "03",
@@ -141,7 +141,7 @@ const TESTIMONIALS = [
     color: "bg-green-100 text-green-700",
   },
   {
-    quote: "DARA explained organic chemistry in Shona better than my textbook did in English. This platform is genuinely revolutionary.",
+    quote: "BAKO explained organic chemistry in Shona better than my textbook did in English. This platform is genuinely revolutionary.",
     name: "Rudo C.",
     role: "A-Level Student, Harare",
     initials: "RC",
@@ -256,6 +256,32 @@ export default function Home() {
                   <div className="text-amber-600">{s.icon}</div>
                   <div className="text-2xl font-black text-stone-900 tracking-tight">{s.value}</div>
                   <div className="text-xs font-bold text-stone-500 uppercase tracking-wider">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Photo gallery strip */}
+          <motion.div variants={fadeIn} className="mt-10 w-full max-w-4xl">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
+              {[
+                { url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=400&q=80", alt: "Students studying together", span: "col-span-2 row-span-2" },
+                { url: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80", alt: "Open books in library" },
+                { url: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=400&q=80", alt: "Library shelves" },
+                { url: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=400&q=80", alt: "Classroom learning" },
+                { url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80", alt: "Group study session" },
+              ].map((img, i) => (
+                <div key={i}
+                  className={`relative overflow-hidden rounded-2xl bg-stone-100 ${i === 0 ? "col-span-2 row-span-2" : ""}`}
+                  style={{ aspectRatio: i === 0 ? "1/1" : "1/1" }}>
+                  <img
+                    src={img.url}
+                    alt={img.alt}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                    style={{ aspectRatio: "1/1" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-stone-900/30 to-transparent" />
                 </div>
               ))}
             </div>
@@ -476,53 +502,73 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── DARA AI SECTION — warm mahogany dark ──────────────── */}
+      {/* ── BAKO AI SECTION ───────────────────────────────────── */}
       <section className="py-24 px-6 lg:px-12 overflow-hidden relative border-y border-stone-800"
-        style={{ background: "linear-gradient(135deg, #1C1009 0%, #2D1800 50%, #1A0C05 100%)" }}>
+        style={{ background: "linear-gradient(135deg, #1C0A00 0%, #2D1400 50%, #1A0800 100%)" }}>
 
-        {/* Warm amber glow */}
+        {/* Amber glow */}
         <div className="absolute top-1/2 left-1/2 w-[700px] h-[700px] rounded-full blur-[130px] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-          style={{ background: "rgba(217,119,6,0.08)" }}></div>
+          style={{ background: "rgba(217,119,6,0.09)" }}></div>
         <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full blur-[100px] pointer-events-none"
-          style={{ background: "rgba(21,128,61,0.06)" }}></div>
+          style={{ background: "rgba(194,65,12,0.07)" }}></div>
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center relative z-10">
-          {/* Chat demo */}
+          {/* BAKO identity card */}
           <div className="order-2 lg:order-1 relative">
-            <div className="absolute -inset-1 rounded-[2.5rem] opacity-20 blur"
-              style={{ background: "linear-gradient(135deg, #D97706, #15803D)" }}></div>
-            <div className="aspect-[4/5] sm:aspect-square bg-stone-950/80 backdrop-blur-2xl rounded-[2.5rem] border border-stone-700/50 relative p-6 sm:p-10 flex flex-col justify-end shadow-2xl">
-              <div className="absolute top-8 right-8">
-                <Sparkles size={36} className="text-amber-400 opacity-50" />
+            <div className="absolute -inset-2 rounded-[2.5rem] opacity-25 blur-xl pointer-events-none"
+              style={{ background: "linear-gradient(135deg, #F59E0B, #C2410C)" }}></div>
+            <div className="relative bg-stone-950/70 backdrop-blur-2xl rounded-[2.5rem] border border-amber-900/30 p-8 sm:p-10 shadow-2xl">
+              {/* BAKO header */}
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-lg border border-amber-700/40"
+                  style={{ background: "linear-gradient(135deg, #92400E, #B45309)" }}>
+                  🌳
+                </div>
+                <div>
+                  <h3 className="font-black text-xl text-white tracking-tight">BAKO AI</h3>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                    <span className="text-[10px] text-amber-300/70 font-bold uppercase tracking-widest">Boundless African Knowledge Oracle</span>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-5 w-full">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ delay: 0.2 }}
-                  className="flex items-start gap-3"
-                >
-                  <div className="w-9 h-9 rounded-full bg-stone-700 flex-shrink-0"></div>
-                  <div className="px-4 py-3.5 bg-stone-700/60 backdrop-blur rounded-2xl border border-stone-600/50 text-stone-200 font-medium text-sm shadow-sm leading-relaxed">
-                    Ndinoda kunzwisisa photosynthesis — ndizvo chii chaizvo?
+              {/* Chat bubbles */}
+              <div className="space-y-4">
+                <motion.div initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }} transition={{ delay: 0.2 }}
+                  className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-stone-700 flex-shrink-0 flex items-center justify-center text-sm">👤</div>
+                  <div className="px-4 py-3 bg-stone-700/50 rounded-2xl rounded-tl-none border border-stone-600/40 text-stone-200 text-sm leading-relaxed">
+                    Ndinoda kunzwisisa photosynthesis — ndizvo chii?
                   </div>
                 </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ delay: 0.7 }}
-                  className="flex items-start gap-3 flex-row-reverse"
-                >
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg"
-                    style={{ background: "linear-gradient(135deg, #D97706, #15803D)" }}>
-                    <Sparkles size={16} className="text-white" />
+                <motion.div initial={{ opacity: 0, x: 16 }} whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }} transition={{ delay: 0.7 }}
+                  className="flex items-start gap-3 flex-row-reverse">
+                  <div className="w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center text-sm"
+                    style={{ background: "linear-gradient(135deg, #92400E, #C2410C)" }}>🌳</div>
+                  <div className="px-4 py-3 rounded-2xl rounded-tr-none border text-sm leading-relaxed"
+                    style={{ background: "rgba(217,119,6,0.12)", borderColor: "rgba(217,119,6,0.3)", color: "#FEF3C7" }}>
+                    Fikiridza muti une "solar panels" mumashizha ake — chlorophyll. Inobata chiedza chezuva
+                    ichishandura mvura ne CO₂ kuita zuccheri ne oksijeni! 🌿☀️
                   </div>
-                  <div className="px-4 py-3.5 backdrop-blur-md rounded-2xl border text-sm font-medium leading-relaxed"
-                    style={{ background: "rgba(217,119,6,0.12)", borderColor: "rgba(217,119,6,0.25)", color: "#FEF3C7" }}>
-                    Fikiridza zura riri mudenga — muti une "solar panels" mumashizha ake anonzi chlorophyll. Anotora
-                    chiedza chezuva kuchinja mvura ne CO₂ kuita zuccheri (simba) ne oksijeni! 🌿☀️
+                </motion.div>
+                <motion.div initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }} transition={{ delay: 1.1 }}
+                  className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-stone-700 flex-shrink-0 flex items-center justify-center text-sm">👤</div>
+                  <div className="px-4 py-3 bg-stone-700/50 rounded-2xl rounded-tl-none border border-stone-600/40 text-stone-200 text-sm leading-relaxed">
+                    Can you make a ZIMSEC quiz on this?
+                  </div>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, x: 16 }} whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }} transition={{ delay: 1.5 }}
+                  className="flex items-start gap-3 flex-row-reverse">
+                  <div className="w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center text-sm"
+                    style={{ background: "linear-gradient(135deg, #92400E, #C2410C)" }}>🌳</div>
+                  <div className="px-4 py-3 rounded-2xl rounded-tr-none border text-sm leading-relaxed"
+                    style={{ background: "rgba(217,119,6,0.12)", borderColor: "rgba(217,119,6,0.3)", color: "#FEF3C7" }}>
+                    Of course! Here's a 5-question O-Level Biology quiz on Photosynthesis, aligned with ZIMSEC… 📝
                   </div>
                 </motion.div>
               </div>
@@ -532,23 +578,24 @@ export default function Home() {
           {/* Copy */}
           <div className="order-1 lg:order-2">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-bold mb-8 tracking-widest uppercase"
-              style={{ background: "rgba(217,119,6,0.12)", borderColor: "rgba(217,119,6,0.25)", color: "#FCD34D" }}>
+              style={{ background: "rgba(217,119,6,0.12)", borderColor: "rgba(217,119,6,0.3)", color: "#FCD34D" }}>
               <Cpu size={15} /> Indigenous Intelligence
             </div>
-            <h2 className="text-5xl lg:text-6xl font-black tracking-tight mb-8 leading-[1.1] text-white"
+            <h2 className="text-5xl lg:text-6xl font-black tracking-tight mb-6 leading-[1.1] text-white"
               style={{ fontFamily: 'var(--font-accent)' }}>
               Meet{" "}
               <span className="text-transparent bg-clip-text"
-                style={{ backgroundImage: "linear-gradient(135deg, #FCD34D 0%, #A3E635 100%)" }}>
-                DARA
+                style={{ backgroundImage: "linear-gradient(135deg, #F59E0B 0%, #C2410C 100%)" }}>
+                BAKO
               </span>
-              , your AI learning companion.
+              ,{" "}your AI learning companion.
             </h2>
-            <p className="text-xl text-stone-400 font-medium mb-10 leading-relaxed">
-              Break down complex subjects, get ZIMSEC-aligned summaries, and generate instant practice quizzes.
-              DARA is fluent in <strong className="text-stone-200">English, Shona, and Ndebele</strong>.
+            <p className="text-lg text-stone-400 font-medium mb-8 leading-relaxed">
+              Like the baobab — ancient, vast, and life-giving. BAKO breaks down complex subjects,
+              generates ZIMSEC-aligned quizzes, and is fluent in{" "}
+              <strong className="text-stone-200">English, Shona, and Ndebele</strong>.
             </p>
-            <ul className="space-y-4 mb-10">
+            <ul className="space-y-3.5 mb-10">
               {[
                 "Summarise any chapter in seconds",
                 "Contextual Q&A within your documents",
@@ -556,13 +603,14 @@ export default function Home() {
                 "Shona & Ndebele language support",
               ].map(item => (
                 <li key={item} className="flex items-center gap-3 font-medium text-stone-200">
-                  <CheckCircle2 className="shrink-0" size={22} style={{ color: "#4ADE80" }} /> {item}
+                  <CheckCircle2 className="shrink-0" size={20} style={{ color: "#F59E0B" }} /> {item}
                 </li>
               ))}
             </ul>
             <Link to="/tutor"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-white text-stone-900 rounded-full font-bold text-lg hover:bg-amber-50 transition-all hover:-translate-y-1 active:translate-y-0 shadow-lg">
-              Try DARA Free
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-full font-bold text-lg transition-all hover:-translate-y-1 active:translate-y-0 shadow-xl text-white"
+              style={{ background: "linear-gradient(135deg, #B45309, #C2410C)" }}>
+              Try BAKO Free
               <PlayCircle size={22} />
             </Link>
           </div>

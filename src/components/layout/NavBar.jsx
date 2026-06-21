@@ -165,7 +165,7 @@ export default function NavBar() {
             )}
           </Link>
 
-          {/* DARA AI — amber accent */}
+          {/* BAKO AI — amber accent */}
           <Link
             to="/tutor"
             className={`relative px-4 py-2 rounded-full text-sm font-semibold transition-all duration-150 focus:outline-none group ${
@@ -175,8 +175,8 @@ export default function NavBar() {
             }`}
           >
             <span className="flex items-center gap-1.5">
-              <Sparkles size={13} className="text-amber-500 shrink-0" />
-              DARA AI
+              <span className="text-base leading-none">🌳</span>
+              BAKO AI
             </span>
             {isActive('/tutor') && (
               <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-[2.5px] rounded-full bg-amber-500" />
@@ -426,7 +426,7 @@ export default function NavBar() {
                   </Link>
                 ))}
 
-                {/* DARA AI */}
+                {/* BAKO AI */}
                 <Link
                   to="/tutor"
                   className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold transition-colors ${
@@ -435,8 +435,8 @@ export default function NavBar() {
                       : 'text-amber-600 hover:bg-amber-50/60'
                   }`}
                 >
-                  <Sparkles size={18} className="text-amber-500 shrink-0" />
-                  DARA AI
+                  <span className="text-xl leading-none">🌳</span>
+                  BAKO AI
                 </Link>
 
                 {/* Explore section */}

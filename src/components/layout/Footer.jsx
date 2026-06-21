@@ -64,7 +64,7 @@ export default function Footer() {
               { label: 'Open Books', to: '/open-books' },
               { label: 'Academic Database', to: '/academic' },
               { label: 'Research Portal', to: '/research' },
-              { label: 'DARA AI Tutor', to: '/tutor' },
+              { label: 'BAKO AI Tutor', to: '/tutor' },
             ].map(({ label, to }) => (
               <Link
                 key={to}

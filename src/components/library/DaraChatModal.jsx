@@ -84,14 +84,15 @@ export default function DaraChatModal({ isOpen, onClose, initialMessage = "" }) 
             className="bg-white w-full max-w-2xl h-[600px] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden border border-slate-200"
           >
           {/* Header */}
-          <div className="p-6 bg-emerald-600 text-white flex items-center justify-between">
+          <div className="p-6 text-white flex items-center justify-between"
+            style={{ background: "linear-gradient(135deg, #92400E, #C2410C)" }}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                <Bot size={24} />
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl">
+                🌳
               </div>
               <div>
-                <h3 className="font-bold text-lg leading-tight">DARA AI Tutor</h3>
-                <p className="text-xs text-emerald-100">Digital Academic Research Assistant</p>
+                <h3 className="font-bold text-lg leading-tight">BAKO AI Tutor</h3>
+                <p className="text-xs text-amber-200">Boundless African Knowledge Oracle</p>
               </div>
             </div>
             <button 
@@ -187,7 +188,7 @@ export default function DaraChatModal({ isOpen, onClose, initialMessage = "" }) 
               </button>
             </form>
             <p className="text-[10px] text-center text-slate-400 mt-4">
-              DARA AI can make mistakes. Check important info.
+              BAKO AI can make mistakes. Always verify important information.
             </p>
           </div>
         </motion.div>
