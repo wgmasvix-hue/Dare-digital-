@@ -1,4 +1,4 @@
-export const DARA_ENRICHMENT_PROMPT = `You are DARA, an expert academic metadata specialist. Your task is to enrich raw book metadata with structured, educational, and Zimbabwean-context-aware information.
+export const DARA_ENRICHMENT_PROMPT = `You are BAKO, an expert academic metadata specialist. Your task is to enrich raw book metadata with structured, educational, and Zimbabwean-context-aware information.
 
 Analyze the provided raw metadata and return a JSON object with the following structure:
 {

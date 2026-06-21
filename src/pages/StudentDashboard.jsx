@@ -526,7 +526,7 @@ export default function StudentDashboard() {
 
         <button 
           onClick={() => {
-            setDaraInitialMessage("Hi DARA! I'd like to create a new reading list for my research.");
+            setDaraInitialMessage("Hi BAKO! I'd like to create a new reading list for my research.");
             setIsDaraModalOpen(true);
           }}
           className="group bg-white border border-[#E8DFD0] p-6 rounded-3xl flex items-center gap-4 hover:border-[#C8861A] hover:shadow-md transition-all text-left"
@@ -725,7 +725,7 @@ export default function StudentDashboard() {
               <p className="text-[#8E8271]">No reading lists yet.</p>
               <button 
                 onClick={() => {
-                  setDaraInitialMessage("Hi DARA! I'd like to create a new reading list for my research.");
+                  setDaraInitialMessage("Hi BAKO! I'd like to create a new reading list for my research.");
                   setIsDaraModalOpen(true);
                 }}
                 className="mt-4 text-[#C8861A] font-semibold hover:underline flex items-center gap-2 mx-auto"
@@ -776,7 +776,7 @@ export default function StudentDashboard() {
         whileHover={{ scale: 1.05, y: -4 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => {
-          setDaraInitialMessage("Mhoro DARA! I'm on my student dashboard. Can you help me organize my study schedule for this week?");
+          setDaraInitialMessage("Mhoro BAKO! I'm on my student dashboard. Can you help me organize my study schedule for this week?");
           setIsDaraModalOpen(true);
         }}
         className="fixed bottom-8 right-8 bg-[#3D3028] text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 z-50 group hover:bg-[#4D4038] transition-all"

@@ -30,7 +30,7 @@ export default function HBCRemedialAssistant({ initialData = null }) {
 
   useEffect(() => {
     if (initialData && messages.length === 0) {
-      const welcomeMessage = `Hello! I'm DARA, your HBC Inclusivity Specialist. 
+      const welcomeMessage = `Hello! I'm BAKO, your HBC Inclusivity Specialist. 
       
 Every student learns differently. I see you're teaching **${initialData.subject}** on **${initialData.topic}**. 
 
@@ -46,7 +46,7 @@ Which group of students shall we support today?`;
     } else if (messages.length === 0) {
       setMessages([{ 
         role: 'ai', 
-        text: "Hello! I'm DARA, your HBC Inclusivity Specialist. I help teachers ensure that no student is left behind. What topic are we differentiating today?" 
+        text: "Hello! I'm BAKO, your HBC Inclusivity Specialist. I help teachers ensure that no student is left behind. What topic are we differentiating today?" 
       }]);
     }
   }, [initialData]);
@@ -73,7 +73,7 @@ Which group of students shall we support today?`;
         text: m.text 
       }));
       
-      const systemInstruction = `You are DARA, Zimbabwe's Heritage-Based Curriculum (HBC) Inclusivity Specialist.
+      const systemInstruction = `You are BAKO, Zimbabwe's Heritage-Based Curriculum (HBC) Inclusivity Specialist.
       Your goal is to help teachers differentiate their instruction to meet the needs of all learners.
       
       DIFFERENTIATION PRINCIPLES:
@@ -168,7 +168,7 @@ Which group of students shall we support today?`;
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask DARA for remedial or extension ideas..."
+              placeholder="Ask BAKO for remedial or extension ideas..."
               className={styles.input}
               disabled={isLoading}
             />
@@ -206,7 +206,7 @@ Which group of students shall we support today?`;
             </div>
           ) : (
             <div className={styles.noPlan}>
-              <p>No activities generated yet. Chat with DARA to differentiate your lesson!</p>
+              <p>No activities generated yet. Chat with BAKO to differentiate your lesson!</p>
             </div>
           )}
         </div>

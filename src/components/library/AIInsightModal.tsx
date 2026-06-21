@@ -84,7 +84,7 @@ Description context if available: ${book.description || 'No description availabl
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles size={20} className="text-amber-300" />
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-teal-50">DARA AI Insight</h2>
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-teal-50">BAKO AI Insight</h2>
                 </div>
                 <h3 className="text-2xl font-serif font-bold line-clamp-2 leading-tight">
                   {book?.title}

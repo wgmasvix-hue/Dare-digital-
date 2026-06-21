@@ -64,7 +64,7 @@ const FEATURES = [
     tag: "Most Requested",
     title: "MoPSE-Aligned Lesson Plan Generator",
     description:
-      "Generate complete, curriculum-accurate lesson plans in minutes. DARA knows Zimbabwe's primary and secondary syllabi, knows rural classroom constraints, and structures every plan to ZIMSEC standards.",
+      "Generate complete, curriculum-accurate lesson plans in minutes. BAKO knows Zimbabwe's primary and secondary syllabi, knows rural classroom constraints, and structures every plan to ZIMSEC standards.",
     bullets: [
       "Specific objectives written to ZTC behavioural standards",
       "Teacher activity & pupil activity columns auto-structured",
@@ -81,9 +81,9 @@ const FEATURES = [
     tag: "Field-Ready",
     title: "Teaching Practice Field Companion",
     description:
-      "Student-teachers on attachment are isolated from campus resources. DARA travels with them — offline-capable, reflective, and ready at 10pm before a 7am lesson.",
+      "Student-teachers on attachment are isolated from campus resources. BAKO travels with them — offline-capable, reflective, and ready at 10pm before a 7am lesson.",
     bullets: [
-      "Structured observation journal with DARA reflection prompts",
+      "Structured observation journal with BAKO reflection prompts",
       "Supervisor visit preparation — mock observation questioning",
       "Post-visit feedback analysis and improvement planning",
       "Offline-first PWA — works through load-shedding",
@@ -98,10 +98,10 @@ const FEATURES = [
     tag: "Zimbabwe-First",
     title: "Zimbabwe Curriculum Intelligence Engine",
     description:
-      "Every Grade 1–6 primary topic, every ZJC and O-Level syllabus objective, every A-Level content requirement — queryable, explained, and mapped to teaching strategies by DARA.",
+      "Every Grade 1–6 primary topic, every ZJC and O-Level syllabus objective, every A-Level content requirement — queryable, explained, and mapped to teaching strategies by BAKO.",
     bullets: [
       "Full ZJC/O-Level/A-Level syllabus database",
-      "DARA explains what each objective means practically",
+      "BAKO explains what each objective means practically",
       "Past ZIMSEC exam pattern analysis per topic",
       "Suggested teaching sequences per term",
       "Cross-subject integration maps",
@@ -186,7 +186,7 @@ function CurriculumEngine() {
       setResponse(result);
       setTimeout(() => responseRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     } catch (err) {
-      setError("DARA couldn't analyze the curriculum. Please try again.");
+      setError("BAKO couldn't analyze the curriculum. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -270,7 +270,7 @@ function CurriculumEngine() {
             display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
           }}
         >
-          {loading ? "DARA is analyzing..." : "Analyze Topic Objectives"}
+          {loading ? "BAKO is analyzing..." : "Analyze Topic Objectives"}
         </motion.button>
       </div>
 
@@ -350,7 +350,7 @@ function TPCompanion() {
       setResponse(result);
       setTimeout(() => responseRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     } catch (err) {
-      setError("DARA couldn't process your request. Please try again.");
+      setError("BAKO couldn't process your request. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -513,7 +513,7 @@ function TPCompanion() {
             display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
           }}
         >
-          {loading ? "DARA is analyzing..." : "Get DARA's Guidance"}
+          {loading ? "BAKO is analyzing..." : "Get BAKO's Guidance"}
         </motion.button>
       </div>
 
@@ -533,7 +533,7 @@ function TPCompanion() {
           >
             <div style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ background: COLORS.sagePale, color: COLORS.forest, padding: "4px 12px", borderRadius: "20px", fontSize: "11px", fontWeight: 700 }}>
-                DARA MENTORSHIP
+                BAKO MENTORSHIP
               </span>
               <button
                 onClick={() => {
@@ -645,7 +645,7 @@ function LiveDemo() {
       setPlan(result);
       setTimeout(() => planRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     } catch (err) {
-      setError("DARA couldn't generate the plan. Please try again.");
+      setError("BAKO couldn't generate the plan. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -684,7 +684,7 @@ function LiveDemo() {
             textTransform: "uppercase", color: COLORS.amberLight,
             marginBottom: "6px",
           }}>
-            ⚡ Live DARA Demo
+            ⚡ Live BAKO Demo
           </div>
           <div style={{
             fontSize: "20px", fontWeight: 700, color: COLORS.white,
@@ -790,12 +790,12 @@ function LiveDemo() {
                   display: "inline-block",
                 }} 
               />
-              DARA is writing your lesson plan...
+              BAKO is writing your lesson plan...
             </>
           ) : (
             <>
               <Sparkles size={20} />
-              Generate Lesson Plan with DARA
+              Generate Lesson Plan with BAKO
             </>
           )}
         </motion.button>
@@ -851,7 +851,7 @@ function LiveDemo() {
                 background: "#FEF9C3", color: COLORS.amber,
                 padding: "4px 12px", borderRadius: "20px", fontSize: "11px",
               }}>
-                DARA Generated
+                BAKO Generated
               </span>
             </div>
             <button
@@ -1116,7 +1116,7 @@ function ZTCPortfolio() {
       setResponse(result);
       setTimeout(() => responseRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     } catch (err) {
-      setError("DARA couldn't generate the portfolio structure. Please try again.");
+      setError("BAKO couldn't generate the portfolio structure. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -1145,7 +1145,7 @@ function ZTCPortfolio() {
     { label: "Unique titles accessible", value: "847", change: "+124 this term", icon: <BookOpen size={20} /> },
     { label: "Active student users", value: "312", change: "87% of cohort", icon: <Users size={20} /> },
     { label: "Lesson plans generated", value: "2,341", change: "This semester", icon: <ClipboardCheck size={20} /> },
-    { label: "DARA study sessions", value: "4,847", change: "Avg 34 min each", icon: <Sparkles size={20} /> },
+    { label: "BAKO study sessions", value: "4,847", change: "Avg 34 min each", icon: <Sparkles size={20} /> },
     { label: "O-Level syllabus coverage", value: "100%", change: "All 8 subjects", icon: <CheckCircle2 size={20} /> },
     { label: "TP journals submitted", value: "156", change: "via Dare", icon: <FileText size={20} /> },
   ];
@@ -1251,7 +1251,7 @@ function ZTCPortfolio() {
             display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
           }}
         >
-          {loading ? "DARA is building..." : "Generate Portfolio Structure"}
+          {loading ? "BAKO is building..." : "Generate Portfolio Structure"}
         </motion.button>
       </div>
 

@@ -220,7 +220,7 @@ export default function PDFViewer({ url, onClose, title, contentId }: PDFViewerP
               <div className="p-6 border-b border-slate-50 dark:border-slate-800/50 flex items-center justify-between bg-purple-50/30 dark:bg-purple-900/10">
                 <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
                   <Sparkles size={18} />
-                  <span className="font-serif font-bold">DARA Insight</span>
+                  <span className="font-serif font-bold">BAKO Insight</span>
                 </div>
                 <button 
                   onClick={() => setShowAiPanel(false)}
@@ -248,7 +248,7 @@ export default function PDFViewer({ url, onClose, title, contentId }: PDFViewerP
                       <Sparkles size={32} />
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-2">How can DARA help?</h4>
+                      <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-2">How can BAKO help?</h4>
                       <p className="text-sm text-slate-500 max-w-[200px] mx-auto">
                         Get AI-powered insights for the current page you're reading.
                       </p>

@@ -15,7 +15,7 @@ export default function AIChat() {
     if (isOpen && messages.length === 0) {
       setMessages([{
         role: 'ai',
-        text: "Mhoro! I'm DARA, your Digital Academic Research Assistant. Grounded in the Education 5.0 framework, I'm here to facilitate Teaching, Research, Community Service, Innovation, and Industrialization. What are we exploring today?"
+        text: "Mhoro! I'm BAKO, your Digital Academic Research Assistant. Grounded in the Education 5.0 framework, I'm here to facilitate Teaching, Research, Community Service, Innovation, and Industrialization. What are we exploring today?"
       }])
     }
   }, [isOpen])
@@ -58,7 +58,7 @@ export default function AIChat() {
             <div className={styles.chatHeader}>
               <div className={styles.headerInfo}>
                 <Bot size={20} />
-                <span>DARA AI Tutor</span>
+                <span>BAKO AI Tutor</span>
               </div>
               <button onClick={() => setIsOpen(false)} className={styles.closeBtn}>
                 <X size={18} />
@@ -93,7 +93,7 @@ export default function AIChat() {
               <input 
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask DARA anything..."
+                placeholder="Ask BAKO anything..."
                 disabled={isLoading}
               />
               <button type="submit" disabled={!input.trim() || isLoading}>
@@ -109,7 +109,7 @@ export default function AIChat() {
             className={styles.chatTrigger}
           >
             <Sparkles size={24} />
-            <span>Ask DARA</span>
+            <span>Ask BAKO</span>
           </motion.button>
         )}
       </AnimatePresence>

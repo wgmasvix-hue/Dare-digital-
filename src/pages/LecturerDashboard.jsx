@@ -383,7 +383,7 @@ export default function LecturerDashboard() {
         whileHover={{ scale: 1.05, y: -4 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => {
-          setDaraInitialMessage("Hi DARA! I'm on my lecturer dashboard. Can you help me analyze student engagement for my latest uploads?");
+          setDaraInitialMessage("Hi BAKO! I'm on my lecturer dashboard. Can you help me analyze student engagement for my latest uploads?");
           setIsDaraModalOpen(true);
         }}
         className="fixed bottom-8 right-8 bg-[#3D3028] text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 z-50 group hover:bg-[#4D4038] transition-all"

@@ -379,7 +379,7 @@ function ResultRow({
             <button
               onClick={() => window.open(`https://dare.co.zw/academic?q=${encodeURIComponent(result.title)}`, '_blank')}
               className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg hover:bg-amber-100 transition-colors border border-amber-200">
-              <Sparkles size={11} /> DARA Assist
+              <Sparkles size={11} /> BAKO Assist
             </button>
           </div>
         </div>

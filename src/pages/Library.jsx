@@ -139,7 +139,7 @@ function LibraryListRow({ book, progress }) {
             )}
             <button onClick={() => navigate(`/book-action/${book.id}?action=edu5`, { state: { book } })}
               className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg hover:bg-amber-100 transition-colors border border-amber-200">
-              <SparklesIcon size={11} /> DARA Assist
+              <SparklesIcon size={11} /> BAKO Assist
             </button>
           </div>
         </div>

@@ -31,7 +31,7 @@ export default function HBCTeachingAidAssistant({ initialData = null }) {
 
   useEffect(() => {
     if (initialData && messages.length === 0) {
-      const welcomeMessage = `Hello! I'm DARA, your HBC Teaching Aid Guide. I see you're looking for teaching aids for **${initialData.subject}** on the topic of **${initialData.topic}**.
+      const welcomeMessage = `Hello! I'm BAKO, your HBC Teaching Aid Guide. I see you're looking for teaching aids for **${initialData.subject}** on the topic of **${initialData.topic}**.
 
 I can help you design low-cost, high-impact teaching aids using locally available Zimbabwean materials. Should we start with a list of required materials or a step-by-step construction guide?`;
       
@@ -39,7 +39,7 @@ I can help you design low-cost, high-impact teaching aids using locally availabl
     } else if (messages.length === 0) {
       setMessages([{ 
         role: 'ai', 
-        text: "Hello! I'm DARA, your HBC Teaching Aid Guide. I specialize in helping teachers create innovative teaching aids using local resources, aligned with Zimbabwe's Heritage-Based Curriculum. What are we building today?" 
+        text: "Hello! I'm BAKO, your HBC Teaching Aid Guide. I specialize in helping teachers create innovative teaching aids using local resources, aligned with Zimbabwe's Heritage-Based Curriculum. What are we building today?" 
       }]);
     }
   }, [initialData]);
@@ -66,7 +66,7 @@ I can help you design low-cost, high-impact teaching aids using locally availabl
         text: m.text 
       }));
       
-      const systemInstruction = `You are DARA, Zimbabwe's Heritage-Based Curriculum (HBC) aligned Teaching Aid Specialist. 
+      const systemInstruction = `You are BAKO, Zimbabwe's Heritage-Based Curriculum (HBC) aligned Teaching Aid Specialist. 
       Your goal is to help teachers design and construct effective teaching aids using locally available, low-cost or no-cost materials.
       
       CORE HBC PRINCIPLES FOR TEACHING AIDS:
@@ -200,7 +200,7 @@ I can help you design low-cost, high-impact teaching aids using locally availabl
             </div>
           ) : (
             <div className={styles.noPlan}>
-              <p>No guide generated yet. Ask DARA for a teaching aid design!</p>
+              <p>No guide generated yet. Ask BAKO for a teaching aid design!</p>
             </div>
           )}
         </div>

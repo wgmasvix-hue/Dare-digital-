@@ -39,7 +39,7 @@ export default function DaraChatModal({ isOpen, onClose, initialMessage = "" }) 
       const aiMessage = { role: 'ai', text: response };
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error("DARA Chat Error:", error);
+      console.error("BAKO Chat Error:", error);
       setMessages(prev => [...prev, { role: 'ai', text: "I'm sorry, I encountered an error. Please try again later." }]);
     } finally {
       setIsLoading(false);

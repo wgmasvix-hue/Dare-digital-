@@ -85,7 +85,7 @@ export default function AIViewer({ content }: { content: InstitutionalContent })
                 <Loader2 size={24} className="animate-spin" />
                 <div className="absolute inset-0 bg-emerald-500 blur-md opacity-20 animate-pulse" />
               </div>
-              <span className="text-sm font-bold uppercase tracking-widest animate-pulse">DARA is analyzing...</span>
+              <span className="text-sm font-bold uppercase tracking-widest animate-pulse">BAKO is analyzing...</span>
             </motion.div>
           ) : response ? (
             <motion.div 

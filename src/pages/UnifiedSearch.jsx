@@ -208,7 +208,7 @@ const UnifiedSearch = () => {
                     <BrainCircuit className="text-amber-600" size={24} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-slate-900">DARA AI Tutor</h2>
+                    <h2 className="text-xl font-bold text-slate-900">BAKO AI Tutor</h2>
                     <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Analyzing: {selectedResource.title}</p>
                   </div>
                 </div>
@@ -266,7 +266,7 @@ const UnifiedSearch = () => {
                   {isAiLoading ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                       <Loader2 className="animate-spin text-amber-600" size={48} />
-                      <p className="text-slate-500 font-medium animate-pulse">DARA is thinking...</p>
+                      <p className="text-slate-500 font-medium animate-pulse">BAKO is thinking...</p>
                     </div>
                   ) : aiContent ? (
                     <motion.div 

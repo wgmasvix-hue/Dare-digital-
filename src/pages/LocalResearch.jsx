@@ -1025,7 +1025,7 @@ export default function LocalResearch() {
                 {isGeneratingReport ? (
                   <div className={styles.loadingContainer}>
                     <div className={styles.spinner}></div>
-                    <p>DARA is analyzing the resource and generating a professional archival report...</p>
+                    <p>BAKO is analyzing the resource and generating a professional archival report...</p>
                   </div>
                 ) : (
                   <div className={styles.markdownContent}>

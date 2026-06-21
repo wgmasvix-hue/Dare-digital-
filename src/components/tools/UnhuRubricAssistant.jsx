@@ -30,7 +30,7 @@ export default function UnhuRubricAssistant({ initialData = null }) {
 
   useEffect(() => {
     if (initialData && messages.length === 0) {
-      const welcomeMessage = `Salibonani! I'm DARA, your Unhu/Ubuntu Character Specialist. 
+      const welcomeMessage = `Salibonani! I'm BAKO, your Unhu/Ubuntu Character Specialist. 
       
 In the Heritage-Based Curriculum, character is just as important as grades. I see you're working with **${initialData.level}** students. 
 
@@ -46,7 +46,7 @@ Which area of character development should we focus on?`;
     } else if (messages.length === 0) {
       setMessages([{ 
         role: 'ai', 
-        text: "Salibonani! I'm DARA, your Unhu/Ubuntu Character Specialist. I help teachers build 'The Heart' of the student. How can we integrate Zimbabwean values into your classroom today?" 
+        text: "Salibonani! I'm BAKO, your Unhu/Ubuntu Character Specialist. I help teachers build 'The Heart' of the student. How can we integrate Zimbabwean values into your classroom today?" 
       }]);
     }
   }, [initialData]);
@@ -73,7 +73,7 @@ Which area of character development should we focus on?`;
         text: m.text 
       }));
       
-      const systemInstruction = `You are DARA, Zimbabwe's Heritage-Based Curriculum (HBC) Unhu/Ubuntu Character Specialist.
+      const systemInstruction = `You are BAKO, Zimbabwe's Heritage-Based Curriculum (HBC) Unhu/Ubuntu Character Specialist.
       Your goal is to help teachers assess and develop the affective domain (values, ethics, character).
       
       UNHU/UBUNTU CORE VALUES:
@@ -167,7 +167,7 @@ Which area of character development should we focus on?`;
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask DARA to help with character assessment..."
+              placeholder="Ask BAKO to help with character assessment..."
               className={styles.input}
               disabled={isLoading}
             />
@@ -205,7 +205,7 @@ Which area of character development should we focus on?`;
             </div>
           ) : (
             <div className={styles.noPlan}>
-              <p>No rubric generated yet. Chat with DARA to create one!</p>
+              <p>No rubric generated yet. Chat with BAKO to create one!</p>
             </div>
           )}
         </div>

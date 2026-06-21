@@ -29,7 +29,7 @@ export default function HBCLessonPlannerAssistant({ initialData = null }) {
 
   useEffect(() => {
     if (initialData && messages.length === 0) {
-      const welcomeMessage = `Hello! I'm DARA, your HBC Lesson Planning Assistant. I see you're interested in planning a lesson for **${initialData.subject}** on the topic of **${initialData.topic}** for **${initialData.level}** level.
+      const welcomeMessage = `Hello! I'm BAKO, your HBC Lesson Planning Assistant. I see you're interested in planning a lesson for **${initialData.subject}** on the topic of **${initialData.topic}** for **${initialData.level}** level.
 
 Would you like me to generate a draft lesson plan aligned with Zimbabwe's Heritage-Based Curriculum (HBC) for you, or should we discuss specific objectives first?`;
       
@@ -37,7 +37,7 @@ Would you like me to generate a draft lesson plan aligned with Zimbabwe's Herita
     } else if (messages.length === 0) {
       setMessages([{ 
         role: 'ai', 
-        text: "Hello! I'm DARA, your HBC Lesson Planning Assistant. I can help you create detailed, interactive lesson plans aligned with Zimbabwe's Heritage-Based Curriculum (HBC). What subject and topic are we working on today?" 
+        text: "Hello! I'm BAKO, your HBC Lesson Planning Assistant. I can help you create detailed, interactive lesson plans aligned with Zimbabwe's Heritage-Based Curriculum (HBC). What subject and topic are we working on today?" 
       }]);
     }
   }, [initialData]);
@@ -65,7 +65,7 @@ Would you like me to generate a draft lesson plan aligned with Zimbabwe's Herita
       }));
       
       // Specialized prompt for lesson planning
-      const systemInstruction = `You are DARA, Zimbabwe's Heritage-Based Curriculum (HBC) aligned teacher training AI. 
+      const systemInstruction = `You are BAKO, Zimbabwe's Heritage-Based Curriculum (HBC) aligned teacher training AI. 
       Your goal is to help teachers develop high-quality lesson plans.
       
       CORE HBC PRINCIPLES:
@@ -164,7 +164,7 @@ Would you like me to generate a draft lesson plan aligned with Zimbabwe's Herita
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask DARA to help with your lesson plan..."
+              placeholder="Ask BAKO to help with your lesson plan..."
               className={styles.input}
               disabled={isLoading}
             />
@@ -202,7 +202,7 @@ Would you like me to generate a draft lesson plan aligned with Zimbabwe's Herita
             </div>
           ) : (
             <div className={styles.noPlan}>
-              <p>No lesson plan generated yet. Chat with DARA to create one!</p>
+              <p>No lesson plan generated yet. Chat with BAKO to create one!</p>
             </div>
           )}
         </div>
@@ -244,7 +244,7 @@ Would you like me to generate a draft lesson plan aligned with Zimbabwe's Herita
         </div>
 
         <div className={styles.hbcTips}>
-          <h4>DARA Pro Tip</h4>
+          <h4>BAKO Pro Tip</h4>
           <p>HBC is about more than just facts. It's about building character (Unhu) and solving local problems through innovation.</p>
         </div>
       </div>

@@ -2,7 +2,7 @@ import { supabase } from "../lib/supabase";
 import { DARA_ENRICHMENT_PROMPT } from "../lib/daraEnrichmentPrompt";
 
 /**
- * Enriches book metadata using DARA AI.
+ * Enriches book metadata using BAKO AI.
  * @param {Object} metadata - Raw metadata (title, description, authors, etc.)
  * @returns {Promise<Object>} - Structured enrichment data
  */
@@ -22,7 +22,7 @@ export async function enrichMetadata(metadata) {
     const result = JSON.parse(data.text);
     return result;
   } catch (error) {
-    console.error("DARA Enrichment Error:", error);
-    throw new Error("Failed to enrich metadata with DARA AI.");
+    console.error("BAKO Enrichment Error:", error);
+    throw new Error("Failed to enrich metadata with BAKO AI.");
   }
 }

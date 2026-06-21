@@ -30,7 +30,7 @@ export default function HBCAssessmentAssistant({ initialData = null }) {
 
   useEffect(() => {
     if (initialData && messages.length === 0) {
-      const welcomeMessage = `Hello! I'm DARA, your HBC Assessment Specialist. I see you're working on **${initialData.subject}** for **${initialData.level}** level on the topic of **${initialData.topic}**.
+      const welcomeMessage = `Hello! I'm BAKO, your HBC Assessment Specialist. I see you're working on **${initialData.subject}** for **${initialData.level}** level on the topic of **${initialData.topic}**.
       
 I can help you create:
 1. **Interactive Quizzes** (Multiple Choice & Short Answer)
@@ -44,7 +44,7 @@ What type of assessment should we build first?`;
     } else if (messages.length === 0) {
       setMessages([{ 
         role: 'ai', 
-        text: "Hello! I'm DARA, your HBC Assessment Specialist. I help teachers create meaningful evaluations that measure not just facts, but skills, values (Unhu), and innovation. What are we assessing today?" 
+        text: "Hello! I'm BAKO, your HBC Assessment Specialist. I help teachers create meaningful evaluations that measure not just facts, but skills, values (Unhu), and innovation. What are we assessing today?" 
       }]);
     }
   }, [initialData]);
@@ -71,7 +71,7 @@ What type of assessment should we build first?`;
         text: m.text 
       }));
       
-      const systemInstruction = `You are DARA, Zimbabwe's Heritage-Based Curriculum (HBC) Assessment Specialist.
+      const systemInstruction = `You are BAKO, Zimbabwe's Heritage-Based Curriculum (HBC) Assessment Specialist.
       Your goal is to help teachers create assessments that align with the 5.0 model.
       
       ASSESSMENT PRINCIPLES:
@@ -166,7 +166,7 @@ What type of assessment should we build first?`;
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask DARA to generate a quiz or practical task..."
+              placeholder="Ask BAKO to generate a quiz or practical task..."
               className={styles.input}
               disabled={isLoading}
             />
@@ -204,7 +204,7 @@ What type of assessment should we build first?`;
             </div>
           ) : (
             <div className={styles.noPlan}>
-              <p>No assessment generated yet. Chat with DARA to create one!</p>
+              <p>No assessment generated yet. Chat with BAKO to create one!</p>
             </div>
           )}
         </div>
@@ -246,7 +246,7 @@ What type of assessment should we build first?`;
         </div>
 
         <div className={styles.hbcTips}>
-          <h4>DARA Assessment Tip</h4>
+          <h4>BAKO Assessment Tip</h4>
           <p>HBC assessments should measure the 'Head, Heart, and Hands'. Don't just test memory; test application and character.</p>
         </div>
       </div>

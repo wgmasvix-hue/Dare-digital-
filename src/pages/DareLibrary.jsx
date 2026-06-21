@@ -260,7 +260,7 @@ const ResourceDetail = ({ resource, onClose, onToast, aiDataSaverActive }) => {
                 {generating ? (
                   <div className="flex flex-col items-center justify-center py-8 gap-3">
                     <Loader2 size={24} className="animate-spin text-amber-500" />
-                    <p className="text-sm text-slate-500 font-medium">DARA AI is analyzing this resource...</p>
+                    <p className="text-sm text-slate-500 font-medium">BAKO AI is analyzing this resource...</p>
                   </div>
                 ) : aiSummary ? (
                   <>

@@ -238,7 +238,7 @@ export default function BookCard({ publication, variant = 'tile', onOpen, loadin
               navigate(`/book-action/${id}?action=edu5`, { state: { book: publication } });
             }}
             className="flex items-center gap-1.5 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all border border-teal-400/20"
-            title="DARA AI Assist"
+            title="BAKO AI Assist"
           >
             <Sparkles size={11} className="animate-pulse text-amber-300" />
             <span>AI Assist</span>

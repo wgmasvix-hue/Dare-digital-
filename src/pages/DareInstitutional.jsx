@@ -642,7 +642,7 @@ const Onboarding = () => {
                 { key: 'reqReg', label: 'Require student registration' },
                 { key: 'guest', label: 'Allow guest browsing' },
                 { key: 'download', label: 'Student can download resources' },
-                { key: 'dara', label: 'DARA AI available to students' }
+                { key: 'dara', label: 'BAKO AI available to students' }
               ].map(setting => (
                 <div key={setting.key} className="flex items-center justify-between">
                   <span className="text-sm text-gray-700">{setting.label}</span>
@@ -805,7 +805,7 @@ const Reports = () => {
         <Card className="p-4"><p className="text-xs text-gray-500">Total Sessions</p><h3 className="text-2xl font-bold">0</h3></Card>
         <Card className="p-4"><p className="text-xs text-gray-500">Unique Students</p><h3 className="text-2xl font-bold">0</h3></Card>
         <Card className="p-4"><p className="text-xs text-gray-500">Resources Accessed</p><h3 className="text-2xl font-bold">0</h3></Card>
-        <Card className="p-4"><p className="text-xs text-gray-500">DARA AI Queries</p><h3 className="text-2xl font-bold">0</h3></Card>
+        <Card className="p-4"><p className="text-xs text-gray-500">BAKO AI Queries</p><h3 className="text-2xl font-bold">0</h3></Card>
       </div>
 
       <div className="border-b border-gray-200">
@@ -936,7 +936,7 @@ const Reports = () => {
 
 const DaraAI = () => {
   const [messages, setMessages] = useState([
-    { role: 'ai', text: "Mhoro! 👋 I'm DARA, your institutional AI assistant for Mkoba Teachers College. I can help you understand your curriculum, find resources, and much more. What are you working on today?" }
+    { role: 'ai', text: "Mhoro! 👋 I'm BAKO, your institutional AI assistant for Mkoba Teachers College. I can help you understand your curriculum, find resources, and much more. What are you working on today?" }
   ]);
   const [input, setInput] = useState('');
   const [configOpen, setConfigOpen] = useState(true);
@@ -954,7 +954,7 @@ const DaraAI = () => {
       const response = await geminiService.chat(input, messages);
       setMessages(prev => [...prev, { role: 'ai', text: response }]);
     } catch (error) {
-      console.error('DARA AI Error:', error);
+      console.error('BAKO AI Error:', error);
       setMessages(prev => [...prev, { role: 'ai', text: "Sorry, I encountered an error. Please try again later." }]);
     } finally {
       setLoading(false);
@@ -969,7 +969,7 @@ const DaraAI = () => {
           <div className="p-4 bg-gray-50 flex justify-between items-center cursor-pointer" onClick={() => setConfigOpen(!configOpen)}>
             <div className="flex items-center gap-2">
               <Bot size={20} color={COLORS.navy} />
-              <span className="font-bold text-[var(--navy)]">DARA Configuration</span>
+              <span className="font-bold text-[var(--navy)]">BAKO Configuration</span>
               <Badge variant="navy">Scoped to Mkoba Teachers College</Badge>
             </div>
             {configOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
@@ -1024,14 +1024,14 @@ const DaraAI = () => {
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && send()}
                 disabled={loading}
-                placeholder={loading ? "DARA is thinking..." : "Ask DARA anything about your curriculum..."} 
+                placeholder={loading ? "BAKO is thinking..." : "Ask BAKO anything about your curriculum..."} 
                 className="flex-1 p-3 border border-[var(--border)] rounded-lg outline-none focus:ring-2 focus:ring-[var(--navy)] disabled:bg-gray-50"
               />
               <Button variant="primary" onClick={send} icon={loading ? Loader2 : ArrowRight} disabled={loading}>
                 {loading ? 'Thinking...' : 'Send'}
               </Button>
             </div>
-            <p className="text-xs text-center text-gray-400 mt-2">DARA searches 11,240 resources scoped to Mkoba Teachers College · Powered by Dare Digital Library</p>
+            <p className="text-xs text-center text-gray-400 mt-2">BAKO searches 11,240 resources scoped to Mkoba Teachers College · Powered by Dare Digital Library</p>
           </div>
         </Card>
       </div>
@@ -1039,7 +1039,7 @@ const DaraAI = () => {
       {/* Sidebar Stats */}
       <div className="w-64 space-y-4">
         <Card className="p-4">
-          <h4 className="font-bold text-[var(--navy)] mb-3">DARA Stats</h4>
+          <h4 className="font-bold text-[var(--navy)] mb-3">BAKO Stats</h4>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between"><span>Questions today</span><span className="font-bold">0</span></div>
             <div className="flex justify-between"><span>Avg response</span><span className="font-bold">—</span></div>
@@ -1426,7 +1426,7 @@ export default function DareInstitutional() {
     { id: 'students', label: 'Students', icon: Users },
     { id: 'reports', label: 'Reports', icon: FileText },
     { id: 'buku', label: 'Buku', icon: Globe },
-    { id: 'dara', label: 'DARA AI', icon: Bot }
+    { id: 'dara', label: 'BAKO AI', icon: Bot }
   ];
 
   return (

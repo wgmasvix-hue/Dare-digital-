@@ -275,7 +275,7 @@ export default function UploadWizard() {
       // Success feedback or just continue
     } catch (err) {
       console.error('Enrichment error:', err);
-      setError('DARA AI enrichment failed. You can still fill the fields manually.');
+      setError('BAKO AI enrichment failed. You can still fill the fields manually.');
     } finally {
       setIsEnriching(false);
     }
@@ -568,7 +568,7 @@ export default function UploadWizard() {
                 ) : (
                   <>
                     <Sparkles size={16} />
-                    <span>Auto-fill with DARA AI</span>
+                    <span>Auto-fill with BAKO AI</span>
                   </>
                 )}
               </button>
@@ -577,7 +577,7 @@ export default function UploadWizard() {
             {formData.enrichmentData && (
               <div className={styles.enrichmentSuccess}>
                 <Sparkles size={14} />
-                <span>Enriched by DARA AI: {formData.enrichmentData.dara_summary.substring(0, 100)}...</span>
+                <span>Enriched by BAKO AI: {formData.enrichmentData.dara_summary.substring(0, 100)}...</span>
               </div>
             )}
 

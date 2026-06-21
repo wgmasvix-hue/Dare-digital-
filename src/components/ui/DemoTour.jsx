@@ -19,14 +19,14 @@ const TOUR_STEPS = [
   },
   {
     title: "AI-Powered Data Saving",
-    description: "Our DARA AI helps you save up to 95% of mobile data by providing high-impact summaries before you download.",
+    description: "Our BAKO AI helps you save up to 95% of mobile data by providing high-impact summaries before you download.",
     target: "study-hub",
     icon: <Zap className="text-amber-500" size={24} />,
     position: "top"
   },
   {
-    title: "The AI Librarian (DARA)",
-    description: "Ask DARA anything! From study plans to complex research queries, your AI librarian is always ready.",
+    title: "The AI Librarian (BAKO)",
+    description: "Ask BAKO anything! From study plans to complex research queries, your AI librarian is always ready.",
     target: "ask-dara",
     icon: <Sparkles className="text-purple-500" size={24} />,
     position: "left"

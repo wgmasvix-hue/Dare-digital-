@@ -164,7 +164,7 @@ export default function HBCTransformer() {
                       <Sparkles size={20} className="absolute -top-2 -right-2 text-amber animate-pulse" />
                     </div>
                     <p className="text-soil font-medium italic">
-                      DARA is analyzing the content and aligning it with Zimbabwe's Heritage-Based Curriculum...
+                      BAKO is analyzing the content and aligning it with Zimbabwe's Heritage-Based Curriculum...
                     </p>
                   </motion.div>
                 ) : error ? (
