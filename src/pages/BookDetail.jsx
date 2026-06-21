@@ -31,6 +31,7 @@ import { offlineStorage } from '../lib/offlineStorage';
 import { useAuth } from '../hooks/useAuth';
 import BookCard from '../components/library/BookCard';
 import Toast from '../components/ui/Toast';
+import BakoSummaryCard from '../components/BakoSummaryCard';
 
 const ALL_OER = [...OPENSTAX_CURATED, ...ALL_ADDITIONAL_OER];
 
@@ -575,6 +576,11 @@ export default function BookDetail() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* BAKO AI Auto Summary */}
+            <div className="mb-8">
+              <BakoSummaryCard resource={book} />
             </div>
 
             <div className="prose prose-slate max-w-none prose-lg">

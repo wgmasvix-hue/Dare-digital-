@@ -64,6 +64,7 @@ import UnifiedSearch from './pages/UnifiedSearch';
 import SearchResults from './pages/SearchResults';
 import Institutions from './pages/Institutions';
 import Institution from './pages/Institution';
+import ResourceHub from './pages/ResourceHub';
 
 // Check if ALL_LOCAL_OER is loaded
 console.log("ALL_LOCAL_OER length:", window.ALL_LOCAL_OER?.length || "undefined");
@@ -95,6 +96,8 @@ createRoot(rootElement).render(
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            {/* Google OAuth callback — Supabase handles redirect, just navigate home */}
+            <Route path="/auth/callback" element={<Login />} />
             <Route path="/library" element={<Library />} />
             <Route path="/search" element={<UnifiedSearch />} />
             <Route path="/results" element={<SearchResults />} />
@@ -155,6 +158,9 @@ createRoot(rootElement).render(
             <Route path="/teachers-colleges" element={<TeachersColleges />} />
             <Route path="/teacher-tools" element={<TeacherTools />} />
             <Route path="/vocational-tools" element={<VocationalTools />} />
+
+            {/* Resource Hub */}
+            <Route path="/resources" element={<ResourceHub />} />
 
             {/* Placeholder Routes */}
             <Route path="/browse" element={<DareLibrary />} />

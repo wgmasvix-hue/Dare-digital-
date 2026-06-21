@@ -11,9 +11,10 @@ import GlobalSearch from './GlobalSearch';
 import LogoIcon from '../common/LogoIcon';
 
 const CORE_NAV = [
-  { label: 'Browse',   href: '/library'  },
-  { label: 'Academic', href: '/academic' },
-  { label: 'Research', href: '/research' },
+  { label: 'Browse',    href: '/library'    },
+  { label: 'Academic',  href: '/academic'   },
+  { label: 'Research',  href: '/research'   },
+  { label: 'Resources', href: '/resources'  },
 ];
 
 const EXPLORE_ITEMS = [
