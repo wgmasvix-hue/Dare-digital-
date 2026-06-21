@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DARE Digital Library</string>
+    <string name="title_activity_main">DARE Digital Library</string>
+    <string name="package_name">zw.ac.dare.digital</string>
+    <string name="custom_url_scheme">zw.ac.dare.digital</string>
+</resources>
