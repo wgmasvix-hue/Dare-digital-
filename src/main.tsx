@@ -40,6 +40,9 @@ declare global {
 
 /* ── Lazy page imports — each becomes its own JS chunk ─────────── */
 const Home              = lazy(() => import('./pages/Home'));
+const AuthorOnboarding  = lazy(() => import('./pages/AuthorOnboarding'));
+const BookWriter        = lazy(() => import('./pages/BookWriter'));
+const AITools           = lazy(() => import('./pages/AITools'));
 const Library           = lazy(() => import('./pages/Library'));
 const BookDetail        = lazy(() => import('./pages/BookDetail'));
 const BookActionPage    = lazy(() => import('./pages/BookActionPage'));
@@ -113,6 +116,9 @@ createRoot(rootElement).render(
                   <Route path="/book-action/:id" element={<BookActionPage />} />
                   <Route path="/reader/:id"    element={<Reader />} />
                   <Route path="/tutor"         element={<TutorPage />} />
+                  <Route path="/ai-tools"      element={<AITools />} />
+                  <Route path="/author-onboarding" element={<AuthorOnboarding />} />
+                  <Route path="/book-writer"   element={<BookWriter />} />
 
                   {/* Protected */}
                   <Route path="/dashboard" element={
@@ -165,7 +171,7 @@ createRoot(rootElement).render(
                   <Route path="/dspace"              element={<DSpaceIntegration />} />
                   <Route path="/dspace-explorer"     element={<DSpaceExplorer />} />
                   <Route path="/hbc-transformer"     element={<HBCTransformer />} />
-                  <Route path="/ai-tools"            element={<AIModelsTools />} />
+                  <Route path="/ai-models"           element={<AIModelsTools />} />
                   <Route path="/institutional"       element={<DareInstitutional />} />
                   <Route path="/premium"             element={<PremiumResource />} />
 
