@@ -1,0 +1,102 @@
+networks:
+  dspacenet:
+    driver: bridge
+
+volumes:
+  pgdata:
+  solrdata:
+  assetstore:
+
+services:
+
+  # ─── PostgreSQL ───────────────────────────────────────────────────────────────
+  dspacedb:
+    container_name: dspacedb
+    image: dspace/dspace-postgres-pgcrypto:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dspace}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dspace}
+      POSTGRES_DB: ${POSTGRES_DB:-dspace}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - dspacenet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dspace} -d ${POSTGRES_DB:-dspace}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Solr ─────────────────────────────────────────────────────────────────────
+  dspacesolr:
+    container_name: dspacesolr
+    image: dspace/dspace-solr:latest
+    volumes:
+      - solrdata:/var/solr/data
+    networks:
+      - dspacenet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8983/solr/"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ─── DSpace Backend (REST API) ─────────────────────────────────────────────────
+  dspace:
+    container_name: dspace
+    image: dspace/dspace:dspace-7.6.2-test
+    depends_on:
+      dspacedb:
+        condition: service_healthy
+      dspacesolr:
+        condition: service_healthy
+    environment:
+      # Database
+      db__P__url: "jdbc:postgresql://dspacedb:5432/${POSTGRES_DB:-dspace}"
+      db__P__username: ${POSTGRES_USER:-dspace}
+      db__P__password: ${POSTGRES_PASSWORD:-dspace}
+      # Solr
+      solr__P__server: "http://dspacesolr:8983/solr"
+      # Site identity
+      dspace__P__name: "${DSPACE_NAME:-Harare Polytechnic Digital Repository}"
+      dspace__P__hostname: "${DSPACE_HOSTNAME:-localhost}"
+      dspace__P__baseUrl: "http://${DSPACE_HOSTNAME:-localhost}:8080"
+      dspace__P__ui__url: "http://${DSPACE_HOSTNAME:-localhost}:4000"
+      dspace__P__server__url: "http://${DSPACE_HOSTNAME:-localhost}:8080/server"
+      # Admin
+      dspace__P__mail__server: "${MAIL_SERVER:-localhost}"
+      dspace__P__mail__from__address: "${MAIL_FROM:-dspace@hararepolytechnic.ac.zw}"
+      dspace__P__mail__admin: "${ADMIN_EMAIL:-admin@hararepolytechnic.ac.zw}"
+      # Allow registration from institutional domain
+      authentication-password__P__domain__valid: "hararepolytechnic.ac.zw"
+    volumes:
+      - assetstore:/dspace/assetstore
+      - ./config/local.cfg:/dspace/config/local.cfg:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - dspacenet
+    restart: unless-stopped
+
+  # ─── DSpace Angular Frontend ──────────────────────────────────────────────────
+  dspace-angular:
+    container_name: dspace-angular
+    image: dspace/dspace-angular:dspace-7.6.2
+    environment:
+      DSPACE_UI_SSL: "false"
+      DSPACE_UI_HOST: "${DSPACE_HOSTNAME:-localhost}"
+      DSPACE_UI_PORT: "4000"
+      DSPACE_UI_NAMESPACEPATH: "/"
+      DSPACE_REST_SSL: "false"
+      DSPACE_REST_HOST: "${DSPACE_HOSTNAME:-localhost}"
+      DSPACE_REST_PORT: "8080"
+      DSPACE_REST_NAMESPACEPATH: "/server"
+    depends_on:
+      - dspace
+    ports:
+      - "4000:4000"
+    networks:
+      - dspacenet
+    restart: unless-stopped
