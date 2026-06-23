@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Kiwix / WebZim crawler
+User-agent: CCBot
+Allow: /
+
+User-agent: zimwriterfs
+Allow: /
+
+Sitemap: https://dare.chengetai.co.zw/sitemap.xml
