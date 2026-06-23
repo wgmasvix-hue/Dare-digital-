@@ -6,12 +6,9 @@ import {
   LayoutGrid,
   List as ListIcon,
   Filter,
-  AlertCircle,
   History,
   Globe,
   ArrowRight,
-  RefreshCw,
-  Database,
   X
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -679,18 +676,6 @@ export default function Library() {
           </div>
         </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 p-6 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <AlertCircle size={24} className="text-red-500" />
-              <p className="font-medium">{error}</p>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-               <button className="px-4 py-2 bg-white border border-red-200 text-red-700 font-bold hover:bg-red-50 rounded-xl transition-colors shadow-sm" onClick={() => fetchPublications(false)}>Try Again</button>
-               {error.includes('Gutenberg') && <Link to="/ai-tools" className="px-4 py-2 bg-red-600 text-white font-bold hover:bg-red-700 rounded-xl transition-colors shadow-sm">Explore AI Tools</Link>}
-            </div>
-          </div>
-        )}
 
         {/* Controls */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -741,7 +726,7 @@ export default function Library() {
         </div>
 
         {/* Result Summary Bar */}
-        {(!loading || filteredPublications.length > 0) && (
+        {filteredPublications.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-4 min-h-[28px]">
             <span className="text-sm font-semibold text-slate-500 shrink-0">
               {filteredPublications.length.toLocaleString()} result{filteredPublications.length !== 1 ? 's' : ''}
@@ -769,102 +754,27 @@ export default function Library() {
           </div>
         )}
 
-        {/* Results */}
-        {filters.source === 'Research' && !loading && publications.length === 0 && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-12 bg-white rounded-3xl border border-amber/20 overflow-hidden shadow-xl"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              <div className="p-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber/10 text-amber font-bold text-[10px] uppercase tracking-widest rounded-full mb-4">
-                  <Database size={12} />
-                  Institutional Integration
-                </div>
-                <h3 className="text-2xl font-black text-soil mb-4 leading-tight">
-                  No local research synced yet.
-                </h3>
-                <p className="text-clay mb-8 text-sm leading-relaxed">
-                  Connect your institutional DSpace repository to automatically synchronize theses, journals, and local research papers with the DARE Open Access library.
-                </p>
-                <div className="flex flex-wrap gap-4">
-                  <Link 
-                    to="/dspace" 
-                    className="px-6 py-3 bg-soil text-white font-bold rounded-xl hover:bg-soil/90 shadow-lg shadow-soil/20 transition-all flex items-center gap-2"
-                  >
-                    <RefreshCw size={18} />
-                    Connect DSpace
-                  </Link>
-                  <Link 
-                    to="/help" 
-                    className="px-6 py-3 bg-white border border-border text-soil font-bold rounded-xl hover:bg-bg-base transition-all"
-                  >
-                    Integration Guide
-                  </Link>
-                </div>
-              </div>
-              <div className="bg-bg-base p-8 flex items-center justify-center border-l border-border/50">
-                 <div className="relative w-full max-w-xs aspect-square">
-                    <div className="absolute inset-0 bg-amber/10 rounded-full animate-pulse" />
-                    <div className="absolute inset-4 bg-white rounded-3xl shadow-2xl flex flex-col items-center justify-center p-6 text-center">
-                       <Database size={48} className="text-amber mb-4" />
-                       <div className="h-2 w-24 bg-slate-100 rounded-full mb-2" />
-                       <div className="h-2 w-16 bg-slate-100 rounded-full mb-6" />
-                       <div className="flex gap-2">
-                          <div className="w-8 h-8 bg-amber/20 rounded-lg" />
-                          <div className="w-8 h-8 bg-amber/20 rounded-lg" />
-                          <div className="w-8 h-8 bg-amber/20 rounded-lg" />
-                       </div>
-                    </div>
-                 </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
 
         <div className={
           viewMode === 'tile' ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6" : 
           viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" : 
           "flex flex-col gap-4"
         }>
-          {loading && publications.length === 0 ? (
-            // Skeletons
-            Array(12).fill(0).map((_, i) => (
-              <BookCard key={i} loading={true} variant={viewMode} />
-            ))
-          ) : filteredPublications.length > 0 ? (
-            filteredPublications.map(book => (
-              <BookCard
-                key={book.id}
-                publication={book}
-                variant={viewMode}
-                progress={bookProgress[book.id] || 0}
-                isSaved={savedIds.has(String(book.id))}
-                onToggleSave={toggleSaved}
-              />
-            ))
-          ) : (
-            <div className="col-span-full py-32 flex flex-col items-center justify-center text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
-              <div className="w-20 h-20 bg-slate-50 rounded-3xl shadow-inner flex items-center justify-center text-slate-400 mb-6 border border-slate-100">
-                <AlertCircle size={32} />
-              </div>
-              <h3 className="text-xl font-black text-slate-900 mb-2">No books found</h3>
-              <p className="text-slate-500 max-w-sm text-base">
-                We couldn't find any resources matching your current search or format filters.
-              </p>
-              <button 
-                onClick={() => {
-                  setLocalSearch('');
-                  setLocalCategory('All');
-                  clearFilters();
-                }}
-                className="mt-8 px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-base hover:bg-slate-800 hover:-translate-y-0.5 transition-all shadow-md active:translate-y-0"
-              >
-                Clear All Filters
-              </button>
-            </div>
-          )}
+          {loading && publications.length === 0
+            ? Array(12).fill(0).map((_, i) => (
+                <BookCard key={i} loading={true} variant={viewMode} />
+              ))
+            : filteredPublications.map(book => (
+                <BookCard
+                  key={book.id}
+                  publication={book}
+                  variant={viewMode}
+                  progress={bookProgress[book.id] || 0}
+                  isSaved={savedIds.has(String(book.id))}
+                  onToggleSave={toggleSaved}
+                />
+              ))
+          }
         </div>
 
         {/* Remote sources loading hint */}
