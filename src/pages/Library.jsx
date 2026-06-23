@@ -82,6 +82,7 @@ export default function Library() {
   const [localCategory, setLocalCategory] = useState('All');
   const [semanticResults, setSemanticResults] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingRemote, setLoadingRemote] = useState(false);
   const [error, setError] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
@@ -89,12 +90,15 @@ export default function Library() {
   const loadMoreRef = useRef(null);
   const LIMIT = 40;
 
+  const withTimeout = (promise, ms = 8000) =>
+    Promise.race([promise, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+
   // Fetch Data
   const fetchPublications = useCallback(async (isLoadMore = false) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       if (useSemanticSearch && semanticResults) {
         if (!isLoadMore) {
           setPublications(semanticResults);
@@ -105,89 +109,55 @@ export default function Library() {
       }
 
       const currentOffset = isLoadMore ? offsetRef.current : 0;
-      const currentPage = Math.floor(currentOffset / LIMIT) + 1;
-      
-      let dbData = [];
-      let openStaxData = [];
-      let gutenbergData = [];
-      let openStaxApiData = [];
-      let openLibraryData = [];
-      let arxivData = [];
-      let dbCount = 0;
-      let openStaxCount = 0;
-      let gutenbergCount = 0;
-      let openStaxApiCount = 0;
-      let openLibraryCount = 0;
-      let arxivCount = 0;
+      const page = Math.floor(currentOffset / LIMIT) + 1;
+      const accessOk = filters.access === 'All' || filters.access === 'Dare Access';
+      const srcAll = filters.source === 'All';
+      const srcPartner = filters.source === 'Partner Resources';
 
-      // 1. Fetch from Supabase
-      if (filters.source === 'All' || filters.source === 'Dare Library' || filters.source === 'Project Gutenberg' || filters.source === 'Partner Resources') {
-        const needsDirectQuery = filters.isbn || filters.yearFrom || filters.yearTo || 
+      // ── 1. Supabase books ─────────────────────────────────────────────────────
+      let dbData = [], dbCount = 0;
+      if (srcAll || filters.source === 'Dare Library' || filters.source === 'Project Gutenberg' || srcPartner) {
+        const needsDirectQuery = filters.isbn || filters.yearFrom || filters.yearTo ||
           filters.zimAuthored || filters.africanContext || filters.source === 'Project Gutenberg' ||
-          filters.source === 'Partner Resources' ||
-          (sortBy !== 'relevance' && sortBy !== 'title' && filters.q);
+          srcPartner || (sortBy !== 'relevance' && sortBy !== 'title' && filters.q);
 
         if (!needsDirectQuery) {
           const rpcParams = {
             p_query: filters.q || null,
             p_faculty: filters.faculty === 'All' ? null : filters.faculty,
             p_level: filters.level === 'All' ? null : filters.level,
-            p_limit: LIMIT,
-            p_offset: currentOffset,
-            p_sort: sortBy
+            p_limit: LIMIT, p_offset: currentOffset, p_sort: sortBy
           };
           const { data, count, error } = await supabase.rpc('search_publications', rpcParams, { count: 'exact' });
-          if (!error) {
-            dbData = data || [];
-            dbCount = count || 0;
-          }
+          if (!error) { dbData = data || []; dbCount = count || 0; }
         }
 
         if (dbData.length === 0 && (needsDirectQuery || dbCount === 0)) {
-          let query = supabase
-            .from('books')
-            .select(BOOK_SELECT, { count: 'exact' });
-
-          if (filters.source === 'Project Gutenberg') {
-            query = query.eq('source', 'Project Gutenberg');
-          } else if (filters.source === 'Partner Resources') {
-            // Include all books in partner resources as well per user request
-          }
-
+          let query = supabase.from('books').select(BOOK_SELECT, { count: 'exact' });
+          if (filters.source === 'Project Gutenberg') query = query.eq('source', 'Project Gutenberg');
           if (filters.faculty !== 'All') {
-            const facultyLower = filters.faculty.toLowerCase();
-            query = query.or(`subject.ilike.%${filters.faculty}%,faculty.ilike.%${filters.faculty}%,subject.ilike.%${facultyLower.split(' ')[0]}%,faculty.ilike.%${facultyLower.split(' ')[0]}%`);
+            const fl = filters.faculty.toLowerCase();
+            query = query.or(`subject.ilike.%${filters.faculty}%,faculty.ilike.%${filters.faculty}%,subject.ilike.%${fl.split(' ')[0]}%,faculty.ilike.%${fl.split(' ')[0]}%`);
           }
           if (filters.level !== 'All') query = query.ilike('programme', `%${filters.level}%`);
           if (filters.pillar !== 'All') query = query.contains('ai_topics', [filters.pillar]);
           if (filters.university !== 'All') query = query.ilike('institution_id', `%${filters.university}%`);
           if (filters.access !== 'All') {
-            if (filters.access === 'Dare Access') {
-              query = query.in('access_model', ['dare_access', 'open_access']);
-            } else if (filters.access === 'Licensed') {
-              query = query.eq('access_model', 'licensed');
-            } else if (filters.access === 'Purchased') {
-              query = query.eq('is_purchased', true);
-            }
+            if (filters.access === 'Dare Access') query = query.in('access_model', ['dare_access', 'open_access']);
+            else if (filters.access === 'Licensed') query = query.eq('access_model', 'licensed');
+            else if (filters.access === 'Purchased') query = query.eq('is_purchased', true);
           }
           if (filters.isbn) query = query.or(`description.ilike.%${filters.isbn}%,title.ilike.%${filters.isbn}%`);
-          if (filters.q) {
-            query = query.or(`title.ilike.%${filters.q}%,description.ilike.%${filters.q}%,author_names.ilike.%${filters.q}%`);
-          }
+          if (filters.q) query = query.or(`title.ilike.%${filters.q}%,description.ilike.%${filters.q}%,author_names.ilike.%${filters.q}%`);
           if (filters.yearFrom) query = query.gte('created_at', `${filters.yearFrom}-01-01`);
           if (filters.yearTo) query = query.lte('created_at', `${filters.yearTo}-12-31`);
-
           switch (sortBy) {
             case 'newest': query = query.order('created_at', { ascending: false }); break;
             case 'downloads': query = query.order('total_reads', { ascending: false }); break;
             case 'title': query = query.order('title', { ascending: true }); break;
             default: if (!filters.q) query = query.order('title', { ascending: true }); break;
           }
-
-          if (filters.source === 'Featured Items') {
-            query = query.eq('is_featured', true);
-          }
-          
+          if (filters.source === 'Featured Items') query = query.eq('is_featured', true);
           query = query.range(currentOffset, currentOffset + LIMIT - 1);
           const result = await query;
           if (result.error) throw result.error;
@@ -196,184 +166,128 @@ export default function Library() {
         }
       }
 
-      // 1.5 Fetch from DSpace Documents (Research)
-      let dspaceData = [];
-      let dspaceCount = 0;
-      if (filters.source === 'All' || filters.source === 'Research' || filters.source === 'Dare Library') {
-        let docQuery = supabase
-          .from('documents')
-          .select('*', { count: 'exact' })
-          .not('synced_from_dspace_at', 'is', null);
-
-        if (filters.q) {
-          docQuery = docQuery.or(`title.ilike.%${filters.q}%,creator.ilike.%${filters.q}%,description.ilike.%${filters.q}%`);
-        }
-        
-        if (filters.faculty !== 'All') {
-           docQuery = docQuery.or(`description.ilike.%${filters.faculty}%,title.ilike.%${filters.faculty}%`);
-        }
-
+      // ── 1.5 DSpace documents ──────────────────────────────────────────────────
+      let dspaceData = [], dspaceCount = 0;
+      if (srcAll || filters.source === 'Research' || filters.source === 'Dare Library') {
+        let docQuery = supabase.from('documents').select('*', { count: 'exact' }).not('synced_from_dspace_at', 'is', null);
+        if (filters.q) docQuery = docQuery.or(`title.ilike.%${filters.q}%,creator.ilike.%${filters.q}%,description.ilike.%${filters.q}%`);
+        if (filters.faculty !== 'All') docQuery = docQuery.or(`description.ilike.%${filters.faculty}%,title.ilike.%${filters.faculty}%`);
         docQuery = docQuery.range(currentOffset, currentOffset + LIMIT - 1);
         const { data, count, error } = await docQuery;
         if (!error) {
           dspaceData = (data || []).map(doc => ({
-            id: doc.id,
-            title: doc.title,
-            author_names: doc.creator || 'Unknown Author',
-            description: doc.description,
-            publisher_name: doc.institution || doc.publisher || 'DSpace Repository',
-            year_published: doc.date ? new Date(doc.date).getFullYear() : null,
-            format: doc.format || 'pdf',
-            access_model: 'open_access',
-            source: 'Research',
-            resource_type: 'Research',
-            file_url: doc.url,
-            is_dspace: true,
-            cover_image_url: null
+            id: doc.id, title: doc.title, author_names: doc.creator || 'Unknown Author',
+            description: doc.description, publisher_name: doc.institution || doc.publisher || 'DSpace Repository',
+            year_published: doc.date ? new Date(doc.date).getFullYear() : null, format: doc.format || 'pdf',
+            access_model: 'open_access', source: 'Research', resource_type: 'Research',
+            file_url: doc.url, is_dspace: true, cover_image_url: null
           }));
           dspaceCount = count || 0;
         }
       }
 
-      // 2. Fetch from Local OER Catalog
-      if ((filters.source === 'All' || filters.source === 'Partner Resources' || filters.source === 'Featured Items') && 
-          (filters.access === 'All' || filters.access === 'Dare Access')) {
+      // ── 2. Local OER catalog ──────────────────────────────────────────────────
+      let openStaxData = [], openStaxCount = 0;
+      if ((srcAll || srcPartner || filters.source === 'Featured Items') && accessOk) {
         if (!filters.zimAuthored && !filters.africanContext && !filters.isbn) {
           let filteredOER = ALL_LOCAL_OER;
-          
-          if (filters.source === 'Featured Items') {
-            filteredOER = filteredOER.filter(b => b.featured === true || b.is_featured === true);
-          }
-          
+          if (filters.source === 'Featured Items') filteredOER = filteredOER.filter(b => b.featured === true || b.is_featured === true);
           if (filters.faculty !== 'All') {
-            const facultyLower = filters.faculty.toLowerCase();
+            const fl = filters.faculty.toLowerCase();
             filteredOER = filteredOER.filter(b => {
-              const bFaculty = (b.faculty || "").toLowerCase();
-              const bSubject = (b.subject || "").toLowerCase();
-              return bFaculty.includes(facultyLower) || 
-                     facultyLower.includes(bFaculty) ||
-                     bSubject.includes(facultyLower) ||
-                     facultyLower.includes(bSubject);
+              const bf = (b.faculty || '').toLowerCase(), bs = (b.subject || '').toLowerCase();
+              return bf.includes(fl) || fl.includes(bf) || bs.includes(fl) || fl.includes(bs);
             });
           }
-          
           if (filters.q) {
             const q = filters.q.toLowerCase();
-            filteredOER = filteredOER.filter(b => 
-              b.title.toLowerCase().includes(q) || 
-              b.author_names.toLowerCase().includes(q)
-            );
+            filteredOER = filteredOER.filter(b => b.title.toLowerCase().includes(q) || b.author_names.toLowerCase().includes(q));
           }
-          
-          const start = currentOffset;
-          const end = start + LIMIT;
-          openStaxData = filteredOER.slice(start, end);
+          openStaxData = filteredOER.slice(currentOffset, currentOffset + LIMIT);
           openStaxCount = filteredOER.length;
         }
       }
 
-      // 3. Fetch from Gutenberg API
-      if ((filters.source === 'All' || filters.source === 'Partner Resources' || filters.source === 'Gutenberg' || filters.source === 'Project Gutenberg') && 
-          (filters.access === 'All' || filters.access === 'Dare Access')) {
-        try {
-          const page = Math.floor(currentOffset / LIMIT) + 1;
-          const gData = await gutenbergService.searchBooks(filters.q, page);
-          gutenbergData = gData.books;
-          gutenbergCount = gData.count;
-        } catch (gErr) {
-          console.error('Gutenberg fetch error:', gErr);
-          setError('Gutenberg library is currently unavailable. Please try again or explore our AI tools for alternative resources.');
+      // ── Phase 1: show local data immediately ──────────────────────────────────
+      const buildMerge = (gData, osApiData, olData, axData, gCount, osApiCount, olCount, axCount) => {
+        let combined = [];
+        if (srcPartner) {
+          combined = [...dbData, ...openStaxData, ...gData, ...osApiData, ...olData, ...axData];
+          setTotalCount(dbCount + openStaxCount + gCount + osApiCount + olCount + axCount);
+        } else if (filters.source === 'Research') {
+          combined = dspaceData; setTotalCount(dspaceCount);
+        } else if (filters.source === 'Gutenberg' || filters.source === 'Project Gutenberg') {
+          combined = gData; setTotalCount(gCount);
+        } else if (filters.source === 'Open Library') {
+          combined = olData; setTotalCount(olCount);
+        } else if (filters.source === 'arXiv Research') {
+          combined = axData; setTotalCount(axCount);
+        } else if (filters.source === 'Dare Library') {
+          combined = [...dbData, ...dspaceData]; setTotalCount(dbCount + dspaceCount);
+        } else if (filters.source === 'Featured Items') {
+          combined = [...dbData, ...openStaxData]; setTotalCount(dbCount + openStaxCount);
+        } else {
+          const seen = new Set(dbData.map(b => b.title?.toLowerCase()));
+          combined = [
+            ...dbData,
+            ...dspaceData.filter(b => !seen.has(b.title?.toLowerCase())),
+            ...openStaxData.filter(b => !seen.has(b.title?.toLowerCase())),
+            ...gData.filter(b => !seen.has(b.title?.toLowerCase())),
+            ...osApiData.filter(b => !seen.has(b.title?.toLowerCase())),
+            ...olData.filter(b => !seen.has(b.title?.toLowerCase())),
+            ...axData.filter(b => !seen.has(b.title?.toLowerCase())),
+          ];
+          if (!isLoadMore) setTotalCount(dbCount + dspaceCount + openStaxCount + gCount + osApiCount + olCount + axCount);
         }
-      }
+        return combined;
+      };
 
-      // 4. Fetch from OpenStax API
-      if ((filters.source === 'All' || filters.source === 'Partner Resources') && 
-          (filters.access === 'All' || filters.access === 'Dare Access')) {
-        try {
-          const page = Math.floor(currentOffset / LIMIT) + 1;
-          const osData = await openStaxService.searchBooks({ 
-            query: filters.q, 
-            page, 
-            limit: LIMIT 
-          });
-          openStaxApiData = osData.data;
-          openStaxApiCount = osData.total;
-        } catch (osErr) {
-          console.error('OpenStax fetch error:', osErr);
-        }
+      if (!isLoadMore) {
+        setPublications(buildMerge([], [], [], [], 0, 0, 0, 0));
       }
+      setLoading(false);
 
-      // 5. Fetch from Open Library API
-      if ((filters.source === 'All' || filters.source === 'Partner Resources' || filters.source === 'Open Library') && 
-          (filters.access === 'All' || filters.access === 'Dare Access')) {
-        try {
-          const page = Math.floor(currentOffset / LIMIT) + 1;
-          const olData = await openLibraryService.searchBooks(filters.q || 'Zimbabwe', page);
-          openLibraryData = olData.books;
-          openLibraryCount = olData.numFound;
-        } catch (olErr) {
-          console.error('Open Library fetch error:', olErr);
-        }
-      }
+      // ── Phase 2: all external APIs in parallel ────────────────────────────────
+      const needsRemote = accessOk && (srcAll || srcPartner ||
+        filters.source === 'Gutenberg' || filters.source === 'Project Gutenberg' ||
+        filters.source === 'Open Library' || filters.source === 'arXiv Research');
+      if (!needsRemote) return;
 
-      // 6. Fetch from arXiv API
-      if ((filters.source === 'All' || filters.source === 'Partner Resources' || filters.source === 'arXiv Research') && 
-          (filters.access === 'All' || filters.access === 'Dare Access')) {
-        try {
-          const page = Math.floor(currentOffset / LIMIT) + 1;
-          const axData = await arxivService.searchResearch(filters.q || 'Zimbabwe', page);
-          arxivData = axData.books;
-          arxivCount = axData.totalResults;
-        } catch (axErr) {
-          console.error('arXiv fetch error:', axErr);
-        }
-      }
+      setLoadingRemote(true);
+      const doGutenberg  = srcAll || srcPartner || filters.source === 'Gutenberg' || filters.source === 'Project Gutenberg';
+      const doOpenStaxApi = srcAll || srcPartner;
+      const doOpenLibrary = srcAll || srcPartner || filters.source === 'Open Library';
+      const doArxiv = srcAll || srcPartner || filters.source === 'arXiv Research';
 
-      // 7. Merge Results
-      let combinedData = [];
-      if (filters.source === 'Partner Resources') {
-        combinedData = [...dbData, ...openStaxData, ...gutenbergData, ...openStaxApiData, ...openLibraryData, ...arxivData];
-        setTotalCount(dbCount + openStaxCount + gutenbergCount + openStaxApiCount + openLibraryCount + arxivCount);
-      } else if (filters.source === 'Research') {
-        combinedData = dspaceData;
-        setTotalCount(dspaceCount);
-      } else if (filters.source === 'Gutenberg' || filters.source === 'Project Gutenberg') {
-        combinedData = gutenbergData;
-        setTotalCount(gutenbergCount);
-      } else if (filters.source === 'Open Library') {
-        combinedData = openLibraryData;
-        setTotalCount(openLibraryCount);
-      } else if (filters.source === 'arXiv Research') {
-        combinedData = arxivData;
-        setTotalCount(arxivCount);
-      } else if (filters.source === 'Dare Library') {
-        combinedData = [...dbData, ...dspaceData];
-        setTotalCount(dbCount + dspaceCount);
-      } else if (filters.source === 'Featured Items') {
-        combinedData = [...dbData, ...openStaxData];
-        setTotalCount(dbCount + openStaxCount);
-      } else {
-        const seenTitles = new Set(dbData.map(b => b.title?.toLowerCase()));
-        const uniqueDSpace = dspaceData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
-        const uniqueOpenStax = openStaxData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
-        const uniqueGutenberg = gutenbergData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
-        const uniqueOpenStaxApi = openStaxApiData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
-        const uniqueOpenLibrary = openLibraryData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
-        const uniqueArxiv = arxivData.filter(b => !seenTitles.has(b.title?.toLowerCase()));
-        
-        combinedData = [...dbData, ...uniqueDSpace, ...uniqueOpenStax, ...uniqueGutenberg, ...uniqueOpenStaxApi, ...uniqueOpenLibrary, ...uniqueArxiv];
-        
-        if (!isLoadMore) {
-          setTotalCount(dbCount + dspaceCount + openStaxCount + gutenbergCount + openStaxApiCount + openLibraryCount + arxivCount);
-        }
-      }
+      const [gR, osR, olR, axR] = await Promise.allSettled([
+        doGutenberg   ? withTimeout(gutenbergService.searchBooks(filters.q, page))                          : Promise.resolve(null),
+        doOpenStaxApi ? withTimeout(openStaxService.searchBooks({ query: filters.q, page, limit: LIMIT })) : Promise.resolve(null),
+        doOpenLibrary ? withTimeout(openLibraryService.searchBooks(filters.q || 'Zimbabwe', page))          : Promise.resolve(null),
+        doArxiv       ? withTimeout(arxivService.searchResearch(filters.q || 'Zimbabwe', page))             : Promise.resolve(null),
+      ]);
+
+      if (gR.status  === 'rejected') console.error('Gutenberg:', gR.reason?.message);
+      if (osR.status === 'rejected') console.error('OpenStax:', osR.reason?.message);
+      if (olR.status === 'rejected') console.error('Open Library:', olR.reason?.message);
+      if (axR.status === 'rejected') console.error('arXiv:', axR.reason?.message);
+
+      const gutenbergData    = (gR.status  === 'fulfilled' && gR.value)  ? gR.value.books  ?? [] : [];
+      const gutenbergCount   = (gR.status  === 'fulfilled' && gR.value)  ? gR.value.count  ?? 0  : 0;
+      const openStaxApiData  = (osR.status === 'fulfilled' && osR.value) ? osR.value.data  ?? [] : [];
+      const openStaxApiCount = (osR.status === 'fulfilled' && osR.value) ? osR.value.total ?? 0  : 0;
+      const openLibraryData  = (olR.status === 'fulfilled' && olR.value) ? olR.value.books    ?? [] : [];
+      const openLibraryCount = (olR.status === 'fulfilled' && olR.value) ? olR.value.numFound ?? 0  : 0;
+      const arxivData        = (axR.status === 'fulfilled' && axR.value) ? axR.value.books        ?? [] : [];
+      const arxivCount       = (axR.status === 'fulfilled' && axR.value) ? axR.value.totalResults ?? 0  : 0;
+
+      const fullCombined = buildMerge(gutenbergData, openStaxApiData, openLibraryData, arxivData, gutenbergCount, openStaxApiCount, openLibraryCount, arxivCount);
 
       if (isLoadMore) {
-        setPublications(prev => [...prev, ...combinedData]);
+        setPublications(prev => [...prev, ...fullCombined]);
         offsetRef.current += LIMIT;
         setOffset(offsetRef.current);
       } else {
-        setPublications(combinedData);
+        setPublications(fullCombined);
         offsetRef.current = LIMIT;
         setOffset(LIMIT);
       }
@@ -383,6 +297,7 @@ export default function Library() {
       setError('Unable to load publications. Please try again.');
     } finally {
       setLoading(false);
+      setLoadingRemote(false);
     }
   }, [filters, sortBy]);
 
@@ -397,7 +312,7 @@ export default function Library() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !loading && publications.length < totalCount) {
+        if (entries[0].isIntersecting && !loading && !loadingRemote && publications.length < totalCount) {
           fetchPublications(true);
         }
       },
@@ -409,7 +324,7 @@ export default function Library() {
     }
 
     return () => observer.disconnect();
-  }, [loading, publications.length, totalCount, fetchPublications]);
+  }, [loading, loadingRemote, publications.length, totalCount, fetchPublications]);
 
   useEffect(() => {
     offsetRef.current = 0;
@@ -891,12 +806,20 @@ export default function Library() {
           )}
         </div>
 
+        {/* Remote sources loading hint */}
+        {loadingRemote && !loading && (
+          <div className="flex items-center justify-center gap-2 py-2 mb-2 text-xs font-bold text-slate-400">
+            <div className="w-3 h-3 border-2 border-slate-200 border-t-teal-400 rounded-full animate-spin" />
+            Loading more sources…
+          </div>
+        )}
+
         {/* Infinite Scroll Sentinel */}
         <div ref={loadMoreRef} className="py-12 flex justify-center w-full">
-          {loading && publications.length > 0 && (
+          {(loading || loadingRemote) && publications.length > 0 && (
             <div className="inline-flex items-center gap-3 px-6 py-3 bg-white border border-slate-200 rounded-full shadow-sm text-sm font-bold text-slate-600">
               <div className="w-4 h-4 border-2 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
-              <span>Loading more titles...</span>
+              <span>Loading more titles…</span>
             </div>
           )}
         </div>
