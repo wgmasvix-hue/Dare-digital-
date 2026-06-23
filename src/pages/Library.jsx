@@ -124,7 +124,7 @@ export default function Library() {
 
       // ── 1. Supabase books ─────────────────────────────────────────────────────
       let dbData = [], dbCount = 0;
-      if (srcAll || filters.source === 'Dare Library' || filters.source === 'Project Gutenberg' || srcPartner) {
+      if (supabase && (srcAll || filters.source === 'Dare Library' || filters.source === 'Project Gutenberg' || srcPartner)) {
         const needsDirectQuery = filters.isbn || filters.yearFrom || filters.yearTo ||
           filters.zimAuthored || filters.africanContext || filters.source === 'Project Gutenberg' ||
           srcPartner || (sortBy !== 'relevance' && sortBy !== 'title' && filters.q);
@@ -181,7 +181,7 @@ export default function Library() {
 
       // ── 1.5 DSpace documents ──────────────────────────────────────────────────
       let dspaceData = [], dspaceCount = 0;
-      if (srcAll || filters.source === 'Research' || filters.source === 'Dare Library') {
+      if (supabase && (srcAll || filters.source === 'Research' || filters.source === 'Dare Library')) {
         let docQuery = supabase.from('documents').select('*', { count: 'exact' }).not('synced_from_dspace_at', 'is', null);
         if (filters.q) docQuery = docQuery.or(`title.ilike.%${filters.q}%,creator.ilike.%${filters.q}%,description.ilike.%${filters.q}%`);
         if (filters.faculty !== 'All') docQuery = docQuery.or(`description.ilike.%${filters.faculty}%,title.ilike.%${filters.faculty}%`);
