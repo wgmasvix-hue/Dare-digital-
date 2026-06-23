@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Menu, X, User, ChevronDown, LogOut, History, Settings, 
-  LayoutDashboard, Trophy, Search, Sparkles, Library, FlaskConical, Zap, Database, Globe, ClipboardCheck
+import {
+  Menu, X, User, ChevronDown, LogOut, History, Settings,
+  LayoutDashboard, Trophy, Search, Sparkles, Library, FlaskConical, Zap, Database, Globe, ClipboardCheck, MoreHorizontal
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useGamification } from '../../context/GamificationContext';
@@ -16,7 +16,9 @@ export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const moreRef = useRef(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -32,6 +34,9 @@ export default function NavBar() {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsProfileOpen(false);
       }
+      if (moreRef.current && !moreRef.current.contains(event.target)) {
+        setIsMoreOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -40,6 +45,7 @@ export default function NavBar() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsProfileOpen(false);
+    setIsMoreOpen(false);
   }, [location]);
 
   return (
@@ -76,28 +82,51 @@ export default function NavBar() {
         </Link>
 
         {/* Desktop Main Links */}
-        <div className="hidden md:flex items-center gap-1">
-          <Link to="/library" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
-            <Library size={16} /> Browse
+        <div className="hidden md:flex items-center gap-0.5">
+          <Link to="/library" className="px-3.5 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-1.5">
+            <Library size={15} /> Browse
           </Link>
-          <Link to="/open-books" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-teal-50 hover:text-teal-700 transition-colors flex items-center gap-2">
-            <Globe size={16} className="text-teal-550 shrink-0" /> 1M+ Books
+          <Link to="/open-books" className="px-3.5 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-teal-700 hover:bg-teal-50 transition-colors flex items-center gap-1.5">
+            <Globe size={15} className="text-teal-500 shrink-0" /> 1M+ Books
           </Link>
-          <Link to="/dspace-explorer" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
-            <Database size={16} /> Repository
+          <Link to="/tutor" className="px-3.5 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-amber-50 hover:text-amber-700 transition-colors flex items-center gap-1.5">
+            <Sparkles size={15} className="text-amber-500" /> AI Tutor
           </Link>
-          <Link to="/tutor" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
-            <Sparkles size={16} className="text-amber-500" /> DARA Tutor
+          <Link to="/research" className="px-3.5 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-1.5">
+            <FlaskConical size={15} /> Research
           </Link>
-          <Link to="/research" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
-            <FlaskConical size={16} /> Research
-          </Link>
-          <Link to="/advanced-search" className="px-4 py-2 rounded-full font-bold text-sm text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 transition-colors flex items-center gap-2 border border-indigo-200">
-            <Search size={16} /> Research DB
-          </Link>
-          <Link to="/teacher-tools" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
-            <ClipboardCheck size={16} className="text-emerald-600" /> Lesson Planner
-          </Link>
+
+          {/* More dropdown */}
+          <div className="relative" ref={moreRef}>
+            <button
+              onClick={() => setIsMoreOpen(!isMoreOpen)}
+              className="px-3.5 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-1.5"
+            >
+              <MoreHorizontal size={15} /> More
+              <ChevronDown size={13} className={`transition-transform duration-200 ${isMoreOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <AnimatePresence>
+              {isMoreOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute left-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-100 p-1.5 z-50"
+                >
+                  <Link to="/dspace-explorer" className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-sm font-semibold text-slate-700 transition-colors">
+                    <Database size={15} className="text-slate-400" /> Repository
+                  </Link>
+                  <Link to="/advanced-search" className="flex items-center gap-3 px-3 py-2.5 hover:bg-indigo-50 rounded-xl text-sm font-semibold text-indigo-600 transition-colors">
+                    <Search size={15} /> Research DB
+                  </Link>
+                  <Link to="/teacher-tools" className="flex items-center gap-3 px-3 py-2.5 hover:bg-emerald-50 rounded-xl text-sm font-semibold text-slate-700 hover:text-emerald-700 transition-colors">
+                    <ClipboardCheck size={15} className="text-emerald-500" /> Lesson Planner
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Search Bar - Center */}
