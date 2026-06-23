@@ -43,6 +43,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        navigateFallback: 'index.html',
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -65,5 +66,29 @@ export default defineConfig({
   server: {
     port: 3000,
     host: '0.0.0.0',
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Core React runtime — never changes, aggressively cached
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Animation library — shared across many pages
+          'vendor-motion': ['motion'],
+          // Icons — large, rarely changes
+          'vendor-icons': ['lucide-react'],
+          // Heavy ML library — only /ai-tools needs this
+          'vendor-ml': ['@xenova/transformers'],
+          // Supabase — only needed after auth
+          'vendor-supabase': ['@supabase/supabase-js'],
+          // PDF rendering — only /reader needs this
+          'vendor-pdf': ['react-pdf'],
+          // Charts — only dashboard pages need this
+          'vendor-charts': ['recharts', 'd3'],
+        },
+      },
+    },
+    // Warn if any chunk is unexpectedly large
+    chunkSizeWarningLimit: 600,
   },
 })

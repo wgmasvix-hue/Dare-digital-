@@ -339,6 +339,104 @@ async function startServer() {
     }
   });
 
+  // ── WebZim / Kiwix compatibility ──────────────────────────────────────────
+  // Adds headers that Kiwix and ZIM crawlers expect, and exposes an OPDS 2.0
+  // catalog so Kiwix can discover and package this library as a ZIM file.
+
+  const BASE_URL = process.env.VITE_APP_URL || 'https://dare.chengetai.co.zw';
+
+  // OPDS 2.0 catalog — Kiwix uses this to list downloadable content
+  app.get('/opds/catalog.json', (_req, res) => {
+    res.setHeader('Content-Type', 'application/opds+json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.json({
+      metadata: {
+        title: 'DARE Digital Library',
+        description: "Zimbabwe's open-access digital library — 1M+ books, AI tutoring & research tools",
+        language: 'en',
+        updated: new Date().toISOString(),
+        author: { name: 'ChengetAI Labs', uri: BASE_URL },
+      },
+      links: [
+        { rel: 'self',       href: `${BASE_URL}/opds/catalog.json`,    type: 'application/opds+json' },
+        { rel: 'start',      href: `${BASE_URL}/opds/catalog.json`,    type: 'application/opds+json' },
+        { rel: 'search',     href: `${BASE_URL}/opds/search{?q}`,      type: 'application/opds+json', templated: true },
+      ],
+      publications: [
+        {
+          metadata: { title: 'Browse DARE Library', '@type': 'http://schema.org/WebSite', language: 'en', subject: ['Education', 'Zimbabwe', 'Open Access'] },
+          links: [{ rel: 'alternate', href: `${BASE_URL}/library`, type: 'text/html' }],
+          images: [{ href: `${BASE_URL}/icons/icon-512x512.png`, type: 'image/png' }],
+        },
+        {
+          metadata: { title: 'Open Access Books (1M+)', '@type': 'http://schema.org/WebSite', language: 'en', subject: ['Books', 'Open Access'] },
+          links: [{ rel: 'alternate', href: `${BASE_URL}/open-books`, type: 'text/html' }],
+          images: [{ href: `${BASE_URL}/icons/icon-512x512.png`, type: 'image/png' }],
+        },
+        {
+          metadata: { title: 'Research Portal', '@type': 'http://schema.org/WebSite', language: 'en', subject: ['Research', 'Academic'] },
+          links: [{ rel: 'alternate', href: `${BASE_URL}/research`, type: 'text/html' }],
+          images: [{ href: `${BASE_URL}/icons/icon-512x512.png`, type: 'image/png' }],
+        },
+      ],
+    });
+  });
+
+  // OPDS 1.2 atom feed (older Kiwix versions use this)
+  app.get('/opds', (_req, res) => {
+    res.setHeader('Content-Type', 'application/atom+xml;profile=opds-catalog;kind=navigation');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const now = new Date().toISOString();
+    res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>urn:dare-digital-library</id>
+  <title>DARE Digital Library</title>
+  <updated>${now}</updated>
+  <author><name>ChengetAI Labs</name><uri>${BASE_URL}</uri></author>
+  <link rel="self"  href="${BASE_URL}/opds"                type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="start" href="${BASE_URL}/opds"               type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <entry>
+    <title>Browse Library</title>
+    <id>urn:dare:browse</id>
+    <updated>${now}</updated>
+    <content type="text">Browse the full DARE Digital Library catalogue.</content>
+    <link rel="subsection" href="${BASE_URL}/library"    type="text/html"/>
+  </entry>
+  <entry>
+    <title>Open Access Books</title>
+    <id>urn:dare:open-books</id>
+    <updated>${now}</updated>
+    <content type="text">1M+ freely available textbooks and references.</content>
+    <link rel="subsection" href="${BASE_URL}/open-books" type="text/html"/>
+  </entry>
+  <entry>
+    <title>Research Portal</title>
+    <id>urn:dare:research</id>
+    <updated>${now}</updated>
+    <content type="text">Zimbabwean and international academic research.</content>
+    <link rel="subsection" href="${BASE_URL}/research"   type="text/html"/>
+  </entry>
+</feed>`);
+  });
+
+  // Sitemap for search engines and Kiwix crawlers
+  app.get('/sitemap.xml', (_req, res) => {
+    const pages = ['/', '/library', '/open-books', '/research', '/tutor', '/advanced-search',
+      '/for-institutions', '/institutions', '/teacher-tools', '/vocational-tools',
+      '/help', '/privacy', '/terms', '/contact', '/login', '/signup'];
+    res.setHeader('Content-Type', 'application/xml');
+    res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${pages.map(p => `  <url><loc>${BASE_URL}${p}</loc><changefreq>weekly</changefreq></url>`).join('\n')}
+</urlset>`);
+  });
+
+  // Kiwix crawl headers on every HTML response
+  app.use((_req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    next();
+  });
+
   const distPath = path.join(process.cwd(), 'dist');
   
   // Vite middleware for development
