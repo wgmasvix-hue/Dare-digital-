@@ -1,14 +1,28 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Menu, X, User, ChevronDown, LogOut, History, Settings, 
-  LayoutDashboard, Trophy, Search, Sparkles, Library, FlaskConical, Zap, Database, Globe, ClipboardCheck
+import {
+  Menu, X, User, LogOut, History, Settings,
+  LayoutDashboard, Trophy, Search, Sparkles, Library,
+  FlaskConical, Zap, Database, Globe, ClipboardCheck
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useGamification } from '../../context/GamificationContext';
 import GlobalSearch from './GlobalSearch';
 import LogoIcon from '../common/LogoIcon';
+
+const PRIMARY_LINKS = [
+  { to: '/library',         label: 'Browse',      Icon: Library },
+  { to: '/repository',      label: 'Repository',  Icon: Database },
+  { to: '/tutor',           label: 'DARA Tutor',  Icon: Sparkles,      cls: 'text-amber-500' },
+  { to: '/advanced-search', label: 'Research DB', Icon: Search,        special: true },
+];
+
+const SECONDARY_LINKS = [
+  { to: '/open-books',    label: '1M+ Books',      Icon: Globe,          cls: 'text-teal-600' },
+  { to: '/research',      label: 'Research',       Icon: FlaskConical },
+  { to: '/teacher-tools', label: 'Lesson Planner', Icon: ClipboardCheck, cls: 'text-emerald-600' },
+];
 
 export default function NavBar() {
   const { user, profile, signOut } = useAuth();
@@ -19,22 +33,23 @@ export default function NavBar() {
   const dropdownRef = useRef(null);
   const location = useLocation();
 
+  const isActive = useCallback((path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname === path || location.pathname.startsWith(path + '/');
+  }, [location.pathname]);
+
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsProfileOpen(false);
-      }
+    const onClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsProfileOpen(false);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
   }, []);
 
   useEffect(() => {
@@ -42,182 +57,238 @@ export default function NavBar() {
     setIsProfileOpen(false);
   }, [location]);
 
+  // Press '/' to focus global search
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === '/' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {
+        e.preventDefault();
+        document.querySelector('[data-global-search]')?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  const linkCls = (path, special) => {
+    const active = isActive(path);
+    if (special) {
+      return `px-3.5 py-2 rounded-full font-bold text-sm flex items-center gap-1.5 transition-all ${
+        active ? 'bg-indigo-700 text-white shadow-sm' : 'text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border border-indigo-200'
+      }`;
+    }
+    return `px-3.5 py-2 rounded-full font-bold text-sm flex items-center gap-1.5 transition-all ${
+      active ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+    }`;
+  };
+
   return (
-    <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm py-2' : 'bg-transparent py-4'
-      }`}
-    >
-      {/* Knowledge Progress Bar (Top Edge) */}
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm py-2' : 'bg-transparent py-4'
+    }`}>
+
+      {/* XP progress bar */}
       {user && (
-        <div className="absolute top-0 left-0 w-full h-1 bg-slate-100">
-          <motion.div 
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-slate-100/60">
+          <motion.div
             className="h-full bg-gradient-to-r from-teal-400 to-emerald-500"
             initial={{ width: 0 }}
             animate={{ width: `${getLevelInfo().progress}%` }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 1.2, ease: 'easeOut' }}
           />
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-8 mt-1">
-        <Link to="/" className="flex items-center gap-3 shrink-0 focus:outline-none group">
-          <div className="p-1.5 rounded-2xl transition-all duration-300 bg-slate-50 border border-slate-200/60 shadow-inner group-hover:scale-105 group-hover:bg-white group-hover:border-slate-300">
-             <LogoIcon size={32} />
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-4 mt-1">
+
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-3 shrink-0 group focus:outline-none" aria-label="DARE home">
+          <div className="p-1.5 rounded-2xl transition-all bg-slate-50 border border-slate-200/60 shadow-inner group-hover:scale-105 group-hover:bg-white group-hover:border-slate-300">
+            <LogoIcon size={32} />
           </div>
           <div className="hidden sm:flex flex-col">
-            <span className="font-display font-black text-xl leading-none tracking-wider text-slate-900 group-hover:text-primary transition-colors">
-              DARE
-            </span>
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-0.5 font-mono">
-              Digital Library
-            </span>
+            <span className="font-display font-black text-xl leading-none tracking-wider text-slate-900 group-hover:text-primary transition-colors">DARE</span>
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-0.5 font-mono">Digital Library</span>
           </div>
         </Link>
 
-        {/* Desktop Main Links */}
-        <div className="hidden md:flex items-center gap-1">
-          <Link to="/library" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
-            <Library size={16} /> Browse
-          </Link>
-          <Link to="/open-books" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-teal-50 hover:text-teal-700 transition-colors flex items-center gap-2">
-            <Globe size={16} className="text-teal-550 shrink-0" /> 1M+ Books
-          </Link>
-          <Link to="/dspace-explorer" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
-            <Database size={16} /> Repository
-          </Link>
-          <Link to="/tutor" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
-            <Sparkles size={16} className="text-amber-500" /> DARA Tutor
-          </Link>
-          <Link to="/research" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
-            <FlaskConical size={16} /> Research
-          </Link>
-          <Link to="/advanced-search" className="px-4 py-2 rounded-full font-bold text-sm text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 transition-colors flex items-center gap-2 border border-indigo-200">
-            <Search size={16} /> Research DB
-          </Link>
-          <Link to="/teacher-tools" className="px-4 py-2 rounded-full font-bold text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-2">
-            <ClipboardCheck size={16} className="text-emerald-600" /> Lesson Planner
-          </Link>
+        {/* Desktop nav — md shows primary only, lg shows all */}
+        <div className="hidden md:flex lg:hidden items-center gap-1">
+          {PRIMARY_LINKS.map(({ to, label, Icon, cls, special }) => (
+            <Link key={to} to={to} aria-current={isActive(to) ? 'page' : undefined} className={linkCls(to, special)}>
+              <Icon size={14} className={isActive(to) || special ? '' : (cls || '')} />{label}
+            </Link>
+          ))}
         </div>
 
-        {/* Search Bar - Center */}
-        <div className="flex-1 max-w-md hidden lg:block">
+        <div className="hidden lg:flex items-center gap-1">
+          {[...PRIMARY_LINKS, ...SECONDARY_LINKS].map(({ to, label, Icon, cls, special }) => (
+            <Link key={to} to={to} aria-current={isActive(to) ? 'page' : undefined} className={linkCls(to, special)}>
+              <Icon size={14} className={isActive(to) ? '' : (cls || '')} />{label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Search — lg+ */}
+        <div className="flex-1 max-w-sm hidden lg:block">
           <GlobalSearch />
         </div>
 
-        {/* Right Auth/Profile Config */}
-        <div className="flex items-center gap-4 shrink-0">
-          {user ? (
-            <>
-              <div className="hidden sm:flex items-center gap-3 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
-                <div className="flex items-center gap-1 text-xs font-bold text-orange-600" title="Daily Streak">
-                  🔥 {streak}
-                </div>
-                <div className="w-[1px] h-4 bg-slate-300"></div>
-                <div className="flex items-center gap-1 text-xs font-bold text-blue-600" title="Experience Points">
-                  <Zap size={14} /> {xp}
-                </div>
-                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-900 text-white text-[10px] font-black">
-                  {level}
-                </div>
-              </div>
-
-              <div className="relative" ref={dropdownRef}>
-                <button 
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center gap-2 focus:outline-none"
-                >
-                  <div className="w-10 h-10 rounded-full bg-teal-100 border border-teal-200 flex items-center justify-center text-teal-700 font-bold transition-transform hover:scale-105 active:scale-95">
-                    {profile?.first_name?.[0]?.toUpperCase() || <User size={20} />}
-                  </div>
-                </button>
-
-                <AnimatePresence>
-                  {isProfileOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-100 p-2"
-                    >
-                      <div className="px-4 py-3 border-b border-slate-100 mb-2">
-                        <p className="font-bold text-slate-900 truncate">{profile?.first_name || 'Student'}</p>
-                        <p className="text-xs text-slate-500 truncate">{user.email}</p>
-                      </div>
-                      <Link to="/dashboard" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
-                        <LayoutDashboard size={16} /> Dashboard
-                      </Link>
-                      <Link to="/history" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
-                        <History size={16} /> Reading History
-                      </Link>
-                      <Link to="/leaderboard" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
-                        <Trophy size={16} /> Leaderboard
-                      </Link>
-                      <Link to="/settings" className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition-colors">
-                        <Settings size={16} /> Settings
-                      </Link>
-                      <div className="h-px bg-slate-100 my-2"></div>
-                      <button onClick={signOut} className="w-full flex items-center gap-3 px-4 py-2 hover:bg-red-50 rounded-xl text-sm font-medium text-red-600 transition-colors text-left">
-                        <LogOut size={16} /> Sign Out
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </>
-          ) : (
-            <div className="hidden sm:flex items-center gap-3">
-              <Link to="/login" className="px-5 py-2.5 rounded-full font-bold text-sm text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer border border-transparent">
-                Sign In
-              </Link>
-              <Link to="/register" className="px-5 py-2.5 rounded-full font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-transform active:scale-95 cursor-pointer shadow-sm border border-slate-800">
-                Join DARE
-              </Link>
+        {/* Right cluster */}
+        <div className="flex items-center gap-3 shrink-0">
+          {user && (
+            <div className="hidden sm:flex items-center gap-2.5 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 text-xs font-black">
+              <span className="text-orange-600" title="Daily Streak">🔥 {streak}</span>
+              <div className="w-px h-3.5 bg-slate-300" />
+              <span className="text-blue-600 flex items-center gap-0.5" title="XP"><Zap size={12} />{xp}</span>
+              <span className="w-5 h-5 rounded-full bg-slate-900 text-white text-[10px] flex items-center justify-center">{level}</span>
             </div>
           )}
 
-          <button 
-            className="sm:hidden focus:outline-none p-2 text-slate-600"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          {user ? (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsProfileOpen(v => !v)}
+                aria-expanded={isProfileOpen}
+                aria-haspopup="menu"
+                className="w-9 h-9 rounded-full bg-teal-100 border-2 border-teal-200 flex items-center justify-center text-teal-700 font-black text-sm hover:scale-105 active:scale-95 hover:border-teal-300 transition-all focus:outline-none"
+              >
+                {profile?.first_name?.[0]?.toUpperCase() || <User size={17} />}
+              </button>
+
+              <AnimatePresence>
+                {isProfileOpen && (
+                  <motion.div
+                    role="menu"
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute right-0 top-full mt-2 w-60 bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-100 p-2 z-50"
+                  >
+                    <div className="px-4 py-3 border-b border-slate-100 mb-1.5">
+                      <p className="font-black text-slate-900 text-sm truncate">{profile?.first_name || 'Student'}</p>
+                      <p className="text-xs text-slate-400 truncate mt-0.5">{user.email}</p>
+                    </div>
+                    {[
+                      { to: '/dashboard',   Icon: LayoutDashboard, label: 'Dashboard' },
+                      { to: '/history',     Icon: History,         label: 'Reading History' },
+                      { to: '/leaderboard', Icon: Trophy,          label: 'Leaderboard' },
+                      { to: '/settings',    Icon: Settings,        label: 'Settings' },
+                    ].map(item => (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        role="menuitem"
+                        className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-colors ${
+                          isActive(item.to) ? 'bg-slate-100 font-black text-slate-900' : 'font-medium text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <item.Icon size={15} className="text-slate-400 shrink-0" />{item.label}
+                      </Link>
+                    ))}
+                    <div className="h-px bg-slate-100 my-1.5" />
+                    <button
+                      onClick={signOut}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors text-left"
+                    >
+                      <LogOut size={15} /> Sign Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <div className="hidden sm:flex items-center gap-2">
+              <Link to="/login" className="px-4 py-2 rounded-full font-bold text-sm text-slate-700 hover:bg-slate-100 transition-colors">Sign In</Link>
+              <Link to="/register" className="px-4 py-2 rounded-full font-bold text-sm bg-slate-900 text-white hover:bg-slate-800 transition-all active:scale-95 shadow-sm">Join DARE</Link>
+            </div>
+          )}
+
+          {/* Hamburger */}
+          <button
+            className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none"
+            onClick={() => setIsMobileMenuOpen(v => !v)}
+            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMobileMenuOpen}
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={isMobileMenuOpen ? 'x' : 'menu'}
+                initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
+                animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                exit={{ rotate: 90, opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.12 }}
+              >
+                {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              </motion.div>
+            </AnimatePresence>
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="sm:hidden bg-white border-b border-slate-200 px-6 py-6 overflow-hidden shadow-xl"
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="md:hidden bg-white border-b border-slate-200 overflow-hidden shadow-xl"
           >
-            <div className="flex flex-col gap-4">
-              <div className="block lg:hidden mb-4 border border-slate-200 rounded-xl p-2 bg-slate-50">
+            <div className="px-5 py-5 flex flex-col gap-1">
+              <div className="mb-3 border border-slate-200 rounded-xl p-2 bg-slate-50">
                 <GlobalSearch />
               </div>
-              <Link to="/library" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Library size={20} /> Browse Library</Link>
-              <Link to="/open-books" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Globe size={20} className="text-teal-500" /> 1M+ Open Source Books</Link>
-              <Link to="/dspace-explorer" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Database size={20} /> Institutional Repository</Link>
-              <Link to="/tutor" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><Sparkles size={20} className="text-amber-500" /> DARA AI Tutor</Link>
-              <Link to="/research" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><FlaskConical size={20} /> Research Portal</Link>
-              <Link to="/advanced-search" className="flex items-center gap-3 font-bold text-lg text-indigo-600 py-2"><Search size={20} className="text-indigo-500" /> Research Database</Link>
-              <Link to="/teacher-tools" className="flex items-center gap-3 font-bold text-lg text-slate-900 py-2"><ClipboardCheck size={20} className="text-emerald-500" /> Lesson Planner</Link>
-              <hr className="border-slate-100 my-2" />
+
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 mb-1">Navigate</p>
+              {[...PRIMARY_LINKS, ...SECONDARY_LINKS].map(({ to, label, Icon, cls }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  aria-current={isActive(to) ? 'page' : undefined}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                    isActive(to) ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  <Icon size={16} className={isActive(to) ? 'text-white' : (cls || 'text-slate-500')} />
+                  {label}
+                </Link>
+              ))}
+
+              <div className="h-px bg-slate-100 my-3" />
+
               {!user ? (
-                <div className="flex flex-col gap-3 mt-2">
-                  <Link to="/login" className="w-full py-3 rounded-full font-bold text-center bg-slate-100 text-slate-900 hover:bg-slate-200 transition-colors">Sign In</Link>
-                  <Link to="/register" className="w-full py-3 rounded-full font-bold text-center bg-teal-500 text-white hover:bg-teal-600 transition-colors shadow-md text-lg">Join DARE</Link>
+                <div className="flex flex-col gap-2">
+                  <Link to="/login" className="py-3 rounded-xl font-bold text-center bg-slate-100 text-slate-900 text-sm">Sign In</Link>
+                  <Link to="/register" className="py-3 rounded-xl font-bold text-center bg-slate-900 text-white text-sm shadow">Join DARE</Link>
                 </div>
               ) : (
-                 <>
-                   <Link to="/dashboard" className="font-bold text-lg text-slate-900 py-2">Dashboard</Link>
-                   <Link to="/settings" className="font-bold text-lg text-slate-900 py-2">Settings</Link>
-                   <button onClick={signOut} className="font-bold text-lg text-red-500 text-left py-2">Sign Out</button>
-                 </>
+                <>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 mb-1">Account</p>
+                  {[
+                    { to: '/dashboard',   Icon: LayoutDashboard, label: 'Dashboard' },
+                    { to: '/history',     Icon: History,         label: 'Reading History' },
+                    { to: '/leaderboard', Icon: Trophy,          label: 'Leaderboard' },
+                    { to: '/settings',    Icon: Settings,        label: 'Settings' },
+                  ].map(item => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                        isActive(item.to) ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <item.Icon size={16} className="text-slate-400" />{item.label}
+                    </Link>
+                  ))}
+                  <button
+                    onClick={signOut}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-red-600 hover:bg-red-50 transition-colors text-left w-full"
+                  >
+                    <LogOut size={16} /> Sign Out
+                  </button>
+                </>
               )}
             </div>
           </motion.div>

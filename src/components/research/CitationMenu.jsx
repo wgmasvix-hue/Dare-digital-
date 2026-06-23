@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Quote, Copy, Download, Check, ChevronDown } from 'lucide-react';
 import { getCitation, downloadCitation } from '../../utils/citationExport';
+import { useToast } from '../../context/ToastContext';
 
 const FORMATS = ['APA', 'MLA', 'Chicago', 'BibTeX', 'RIS'];
 
@@ -9,6 +10,7 @@ export default function CitationMenu({ item, className = '' }) {
   const [activeFormat, setActiveFormat] = useState('APA');
   const [copied, setCopied] = useState(false);
   const ref = useRef(null);
+  const toast = useToast();
 
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -21,6 +23,7 @@ export default function CitationMenu({ item, className = '' }) {
   const handleCopy = async () => {
     await navigator.clipboard.writeText(citation);
     setCopied(true);
+    toast.success(`${activeFormat} citation copied to clipboard`);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -36,6 +39,7 @@ export default function CitationMenu({ item, className = '' }) {
       a.click();
       URL.revokeObjectURL(url);
     }
+    toast.success(`Citation downloaded as ${activeFormat}`);
   };
 
   return (
