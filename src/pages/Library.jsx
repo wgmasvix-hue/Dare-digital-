@@ -261,7 +261,7 @@ export default function Library() {
       setLoading(false);
 
       // ── Phase 2: all external APIs in parallel ────────────────────────────────
-      const needsRemote = accessOk && (srcAll || srcPartner ||
+      const needsRemote = supabase && accessOk && (srcAll || srcPartner ||
         filters.source === 'Gutenberg' || filters.source === 'Project Gutenberg' ||
         filters.source === 'Open Library' || filters.source === 'arXiv Research');
       if (!needsRemote) return;
@@ -353,6 +353,7 @@ export default function Library() {
     }
 
     const timer = setTimeout(async () => {
+      if (!supabase) return;
       try {
         const terms = await geminiService.getSearchSuggestions(query);
         setSuggestions(terms);
@@ -409,7 +410,7 @@ export default function Library() {
   };
 
   const handleAiSearch = async () => {
-    if (!aiQuery.trim() || aiThinking) return;
+    if (!aiQuery.trim() || aiThinking || !supabase) return;
     
     setAiThinking(true);
     try {
