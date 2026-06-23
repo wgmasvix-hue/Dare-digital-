@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { X } from "lucide-react"
 import NavBar from "./components/layout/NavBar"
 import Footer from "./components/layout/Footer"
+import InstallPrompt from "./components/pwa/InstallPrompt"
 import { isSupabaseConfigured } from "./lib/supabase"
 
 const PageWrapper = ({ children }) => {
@@ -54,6 +55,7 @@ export default function App() {
         </PageWrapper>
       </main>
       <Footer />
+      <InstallPrompt />
     </div>
   )
 }
