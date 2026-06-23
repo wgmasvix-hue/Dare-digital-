@@ -1,10 +1,10 @@
 import { Search, Sparkles, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-export default function SearchBar({ 
-  value, 
-  onChange, 
-  onSearch, 
+export default function SearchBar({
+  value,
+  onChange,
+  onSearch,
   placeholder = "Search with AI to save data (e.g. 'summarize education policy')...",
   className = '',
   isAiMode = false,
@@ -13,7 +13,9 @@ export default function SearchBar({
   suggestions = [],
   onSelectSuggestion,
   showSuggestions,
-  setShowSuggestions
+  setShowSuggestions,
+  searchField = 'all',
+  onSearchFieldChange,
 }) {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && onSearch) {
@@ -39,8 +41,22 @@ export default function SearchBar({
               <Search size={24} className="group-focus-within:text-teal-600 transition-colors" />
             )}
           </div>
-          
-          <input 
+
+          {!isAiMode && onSearchFieldChange && (
+            <select
+              value={searchField}
+              onChange={e => onSearchFieldChange(e.target.value)}
+              className="shrink-0 self-stretch bg-transparent text-xs font-bold text-slate-500 border-r border-slate-200 pr-3 mr-3 outline-none cursor-pointer hover:text-slate-700 transition-colors"
+              onClick={e => e.stopPropagation()}
+            >
+              <option value="all">All Fields</option>
+              <option value="title">Title</option>
+              <option value="author">Author</option>
+              <option value="subject">Subject</option>
+            </select>
+          )}
+
+          <input
             type="text" 
             placeholder={isAiMode ? "Ask the AI Librarian (e.g. 'Summarize education policy in Zimbabwe')" : "Search by title, author, or research topic..."}
             className="w-full py-5 bg-transparent border-none outline-none text-slate-900 placeholder:text-slate-400 font-medium text-lg"

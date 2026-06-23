@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import {
   Sparkles,
   LayoutGrid,
@@ -10,7 +11,8 @@ import {
   Globe,
   ArrowRight,
   RefreshCw,
-  Database
+  Database,
+  X
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { transformBooks, BOOK_SELECT, OPENSTAX_CURATED } from '../lib/transformBook';
@@ -83,6 +85,15 @@ export default function Library() {
   const [semanticResults, setSemanticResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingRemote, setLoadingRemote] = useState(false);
+  const [savedIds, setSavedIds] = useState(() => {
+    try {
+      const stored = localStorage.getItem('dare_saved_books');
+      return new Set(stored ? JSON.parse(stored) : []);
+    } catch {
+      return new Set();
+    }
+  });
+  const [searchField, setSearchField] = useState('all');
   const [error, setError] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
@@ -148,7 +159,12 @@ export default function Library() {
             else if (filters.access === 'Purchased') query = query.eq('is_purchased', true);
           }
           if (filters.isbn) query = query.or(`description.ilike.%${filters.isbn}%,title.ilike.%${filters.isbn}%`);
-          if (filters.q) query = query.or(`title.ilike.%${filters.q}%,description.ilike.%${filters.q}%,author_names.ilike.%${filters.q}%`);
+          if (filters.q) {
+            if (searchField === 'title') query = query.ilike('title', `%${filters.q}%`);
+            else if (searchField === 'author') query = query.ilike('author_names', `%${filters.q}%`);
+            else if (searchField === 'subject') query = query.or(`subject.ilike.%${filters.q}%,faculty.ilike.%${filters.q}%`);
+            else query = query.or(`title.ilike.%${filters.q}%,description.ilike.%${filters.q}%,author_names.ilike.%${filters.q}%`);
+          }
           if (filters.yearFrom) query = query.gte('created_at', `${filters.yearFrom}-01-01`);
           if (filters.yearTo) query = query.lte('created_at', `${filters.yearTo}-12-31`);
           switch (sortBy) {
@@ -299,7 +315,7 @@ export default function Library() {
       setLoading(false);
       setLoadingRemote(false);
     }
-  }, [filters, sortBy]);
+  }, [filters, sortBy, searchField]);
 
   useEffect(() => {
     if (filters.q && sortBy === 'title') {
@@ -354,6 +370,16 @@ export default function Library() {
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
+
+  const toggleSaved = useCallback((id) => {
+    setSavedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      try { localStorage.setItem('dare_saved_books', JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     const params = {};
@@ -505,11 +531,13 @@ export default function Library() {
                 .filter(p => bookProgress[p.id] > 0)
                 .slice(0, 4)
                 .map(book => (
-                  <BookCard 
-                    key={`continue-${book.id}`} 
-                    publication={book} 
-                    variant="tile" 
+                  <BookCard
+                    key={`continue-${book.id}`}
+                    publication={book}
+                    variant="tile"
                     progress={bookProgress[book.id]}
+                    isSaved={savedIds.has(String(book.id))}
+                    onToggleSave={toggleSaved}
                   />
                 ))}
             </div>
@@ -644,6 +672,8 @@ export default function Library() {
                 }}
                 showSuggestions={showSuggestions}
                 setShowSuggestions={setShowSuggestions}
+                searchField={searchField}
+                onSearchFieldChange={setSearchField}
               />
             </div>
           </div>
@@ -709,6 +739,35 @@ export default function Library() {
             </select>
           </div>
         </div>
+
+        {/* Result Summary Bar */}
+        {(!loading || filteredPublications.length > 0) && (
+          <div className="flex flex-wrap items-center gap-2 mb-4 min-h-[28px]">
+            <span className="text-sm font-semibold text-slate-500 shrink-0">
+              {filteredPublications.length.toLocaleString()} result{filteredPublications.length !== 1 ? 's' : ''}
+              {loadingRemote && <span className="ml-1 text-xs text-teal-500 font-bold">· loading more…</span>}
+            </span>
+            {[
+              filters.q && { key: 'q', label: `"${filters.q}"`, clear: () => handleFilterChange('q', '') },
+              filters.faculty !== 'All' && { key: 'faculty', label: filters.faculty, clear: () => handleFilterChange('faculty', 'All') },
+              filters.level !== 'All' && { key: 'level', label: filters.level, clear: () => handleFilterChange('level', 'All') },
+              filters.access !== 'All' && { key: 'access', label: filters.access, clear: () => handleFilterChange('access', 'All') },
+              filters.format !== 'All' && { key: 'format', label: `Format: ${filters.format}`, clear: () => handleFilterChange('format', 'All') },
+              filters.yearFrom && { key: 'yearFrom', label: `From ${filters.yearFrom}`, clear: () => handleFilterChange('yearFrom', '') },
+              filters.yearTo && { key: 'yearTo', label: `To ${filters.yearTo}`, clear: () => handleFilterChange('yearTo', '') },
+              filters.zimAuthored && { key: 'zimAuthored', label: '🇿🇼 Zimbabwe', clear: () => handleFilterChange('zimAuthored', false) },
+              filters.africanContext && { key: 'africanContext', label: '🌍 African', clear: () => handleFilterChange('africanContext', false) },
+            ].filter(Boolean).map(chip => (
+              <button
+                key={chip.key}
+                onClick={chip.clear}
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-teal-50 text-teal-700 border border-teal-200 rounded-full text-xs font-bold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
+              >
+                {chip.label}<X size={11} />
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Results */}
         {filters.source === 'Research' && !loading && publications.length === 0 && (
@@ -776,11 +835,13 @@ export default function Library() {
             ))
           ) : filteredPublications.length > 0 ? (
             filteredPublications.map(book => (
-              <BookCard 
-                key={book.id} 
-                publication={book} 
-                variant={viewMode} 
+              <BookCard
+                key={book.id}
+                publication={book}
+                variant={viewMode}
                 progress={bookProgress[book.id] || 0}
+                isSaved={savedIds.has(String(book.id))}
+                onToggleSave={toggleSaved}
               />
             ))
           ) : (
