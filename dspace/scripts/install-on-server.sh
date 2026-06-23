@@ -290,30 +290,96 @@ $SOLR_DIR/bin/solr start -p 8983
 sleep 5
 echo "  Solr started on port 8983"
 
-# ── 8. Start DSpace Backend ───────────────────────────────────────────────────
+# ── 8. Configure & Start DSpace Backend ──────────────────────────────────────
 echo ""
-echo "[Step 9/10] Starting DSpace backend..."
-nohup java \
-    -jar $DSPACE_DIR/webapps/server/WEB-INF/lib/*.jar 2>/dev/null || \
-nohup java \
-    -jar $DSPACE_SRC/dspace/modules/server/target/server-$DSPACE_VERSION.war \
-    --dspace.dir=$DSPACE_DIR \
-    --server.port=8080 &>/var/log/dspace-backend.log &
+echo "[Step 9/10] Starting DSpace backend (Tomcat 9)..."
 
-echo "  Backend starting on port 8080 (log: /var/log/dspace-backend.log)"
+# Use Tomcat 9 (DSpace 7.x requires javax.* namespace — not Tomcat 10+)
+TOMCAT_DIR="/opt/tomcat9"
+if [ ! -d "$TOMCAT_DIR" ]; then
+    TOMCAT_VER="9.0.118"
+    wget -q "https://archive.apache.org/dist/tomcat/tomcat-9/v$TOMCAT_VER/bin/apache-tomcat-$TOMCAT_VER.tar.gz" \
+        -O /tmp/tomcat9.tar.gz
+    tar xzf /tmp/tomcat9.tar.gz -C /opt/
+    mv /opt/apache-tomcat-$TOMCAT_VER $TOMCAT_DIR
+    rm /tmp/tomcat9.tar.gz
+fi
+
+mkdir -p $TOMCAT_DIR/webapps
+cp $DSPACE_DIR/webapps/server.war $TOMCAT_DIR/webapps/server.war 2>/dev/null || \
+cp $DSPACE_SRC/dspace/modules/server/target/server-$DSPACE_VERSION.war $TOMCAT_DIR/webapps/server.war
+
+# Tomcat memory and DSpace home
+cat >> $TOMCAT_DIR/bin/setenv.sh <<ENVEOF
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export CATALINA_OPTS="-Xms512m -Xmx2048m -XX:+UseG1GC -Ddspace.dir=$DSPACE_DIR"
+ENVEOF
+chmod +x $TOMCAT_DIR/bin/setenv.sh
+
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 $TOMCAT_DIR/bin/startup.sh
+echo "  Tomcat 9 starting on port 8080 (log: $TOMCAT_DIR/logs/catalina.out)"
+
+# ── 8b. Set Up Angular Frontend ───────────────────────────────────────────────
+echo ""
+echo "  Cloning and building dspace-angular..."
+ANGULAR_DIR="/home/user/dspace-angular"
+if [ ! -d "$ANGULAR_DIR" ]; then
+    git clone --depth 1 --branch dspace-$DSPACE_VERSION \
+        https://github.com/DSpace/dspace-angular.git $ANGULAR_DIR
+fi
+
+# Configure Angular to point at this server
+cat > $ANGULAR_DIR/config/config.yml <<YAMLEOF
+ui:
+  ssl: false
+  host: 0.0.0.0
+  port: 4000
+  nameSpace: /
+
+rest:
+  ssl: false
+  host: $SERVER_IP
+  port: 8080
+  nameSpace: /server
+YAMLEOF
+
+cd $ANGULAR_DIR
+npm ci --legacy-peer-deps
+npm run build:ssr
+
+# Allow DSpace REST API CORS from the Angular frontend
+grep -q "rest.cors.allowed-origins" $DSPACE_DIR/config/local.cfg || \
+    echo "rest.cors.allowed-origins = http://$SERVER_IP:4000" >> $DSPACE_DIR/config/local.cfg
 
 # ── 9. Create Admin Account ───────────────────────────────────────────────────
 echo ""
 echo "[Step 10/10] Create DSpace administrator..."
-echo "  Waiting 30s for backend to start..."
-sleep 30
+echo "  Waiting 60s for backend to fully start..."
+sleep 60
 
-echo "  Run this to create the admin account:"
-echo "  $DSPACE_DIR/bin/dspace create-administrator"
+/dspace/bin/dspace database migrate 2>/dev/null || true
+
+echo ""
+echo "  Creating admin account..."
+/dspace/bin/dspace create-administrator \
+    -e admin@hararepolytechnic.ac.zw \
+    -f Admin -l User \
+    -p "HarePoly@DSpace2024!" \
+    -c en 2>/dev/null || \
+echo "  (Admin may already exist — skip)"
+
+echo ""
+echo "  Starting Angular SSR frontend..."
+cd $ANGULAR_DIR
+nohup node dist/server/main.js &>/var/log/dspace-angular.log &
+echo "  Frontend starting on port 4000 (log: /var/log/dspace-angular.log)"
+
 echo ""
 echo "========================================================"
 echo "  Installation Complete!"
 echo "  Backend API:   http://$SERVER_IP:8080/server"
-echo "  Frontend:      http://$SERVER_IP:4000 (after Angular build)"
-echo "  Admin login:   http://$SERVER_IP:4000/dspace-admin"
+echo "  Frontend:      http://$SERVER_IP:4000"
+echo "  Admin login:   http://$SERVER_IP:4000/login"
+echo "  Admin email:   admin@hararepolytechnic.ac.zw"
+echo "  Admin pass:    HarePoly@DSpace2024!"
 echo "========================================================"
