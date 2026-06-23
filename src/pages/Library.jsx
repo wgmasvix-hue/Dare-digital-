@@ -461,7 +461,7 @@ export default function Library() {
         <div className="md:hidden flex items-center justify-between mb-6">
           <h2 className="font-bold text-xl">Filters</h2>
           <button onClick={() => setIsMobileFiltersOpen(false)} className="p-2 bg-slate-100 rounded-full text-slate-500">
-             <AlertCircle size={20} />
+             <X size={20} />
           </button>
         </div>
         <FilterPanel 
