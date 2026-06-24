@@ -1,27 +1,35 @@
 import { DARA_SYSTEM_PROMPT } from "../lib/daraSystemPrompt";
 import { supabase } from "../lib/supabase";
 
-/**
- * Truncate text to avoid token limits
- */
 const truncateText = (text: string, maxLength = 30000) => {
   if (!text) return "";
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength) + "... [Text truncated for AI processing]";
 };
 
-const callGemini = async (contents: unknown, config: Record<string, unknown> = {}) => {
-  // Use Supabase Edge Function for portability (Webzim compatible)
-  const { data, error } = await supabase.functions.invoke('dara-ai', {
-    body: {
-      message: typeof contents === 'string' ? contents : JSON.stringify(contents),
-      context: config.systemInstruction || DARA_SYSTEM_PROMPT,
-      provider: 'gemini',
-      model: config.model
-    }
+const callEdgeFunction = async (functionName: string, body: Record<string, unknown>) => {
+  if (supabase) {
+    const { data, error } = await supabase.functions.invoke(functionName, { body });
+    if (error) throw error;
+    return data;
+  }
+  // Fallback to local dev server when Supabase is not configured
+  const res = await fetch(`/api/edge-function/${functionName}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
   });
+  if (!res.ok) throw new Error(`Edge function ${functionName} failed: ${res.status}`);
+  return res.json();
+};
 
-  if (error) throw error;
+const callGemini = async (contents: unknown, config: Record<string, unknown> = {}) => {
+  const data = await callEdgeFunction('dara-ai', {
+    message: typeof contents === 'string' ? contents : JSON.stringify(contents),
+    context: config.systemInstruction || DARA_SYSTEM_PROMPT,
+    provider: 'gemini',
+    model: config.model,
+  });
   return { text: data.reply };
 };
 
@@ -480,15 +488,12 @@ The response should be in Markdown and include:
    */
   async semanticSearch(query: string, matchThreshold = 0.4, matchCount = 20) {
     try {
-      const { data, error } = await supabase.functions.invoke('search-books', {
-        body: { query, match_threshold: matchThreshold, match_count: matchCount }
+      const data = await callEdgeFunction('search-books', {
+        query, match_threshold: matchThreshold, match_count: matchCount
       });
-
-      if (error) throw error;
       return data;
     } catch (error) {
       console.error("Semantic Search Error:", error);
-      // Fallback to keyword search if semantic search fails
       return null;
     }
   },
