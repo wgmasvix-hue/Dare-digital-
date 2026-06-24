@@ -92,6 +92,24 @@ const BrandedPlaceholder = ({ title, color }: { title: string; color: string }) 
   </div>
 );
 
+// ── Highlight ─────────────────────────────────────────────────────────────────
+
+function Highlight({ text, query }: { text?: string; query?: string }) {
+  if (!text) return null;
+  if (!query || query.trim().length < 2) return <>{text}</>;
+  const escaped = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.trim().toLowerCase()
+          ? <mark key={i} className="bg-teal-200 text-teal-900 rounded px-0.5 not-italic">{part}</mark>
+          : part
+      )}
+    </>
+  );
+}
+
 // ── Skeleton ───────────────────────────────────────────────────────────────────
 
 const Skeleton = ({ variant = 'tile' }: { variant?: string }) => {
@@ -141,13 +159,14 @@ interface BookCardProps {
   progress?: number;
   isSaved?: boolean;
   onToggleSave?: (id: string) => void;
+  searchQuery?: string;
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export default function BookCard({
   publication, variant = 'tile', onOpen, loading = false,
-  progress = 0, isSaved = false, onToggleSave,
+  progress = 0, isSaved = false, onToggleSave, searchQuery = '',
 }: BookCardProps) {
   const navigate = useNavigate();
   const [showInsight, setShowInsight] = useState(false);
@@ -255,14 +274,14 @@ export default function BookCard({
                 onClick={handleCardClick}
                 className="font-serif font-black text-[17px] leading-snug text-slate-900 group-hover:text-teal-700 transition-colors cursor-pointer line-clamp-2 mb-1.5"
               >
-                {title}
+                <Highlight text={title} query={searchQuery} />
               </h3>
 
               {/* Authors */}
               {author_names && (
                 <p className="text-sm text-slate-600 mb-1.5 flex items-center gap-1.5 font-medium">
                   <Users size={11} className="text-slate-400 shrink-0" />
-                  <span className="line-clamp-1">{author_names}</span>
+                  <span className="line-clamp-1"><Highlight text={author_names} query={searchQuery} /></span>
                 </p>
               )}
 
@@ -288,7 +307,7 @@ export default function BookCard({
               {/* Abstract */}
               {excerpt && (
                 <p className="text-sm text-slate-600 leading-relaxed mb-3 line-clamp-3">
-                  {excerpt}
+                  <Highlight text={excerpt} query={searchQuery} />
                 </p>
               )}
 
@@ -452,10 +471,12 @@ export default function BookCard({
             </div>
 
             <h3 className={`font-serif font-black text-slate-900 leading-tight mb-1 line-clamp-2 group-hover:text-teal-700 transition-colors ${variant === 'grid' ? 'text-sm' : 'text-base'}`}>
-              {title}
+              <Highlight text={title} query={searchQuery} />
             </h3>
 
-            <p className="text-xs text-slate-500 font-semibold mb-2 line-clamp-1">{author_names}</p>
+            <p className="text-xs text-slate-500 font-semibold mb-2 line-clamp-1">
+              <Highlight text={author_names} query={searchQuery} />
+            </p>
 
             {/* Footer */}
             <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">

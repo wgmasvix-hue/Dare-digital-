@@ -19,6 +19,8 @@ import BookCard from '../components/library/BookCard';
 import DigitizationRequestModal from '../components/library/DigitizationRequestModal';
 import FilterPanel from '../components/library/FilterPanel';
 import SearchBar from '../components/library/SearchBar';
+import ReadingStats from '../components/library/ReadingStats';
+import CollectionExport from '../components/library/CollectionExport';
 
 const ALL_LOCAL_OER = (() => {
   const combined = [...OPENSTAX_CURATED, ...ALL_ADDITIONAL_OER];
@@ -57,6 +59,7 @@ export default function Library() {
     yearFrom: searchParams.get('yearFrom') || '',
     yearTo: searchParams.get('yearTo') || '',
     isbn: searchParams.get('isbn') || '',
+    language: searchParams.get('language') || '',
     zimAuthored: searchParams.get('zimAuthored') === 'true',
     africanContext: searchParams.get('africanContext') === 'true',
   });
@@ -392,21 +395,11 @@ export default function Library() {
   }, [filters, viewMode, sortBy, setSearchParams]);
 
   const clearFilters = () => {
-    const resetFilters = {
-      q: '',
-      faculty: 'All',
-      level: 'All',
-      access: 'All',
-      source: 'All',
-      format: 'All',
-      university: 'All',
-      yearFrom: '',
-      yearTo: '',
-      isbn: '',
-      zimAuthored: false,
-      africanContext: false,
-    };
-    setFilters(resetFilters);
+    setFilters({
+      q: '', faculty: 'All', level: 'All', access: 'All', source: 'All',
+      format: 'All', university: 'All', yearFrom: '', yearTo: '', isbn: '',
+      language: '', zimAuthored: false, africanContext: false, pillar: 'All',
+    });
   };
 
   const handleAiSearch = async () => {
@@ -447,12 +440,15 @@ export default function Library() {
   };
 
   const filteredPublications = publications.filter(pub => {
-    const matchesCategory = localCategory === 'All' || 
+    const matchesCategory = localCategory === 'All' ||
       pub.category?.toLowerCase() === localCategory.toLowerCase() ||
       pub.subject?.toLowerCase().includes(localCategory.toLowerCase()) ||
       pub.faculty?.toLowerCase().includes(localCategory.toLowerCase());
-    
-    return matchesCategory;
+
+    const matchesLanguage = !filters.language || filters.language === 'All' ||
+      (pub.language || '').toLowerCase().includes(filters.language.toLowerCase());
+
+    return matchesCategory && matchesLanguage;
   });
 
   return (
@@ -536,6 +532,7 @@ export default function Library() {
                     progress={bookProgress[book.id]}
                     isSaved={savedIds.has(String(book.id))}
                     onToggleSave={toggleSaved}
+                    searchQuery={filters.q}
                   />
                 ))}
             </div>
@@ -710,9 +707,10 @@ export default function Library() {
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <CollectionExport savedIds={savedIds} publications={publications} />
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sort By</span>
-            <select 
+            <select
               className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 outline-none focus:border-teal-500 focus:ring-4 ring-teal-500/20 transition-all shadow-sm"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -725,6 +723,9 @@ export default function Library() {
             </select>
           </div>
         </div>
+
+        {/* Reading Stats */}
+        <ReadingStats savedCount={savedIds.size} totalResults={filteredPublications.length} />
 
         {/* Result Summary Bar */}
         {filteredPublications.length > 0 && (
@@ -773,6 +774,7 @@ export default function Library() {
                   progress={bookProgress[book.id] || 0}
                   isSaved={savedIds.has(String(book.id))}
                   onToggleSave={toggleSaved}
+                  searchQuery={filters.q}
                 />
               ))
           }

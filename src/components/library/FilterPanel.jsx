@@ -20,6 +20,10 @@ const ACCESS_TYPES = ['All', 'Dare Access', 'Licensed', 'Purchased'];
 const FACULTIES = ['All', 'STEM', 'Agriculture & Environmental', 'Health Sciences', 'Business & Law', 'Education (Heritage-based)', 'Vocational', 'Polytechnic', 'Engineering', 'Humanities & Social Sciences', 'AI & Future Tech'];
 const UNIVERSITIES = ['All', 'UZ', 'MSU', 'NUST', 'CUT', 'BUSE', 'LSU', 'GZU', 'HIT', 'AU', 'ZEGU', 'ZOU'];
 const SOURCES = ['All', 'Featured Items', 'Dare Library', 'Partner Resources', 'Project Gutenberg', 'Open Library', 'arXiv Research'];
+const LANGUAGES = ['English', 'Shona', 'Ndebele', 'Afrikaans', 'French', 'Portuguese', 'Arabic'];
+
+const CURRENT_YEAR = new Date().getFullYear();
+const MIN_YEAR = 1800;
 const FORMATS = [
   { id: 'All', label: 'All Formats', icon: LayoutGrid },
   { id: 'PDF', label: 'PDFs', icon: FileText },
@@ -265,25 +269,72 @@ export default function FilterPanel({
           </div>
         </div>
 
-        {/* Year Published Filter */}
+        {/* Year Range Slider */}
         <div className="space-y-3">
-          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Publication Era</h4>
-          <div className="flex items-center gap-2">
-            <input 
-              type="number" 
-              placeholder="From" 
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium text-slate-900"
-              value={filters.yearFrom || ''}
-              onChange={(e) => onFilterChange('yearFrom', e.target.value)}
+          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center justify-between">
+            Publication Era
+            <span className="text-teal-600 normal-case font-bold text-xs tracking-normal">
+              {filters.yearFrom || MIN_YEAR} – {filters.yearTo || CURRENT_YEAR}
+            </span>
+          </h4>
+          <div className="relative h-6 flex items-center">
+            <div className="absolute left-0 right-0 h-1.5 bg-slate-200 rounded-full" />
+            <div
+              className="absolute h-1.5 bg-teal-500 rounded-full pointer-events-none"
+              style={{
+                left: `${((parseInt(filters.yearFrom || MIN_YEAR) - MIN_YEAR) / (CURRENT_YEAR - MIN_YEAR)) * 100}%`,
+                right: `${100 - ((parseInt(filters.yearTo || CURRENT_YEAR) - MIN_YEAR) / (CURRENT_YEAR - MIN_YEAR)) * 100}%`
+              }}
             />
-            <span className="text-slate-400">—</span>
-            <input 
-              type="number" 
-              placeholder="To" 
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-medium text-slate-900"
-              value={filters.yearTo || ''}
-              onChange={(e) => onFilterChange('yearTo', e.target.value)}
+            <input
+              type="range"
+              min={MIN_YEAR}
+              max={CURRENT_YEAR}
+              value={filters.yearFrom || MIN_YEAR}
+              onChange={e => {
+                const v = parseInt(e.target.value);
+                if (v < parseInt(filters.yearTo || CURRENT_YEAR)) onFilterChange('yearFrom', String(v));
+              }}
+              className="absolute w-full h-1.5 appearance-none bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-teal-500 [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:cursor-pointer pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto"
             />
+            <input
+              type="range"
+              min={MIN_YEAR}
+              max={CURRENT_YEAR}
+              value={filters.yearTo || CURRENT_YEAR}
+              onChange={e => {
+                const v = parseInt(e.target.value);
+                if (v > parseInt(filters.yearFrom || MIN_YEAR)) onFilterChange('yearTo', String(v));
+              }}
+              className="absolute w-full h-1.5 appearance-none bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-teal-500 [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:cursor-pointer pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto"
+            />
+          </div>
+          <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+            <span>{MIN_YEAR}</span>
+            <span>{CURRENT_YEAR}</span>
+          </div>
+        </div>
+
+        {/* Language Filter */}
+        <div className="space-y-3">
+          <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Language</h4>
+          <div className="flex flex-wrap gap-2">
+            {LANGUAGES.map(lang => {
+              const active = (filters.language || 'All') === lang || (!filters.language && lang === 'All');
+              return (
+                <button
+                  key={lang}
+                  onClick={() => onFilterChange('language', active ? 'All' : lang)}
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all border ${
+                    active && filters.language
+                      ? 'bg-violet-600 border-violet-600 text-white shadow-md'
+                      : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                  }`}
+                >
+                  {lang}
+                </button>
+              );
+            })}
           </div>
         </div>
 

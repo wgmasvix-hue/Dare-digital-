@@ -1,18 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Menu, X, User, ChevronDown, LogOut, History, Settings, 
-  LayoutDashboard, Trophy, Search, Sparkles, Library, FlaskConical, Zap, Database, Globe, ClipboardCheck
+import {
+  Menu, X, User, ChevronDown, LogOut, History, Settings,
+  LayoutDashboard, Trophy, Search, Sparkles, Library, FlaskConical, Zap, Database, Globe, ClipboardCheck,
+  Sun, Moon
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useGamification } from '../../context/GamificationContext';
+import { useTheme } from '../../hooks/useTheme';
 import GlobalSearch from './GlobalSearch';
 import LogoIcon from '../common/LogoIcon';
 
 export default function NavBar() {
   const { user, profile, signOut } = useAuth();
   const { xp, streak, level, getLevelInfo } = useGamification();
+  const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -177,7 +180,16 @@ export default function NavBar() {
             </div>
           )}
 
-          <button 
+          {/* Dark mode toggle */}
+          <button
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+
+          <button
             className="sm:hidden focus:outline-none p-2 text-slate-600"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
